@@ -1,15 +1,14 @@
-//! tsgolint's rule tests: every case of `tests/data/cases` against
-//! tsgolint's expectations and its snapshots in `tests/data/snapshots`.
+//! tsgolint's rule tests: every case of `tests/data/cases` against the
+//! expectations of tsgolint's Go tests and the snapshots in
+//! `tests/data/snapshots`.
 //!
 //! `cargo test -p tsgolint-rules --test rules [-- <filter>]`. A trial is
 //! named `<rule>::<GoTest>/valid-<i>` or `.../invalid-<i>`; the filter
 //! matches any part of it. Cases that tsgolint skips are ignored.
 //!
-//! An accepted divergence (`tests/data/divergences/<rule>.json`, explained
-//! in `tests/data/divergences.md`) pins the Rust result of a case; the case
-//! then passes when it produces exactly that result. Set
-//! `TSGOLINT_PRINT_RESULT=1` to print the result of each failing case in the
-//! pinned form.
+//! The snapshots hold tsgolint-rust's own output, on the ts-rust revision in
+//! `Cargo.lock`. Set `TSGOLINT_UPDATE_SNAPSHOTS=1` to rewrite the entries of
+//! the cases that run instead of failing on them; review the diff.
 
 mod cases;
 mod pool;
@@ -17,69 +16,86 @@ mod runner;
 mod snapshot;
 
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use libtest_mimic::{Arguments, Failed, Trial};
-use rustc_hash::{FxHashMap, FxHashSet};
+use rustc_hash::FxHashMap;
 
 use cases::{Case, load_suites};
-use runner::{CaseSetup, Divergences, Observed};
-use snapshot::parse_snapshot_file;
+use runner::CaseSetup;
+use snapshot::{format_snapshot_file, parse_snapshot_file};
 
 struct Shared {
     fixtures: String,
-    /// Snapshot entries by rule name.
-    snapshots: FxHashMap<String, FxHashMap<String, String>>,
-    /// Accepted divergences by rule name.
-    divergences: FxHashMap<String, Divergences>,
-    print_result: bool,
+    /// Snapshot entries by rule name, in file order.
+    snapshots: FxHashMap<String, Vec<(String, String)>>,
+    /// With `TSGOLINT_UPDATE_SNAPSHOTS`: the changed or new entries by rule
+    /// name and key.
+    updates: Option<Mutex<FxHashMap<String, FxHashMap<String, String>>>>,
     loading: pool::LoadingThreads,
+}
+
+impl Shared {
+    fn snapshot(&self, rule: &str, key: &str) -> Option<&str> {
+        let entries = self.snapshots.get(rule)?;
+        let (_, content) = entries.iter().find(|(k, _)| k == key)?;
+        Some(content)
+    }
+
+    /// Writes the updated entries into their `.snap` files: a changed entry
+    /// keeps its place, a new one goes at the end.
+    fn write_updates(&self, dir: &Path) {
+        let Some(updates) = &self.updates else {
+            return;
+        };
+        for (rule, mut changed) in std::mem::take(&mut *updates.lock().unwrap()) {
+            let mut entries = self.snapshots.get(&rule).cloned().unwrap_or_default();
+            for (key, content) in &mut entries {
+                if let Some(new) = changed.remove(key.as_str()) {
+                    *content = new;
+                }
+            }
+            let mut added: Vec<_> = changed.into_iter().collect();
+            added.sort();
+            entries.extend(added);
+            let path = dir.join(format!("{rule}.snap"));
+            std::fs::write(&path, format_snapshot_file(&entries))
+                .unwrap_or_else(|e| panic!("write {}: {e}", path.display()));
+            eprintln!("updated {}", path.display());
+        }
+    }
 }
 
 fn data_dir() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/data")
 }
 
-/// The files of `dir` that end in `ext`, parsed, by name without `ext`.
-fn load_dir<T>(dir: &Path, ext: &str, parse: impl Fn(&str) -> T) -> FxHashMap<String, T> {
+/// The `.snap` files of `dir`, parsed, by rule name.
+fn load_snapshots(dir: &Path) -> FxHashMap<String, Vec<(String, String)>> {
     std::fs::read_dir(dir)
         .unwrap_or_else(|e| panic!("read {}: {e}", dir.display()))
         .filter_map(|entry| {
             let path = entry.unwrap().path();
-            let name = path.file_name()?.to_str()?.strip_suffix(ext)?.to_owned();
+            let name = path
+                .file_name()?
+                .to_str()?
+                .strip_suffix(".snap")?
+                .to_owned();
             let text = std::fs::read_to_string(&path)
                 .unwrap_or_else(|e| panic!("read {}: {e}", path.display()));
-            Some((name, parse(&text)))
+            Some((name, parse_snapshot_file(&text)))
         })
         .collect()
-}
-
-/// Panics when a divergence entry names a rule or a case that does not
-/// exist, so that a renamed case cannot leave a stale entry behind.
-fn check_divergence_keys(divergences: &FxHashMap<String, Divergences>, cases: &FxHashSet<String>) {
-    let mut unknown: Vec<String> = divergences
-        .iter()
-        .flat_map(|(rule, entries)| entries.keys().map(move |key| format!("{rule}::{key}")))
-        .filter(|name| !cases.contains(name))
-        .collect();
-    unknown.sort();
-    assert!(
-        unknown.is_empty(),
-        "divergence entries without a case: {}",
-        unknown.join(", ")
-    );
 }
 
 fn main() {
     let args = Arguments::from_args();
     let data = data_dir();
+    let update = std::env::var_os("TSGOLINT_UPDATE_SNAPSHOTS").is_some_and(|v| !v.is_empty());
     let shared = Arc::new(Shared {
         fixtures: data.join("fixtures").to_str().unwrap().to_owned(),
-        snapshots: load_dir(&data.join("snapshots"), ".snap", parse_snapshot_file),
-        divergences: load_dir(&data.join("divergences"), ".json", |text| {
-            serde_json::from_str(text).expect("divergences file")
-        }),
-        print_result: std::env::var_os("TSGOLINT_PRINT_RESULT").is_some(),
+        snapshots: load_snapshots(&data.join("snapshots")),
+        updates: update.then(Default::default),
         loading: pool::LoadingThreads::new(
             args.test_threads
                 .unwrap_or_else(|| std::thread::available_parallelism().map_or(1, usize::from)),
@@ -87,7 +103,6 @@ fn main() {
     });
 
     let mut trials = Vec::new();
-    let mut case_names = FxHashSet::default();
     for suite in load_suites(&data.join("cases")) {
         let rule = tsgolint_rules::find_rule(&suite.rule)
             .unwrap_or_else(|| panic!("unknown rule {}", suite.rule));
@@ -104,7 +119,6 @@ fn main() {
                 let key = format!("{}/{kind}-{}", suite.test, case.index);
                 let ignored = case.skip || (only_mode && !case.only);
                 let name = format!("{}::{key}", suite.rule);
-                case_names.insert(name.clone());
                 let job = CaseJob {
                     shared: shared.clone(),
                     rule,
@@ -117,8 +131,9 @@ fn main() {
             }
         }
     }
-    check_divergence_keys(&shared.divergences, &case_names);
-    libtest_mimic::run(&args, trials).exit();
+    let conclusion = libtest_mimic::run(&args, trials);
+    shared.write_updates(&data.join("snapshots"));
+    conclusion.exit();
 }
 
 struct CaseJob {
@@ -147,46 +162,43 @@ impl CaseJob {
             default_tsconfig: &self.tsconfig,
             rule: self.rule,
         };
-        let (observed, failures) = if self.invalid {
-            let snapshot_key = format!("[{} - 1]", self.key);
-            let snapshot = self
-                .shared
-                .snapshots
-                .get(self.rule.name)
-                .and_then(|entries| entries.get(&snapshot_key));
-            setup.run_invalid(&self.case, snapshot.map(String::as_str), &snapshot_key)?
+        let failures = if self.invalid {
+            let (observed, mut failures) = setup.run_invalid(&self.case)?;
+            if let Some(failure) = self.check_snapshot(&observed.snapshot) {
+                failures.insert(0, failure);
+            }
+            failures
         } else {
-            setup.run_valid(&self.case)?
+            setup.run_valid(&self.case)?.1
         };
-        let divergence = self
-            .shared
-            .divergences
-            .get(self.rule.name)
-            .and_then(|entries| entries.get(&self.key));
-        match divergence {
-            None if failures.is_empty() => Ok(()),
-            None => Err(self.failed(&failures, &observed)),
-            Some(_) if failures.is_empty() => Err(Failed::from(format!(
-                "{} matches tsgolint now: remove its divergence entry",
-                self.key
-            ))),
-            Some(divergence) if divergence.result == observed => Ok(()),
-            Some(divergence) => Err(self.failed(
-                &[format!(
-                    "the result differs from the pinned divergence ({})",
-                    divergence.reason
-                )],
-                &observed,
-            )),
+        if failures.is_empty() {
+            return Ok(());
         }
+        Err(Failed::from(failures.join("\n\n")))
     }
 
-    fn failed(&self, failures: &[String], observed: &Observed) -> Failed {
-        let mut message = failures.join("\n\n");
-        if self.shared.print_result {
-            message.push_str("\n\n--- Result ---\n");
-            message.push_str(&serde_json::to_string_pretty(observed).unwrap());
+    /// Compares the snapshot entry of an invalid case with `actual`, or
+    /// records `actual` in update mode.
+    fn check_snapshot(&self, actual: &str) -> Option<String> {
+        let key = format!("[{} - 1]", self.key);
+        let expected = self.shared.snapshot(self.rule.name, &key);
+        if expected == Some(actual) {
+            return None;
         }
-        Failed::from(message)
+        if let Some(updates) = &self.shared.updates {
+            updates
+                .lock()
+                .unwrap()
+                .entry(self.rule.name.to_owned())
+                .or_default()
+                .insert(key, actual.to_owned());
+            return None;
+        }
+        Some(match expected {
+            Some(expected) => format!(
+                "Snapshot mismatch for {key}.\n\n--- Snapshot ---\n{expected}\n\n--- Actual ---\n{actual}"
+            ),
+            None => format!("No snapshot entry {key}.\n\n--- Actual ---\n{actual}"),
+        })
     }
 }

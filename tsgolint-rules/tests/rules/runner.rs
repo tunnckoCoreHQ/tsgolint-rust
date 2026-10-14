@@ -5,7 +5,6 @@ use std::sync::Arc;
 
 use goport_core::frontend::tspath;
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
 use tsgolint_core::text::{ecma_line_starts, line_and_utf16_column};
 use tsgolint_core::{
     ConfiguredRule, CreatedProgram, FsFactory, LintEvent, LintFile, LintSettings, ProgramSettings,
@@ -15,10 +14,8 @@ use tsgolint_core::{
 use crate::cases::{Case, ExpectedSuggestion};
 use crate::snapshot::format_diagnostics_snapshot;
 
-/// What a case produced: the part the Go test checks. An accepted
-/// divergence pins this value.
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+/// What a case produced: the part the Go test checks.
+#[derive(Debug)]
 pub struct Observed {
     pub diagnostics: Vec<ObservedDiagnostic>,
     /// The code after each fix pass (invalid cases).
@@ -27,8 +24,7 @@ pub struct Observed {
     pub snapshot: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug)]
 pub struct ObservedDiagnostic {
     pub message_id: String,
     pub line: i32,
@@ -139,13 +135,8 @@ impl CaseSetup<'_> {
     }
 
     /// An invalid case: up to 10 lint and fix passes, then the checks of the
-    /// Go test. `snapshot` is the expected snapshot entry, if any.
-    pub fn run_invalid(
-        &self,
-        case: &Case,
-        snapshot: Option<&str>,
-        snapshot_key: &str,
-    ) -> Result<(Observed, Vec<String>), String> {
+    /// Go test. The caller checks `Observed::snapshot`.
+    pub fn run_invalid(&self, case: &Case) -> Result<(Observed, Vec<String>), String> {
         let initial = self.lint(case, &case.code)?;
         let mut outputs: Vec<String> = Vec::new();
         let mut result = apply_rule_fixes(&case.code, initial.clone());
@@ -160,17 +151,6 @@ impl CaseSetup<'_> {
         let observed = observe(&case.code, &initial, outputs);
 
         let mut failures = Vec::new();
-        match snapshot {
-            Some(expected) if expected == observed.snapshot => {}
-            Some(expected) => failures.push(format!(
-                "Snapshot mismatch for {snapshot_key}.\n\n--- Snapshot ---\n{expected}\n\n--- Actual ---\n{}",
-                observed.snapshot
-            )),
-            None => failures.push(format!(
-                "No snapshot entry {snapshot_key}.\n\n--- Actual ---\n{}",
-                observed.snapshot
-            )),
-        }
         if case.output.len() != observed.outputs.len() {
             failures.push(format!(
                 "Expected to have {} outputs but had {}:\n--- Expected ---\n{:#?}\n--- Actual ---\n{:#?}",
@@ -281,14 +261,3 @@ fn observe(code: &str, diagnostics: &[RuleDiagnostic], outputs: Vec<String>) -> 
         snapshot: format_diagnostics_snapshot(code, diagnostics),
     }
 }
-
-/// An accepted divergence from tsgolint (`tests/data/divergences/<rule>.json`).
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct Divergence {
-    /// Why the Rust result differs (the TypeScript change behind it).
-    pub reason: String,
-    /// The pinned Rust result.
-    pub result: Observed,
-}
-
-pub type Divergences = FxHashMap<String, Divergence>;

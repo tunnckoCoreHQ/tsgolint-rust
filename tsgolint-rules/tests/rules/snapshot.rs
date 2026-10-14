@@ -6,10 +6,10 @@ use std::fmt::Write;
 use tsgolint_core::text::{ecma_line_starts, line_and_utf16_column};
 use tsgolint_core::{RuleDiagnostic, TextRange};
 
-/// Parses a `.snap` file into its entries: key (`[Test/invalid-0 - 1]`) to
-/// content.
-pub fn parse_snapshot_file(data: &str) -> rustc_hash::FxHashMap<String, String> {
-    let mut entries = rustc_hash::FxHashMap::default();
+/// Parses a `.snap` file into its entries in file order: key
+/// (`[Test/invalid-0 - 1]`) and content.
+pub fn parse_snapshot_file(data: &str) -> Vec<(String, String)> {
+    let mut entries = Vec::new();
     for block in data.split("---\n") {
         let block = block.trim_start_matches('\n');
         if block.is_empty() {
@@ -21,9 +21,18 @@ pub fn parse_snapshot_file(data: &str) -> rustc_hash::FxHashMap<String, String> 
         if !key.starts_with('[') || !key.ends_with(']') {
             continue;
         }
-        entries.insert(key.to_owned(), content.trim_end_matches('\n').to_owned());
+        entries.push((key.to_owned(), content.trim_end_matches('\n').to_owned()));
     }
     entries
+}
+
+/// The `.snap` file of `entries`, in the format `parse_snapshot_file` reads.
+pub fn format_snapshot_file(entries: &[(String, String)]) -> String {
+    let mut out = String::new();
+    for (key, content) in entries {
+        let _ = write!(out, "\n{key}\n{content}\n---\n");
+    }
+    out
 }
 
 /// Lines and columns of `code` as the snapshot prints them.

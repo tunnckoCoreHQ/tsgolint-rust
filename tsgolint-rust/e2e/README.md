@@ -20,7 +20,7 @@ TSGOLINT_WASM=$PWD/target/wasm32-wasip1/debug/tsgolint.wasm \
 TSGOLINT_BIN=$PWD/node_modules/.bin/tsgolint pnpm --dir tsgolint-rust/e2e run e2e
 ```
 
-Add `-- --update` to rewrite the Vitest snapshot. The snapshot comes from tsgolint; change it only for a listed difference (see [DIFFERENCES.md](../../DIFFERENCES.md)).
+Add `-- --update` to rewrite the Vitest snapshot from the binary under test. The snapshot holds the native tsgolint-rust output; the wasm build must give the same. [DIFFERENCES.md](../../DIFFERENCES.md) says how it differs from the Go tsgolint.
 
 ## How it works
 

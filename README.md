@@ -7,10 +7,10 @@ It is a drop-in replacement. oxlint spawns it the same way, sends the same `head
 ## Status
 
 - **Rules.** All 60 tsgolint rules, with their options, messages, fixes and suggestions.
-- **tsgolint's own tests.** The 7,574 rule test cases of tsgolint's Go suite run against tsgolint's snapshots. 7,546 pass; the other 28 are skipped in tsgolint itself. One case is pinned as a TypeScript version difference.
+- **tsgolint's own tests.** The 7,574 rule test cases of tsgolint's Go suite run with their expectations. 7,546 pass; the other 28 are skipped in tsgolint itself. The snapshots hold our own output on ts-rust; they differ from tsgolint's in one message, where TypeScript 7.1 orders a union differently.
 - **e2e.** tsgolint's end-to-end suite passes, with the native binary and with the wasm build: 20 tests, plus 3 that run only on Windows or case-insensitive file systems.
 - **oxlint.** oxlint 1.86.0 gives the same output on oxc's 25 tsgolint CLI fixtures with either binary, `--fix` included.
-- **Real projects.** Compared with the Go binary on 12 projects (hono, TanStack Query, tRPC, h3, Effect, t3code, vercel/commerce). Every remaining difference comes from the TypeScript revision, from tsgolint's own run-to-run variation, or from the Effect diagnostics. [DIFFERENCES.md](DIFFERENCES.md) lists them, each with a repro.
+- **Real projects.** Compared with the Go binary on 12 projects (hono, TanStack Query, tRPC, h3, Effect, t3code, vercel/commerce). Every remaining difference comes from the TypeScript revision, from tsgolint's own run-to-run variation, or from the Effect diagnostics. [DIFFERENCES.md](DIFFERENCES.md) explains them.
 - **wasm32-wasip1.** The WASI build runs on one thread, so it runs where threads are not available. Its output equals the native output.
 
 ts-rust ports TypeScript 7.1.0-dev, a few months newer than the TypeScript 7.0 inside tsgolint. That accounts for most of the differences: some type strings in messages are cut short at another point, and a few diagnostics changed upstream.

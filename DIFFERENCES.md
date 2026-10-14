@@ -1,14 +1,16 @@
-# Differences from tsgolint v7.0.2003
+# How tsgolint-rust differs from tsgolint
 
-tsgolint-rust gives the same output as the Go tsgolint, with the exceptions below. Most of them come from the TypeScript revision: tsgolint v7.0.2003 uses typescript-go `2bd066d87f5b` (the TypeScript 7.0 release branch, 2026-07-07). tsgolint-rust uses ts-rust `main` at `598e6416`, which ports microsoft/TypeScript `fed0bf24149f` (7.1.0-dev, 2026-10-08).
+tsgolint-rust runs the same rules as the Go tsgolint, with the same options, messages, fixes and suggestions, and speaks the same protocol to oxlint. On most projects you get the same diagnostics. This note lists where the output can differ when you switch, and why.
 
-Each TypeScript difference below was checked with two compilers: `typescript@7.0.2` (close to tsgolint's typescript-go) and `typescript@7.1.0-dev.20261008.1` (the revision that ts-rust ports). Go agrees with 7.0.2 and tsgolint-rust agrees with 7.1.0-dev in every case.
+The main reason is the TypeScript underneath. tsgolint v7.0.2003 is built on typescript-go `2bd066d87f5b`, the TypeScript 7.0 release branch (2026-07-07). tsgolint-rust 0.1.0 is built on ts-rust `598e6416`, a port of TypeScript `fed0bf24149f` (7.1.0-dev, 2026-10-08). A newer checker can print a type differently or reach another result, and tsgolint-rust follows it. Its own output on ts-rust is the reference for its tests; the [compatibility table](README.md#compatibility) gives the revisions of each release.
 
-## TypeScript 7.1 differences
+## Differences from the newer TypeScript
 
-### Type strings are cut short at another point
+You can reproduce each of these with the TypeScript compiler alone: `typescript@7.0.2` behaves like tsgolint, and `typescript@7.1.0-dev.20261008.1` like tsgolint-rust.
 
-TypeScript 7.1 elides more of a long type when it prints it in a message or label. This changes the text of `description` and `labeled_ranges[].label`, not the diagnostic itself.
+### Long types are shortened at another point
+
+TypeScript 7.1 elides more of a long type when it prints one in a message. The text of a diagnostic or of its labels changes, not the diagnostic itself.
 
 ```ts
 type FC<P> = (props: P) => unknown;
@@ -17,45 +19,48 @@ declare const x: FC<{ a: string }> | FC<{ b: string }> | FC<{ c: string }> | FC<
 export const n: number = x;
 ```
 
-TypeScript 7.0.2 prints `... | FC<...> | ((props: { ...; }) => unknown) | ((props: { ...; }) => unknown)`. TypeScript 7.1.0-dev prints `... | FC<...> | ... | ...`. Object members change the same way: 7.0.2 prints `rerender: (ui: string) => void` where 7.1.0-dev prints `rerender: ...`.
+tsgolint prints `... | FC<...> | ((props: { ...; }) => unknown) | ((props: { ...; }) => unknown)`; tsgolint-rust prints `... | FC<...> | ... | ...`. Object members change the same way: `rerender: (ui: string) => void` becomes `rerender: ...`.
 
-### Union members print in another order
+### Union members can print in another order
 
-When a union in a message has members of the same kind, TypeScript 7.1 can order them differently (seen in Effect's `ai/Tool.ts`). One rule test case is pinned for this, `no-redundant-type-constituents` `invalid-26`: typescript-go's `CompareTypes` has no case for bigint literals and orders them by type id (`1n | -1n`), and TypeScript 7.1 orders them by value (`-1n | 1n`).
+When a message prints a union, TypeScript 7.1 can order members of the same kind differently. For example, `no-redundant-type-constituents` on `type T = (-1n | 1n) | bigint` says `1n | -1n is overridden by bigint` in tsgolint and `-1n | 1n is overridden by bigint` in tsgolint-rust: TypeScript 7.0 orders bigint literals by internal type id, TypeScript 7.1 by value.
 
-### TS7031 on a contextually typed binding pattern with a default
+### New type errors with `--type-check`
+
+TypeScript 7.1 reports some errors that 7.0 does not. For example, a destructured parameter with a default, in a function whose type comes from its context:
 
 ```ts
 type S = (o?: { c?: number }) => number;
 export const s: S = ({ c } = {}) => c ?? 0;
 ```
 
-TypeScript 7.1.0-dev reports `TS7031: Binding element 'c' implicitly has an 'any' type.` TypeScript 7.0.2 reports nothing. With `report_semantic`, tsgolint-rust reports it too (seen in hono).
+tsgolint-rust reports `TS7031: Binding element 'c' implicitly has an 'any' type.`; tsgolint reports nothing. On Effect's `packages/effect`, TypeScript 7.1 also reports six TS2322 and TS2345 errors that 7.0 does not.
 
-### Inference and assignability changes that change a rule result
+### Rules that depend on inference or assignability
 
-- **Inference.** In TanStack Query's `queryCache.build(client, {...}, {...state, data})`, TypeScript 7.1 infers `TData = any` where 7.0 infers `unknown`. The contextual type of `data` is then `any`, so `no-unsafe-assignment` reports `anyAssignment` there and tsgolint does not.
-- **Variance of circular generic types.** TypeScript 7.1 measures the variance of `QueryBehavior` (part of a cycle through `FetchContext`, `QueryOptions` and `Query`) differently and accepts `QueryBehavior<unknown, unknown, string>` where `QueryBehavior<unknown, unknown, number>` is expected. tsgolint reports `no-unsafe-type-assertion` on an assertion between two such types and tsgolint-rust does not. The 7.1.0-dev compiler accepts the same assignment, so ts-rust follows its reference here.
-- **New type errors.** TypeScript 7.1.0-dev reports six TS2322/TS2345 errors in Effect's `packages/effect` (`HttpClient.ts`, `GraphQL.ts`, `SchemaAST.ts`, `schema/SchemaCompiler/runtime.ts`) that 7.0.2 does not.
+A rule that asks the checker whether a type is `any` or whether one type is assignable to another follows the newer checker:
 
-### Library changes
+- In TanStack Query, `queryCache.build(client, {...}, {...state, data})` infers `TData = any` in TypeScript 7.1 and `unknown` in 7.0, so `no-unsafe-assignment` reports `anyAssignment` there in tsgolint-rust only.
+- TypeScript 7.1 measures the variance of some circular generic types differently and accepts an assignment that 7.0 rejects, so `no-unsafe-type-assertion` reports an assertion between two such types in tsgolint only.
 
-The bundled `lib.dom.d.ts` changed. `TransformStreamDefaultController.enqueue` is `enqueue(chunk?: O)` in 7.0 and `enqueue(chunk: O)` in 7.1, so a message that prints its parameter type says `Head | ChunkData` where tsgolint says `Head | ChunkData | undefined`. `OXC_LOG=debug` also reports more lib files in a program ("Program created with 147 source files" against 139).
+### The bundled lib files
 
-## Behavior differences by design
+The `lib.dom.d.ts` of TypeScript 7.1 changed some signatures. `TransformStreamDefaultController.enqueue` takes `chunk?: O` in 7.0 and `chunk: O` in 7.1, so a message that prints its parameter type says `Head | ChunkData` where tsgolint says `Head | ChunkData | undefined`. With `OXC_LOG=debug`, programs also list more lib files.
 
-- **Effect diagnostics.** ts-rust has the Effect language service diagnostics built in. When a tsconfig enables the `@effect/language-service` plugin, `report_semantic` also returns the Effect diagnostics (codes TS377xxx), from the same check. tsgolint has no Effect support. Effect's tsconfig warnings do not count as tsconfig errors.
-- **Checker per file.** tsgolint's default scheduling lints a file on whichever checker is free, so results that depend on checker history (type ids, union order, some `any` results) change from run to run. tsgolint-rust lints each file on the checker that ts-rust assigns to it, like tsgolint with `OXLINT_TSGOLINT_CHECKER_SCHEDULING=affinity`, so its output is the same on every run. ts-rust assigns files to checkers with TypeScript 7.1's weighted import-graph split, not tsgolint's round-robin.
-- **Order of programs in the stream.** tsgolint emits programs in random map order. tsgolint-rust emits them in payload order; the inferred program comes last, as in tsgolint. Within a program the order is tsgolint's: TypeScript diagnostics first, then rule diagnostics in traversal order per file.
-- **Panics.** Where tsgolint panics (for example `no-duplicate-type-constituents` with `-fix` on a union type that spans lines: `couldn't find '&' or '|' token`, or a payload path that is not normalized), tsgolint-rust panics with the same message and exits with code 2. tsgolint dies at once; tsgolint-rust can write a few more diagnostics before it exits. oxlint ignores the output of a run that exits with a non-zero code.
-- **Stdout's reader gone, on Windows.** On Unix both binaries end by SIGPIPE at the next write to stdout. On Windows tsgolint ignores the failed writes and lints to the end, while tsgolint-rust exits with code 2 at once. The WASI build does the same.
-- **Profiling flags.** `-trace`, `-cpuprof`, `-heap` and `-allocs` are accepted and keep tsgolint's error messages for unwritable paths, but the files they create are empty: there is no Go runtime to profile.
-- **Error texts after the fixed prefix.** The `<rule>: failed to unmarshal options: ...` panic keeps tsgolint's prefix, but serde_json words the error after it. Payload errors (`error parsing config: ...`) keep JSON v2's wording, with one exception: Go chooses between "cannot" and "unable to" at random, and tsgolint-rust always says "cannot".
-- **Regular expressions.** tsgolint compiles three kinds of pattern. Each port uses a Rust engine with the same syntax for valid patterns, and they can differ on edge cases:
-  - `switch-exhaustiveness-check` `defaultCaseCommentPattern` uses regexp2 in ECMAScript mode; the port uses `regress`.
-  - `dot-notation` `allowPattern` uses Go RE2; the port uses `regex`.
-  - `prefer-regexp-exec` and `prefer-includes` check whether a pattern is valid; the port uses ts-rust's own regex checker. .NET-only syntax such as `(?i)` compiles in regexp2 but is invalid here.
+## Differences by design
 
-## WASI
+- **Effect diagnostics.** ts-rust has the [Effect](https://effect.website) language service diagnostics built in. When a tsconfig enables the `@effect/language-service` plugin, `--type-check` also reports Effect's diagnostics (codes TS377xxx). tsgolint has no Effect support. Effect's tsconfig warnings do not count as tsconfig errors.
+- **The same output on every run.** tsgolint lints each file on whichever checker is free, so results that depend on checker history (union order, some `any` results) can change from run to run. tsgolint-rust lints each file on the checker that ts-rust assigns to it, like tsgolint with `OXLINT_TSGOLINT_CHECKER_SCHEDULING=affinity`, so its output does not change between runs. ts-rust assigns files with TypeScript 7.1's import-graph split, not tsgolint's round-robin.
+- **Order of the output.** tsgolint writes programs in random order; tsgolint-rust writes them in payload order, with the inferred program last. oxlint does not depend on that order.
+- **Panics.** Where tsgolint panics (for example `no-duplicate-type-constituents` with fixes on a union type that spans lines), tsgolint-rust panics with the same message and exits with code 2. It can write a few more diagnostics before it exits; oxlint ignores the output of a run that fails.
+- **When oxlint stops reading.** On Unix both binaries end at their next write. On Windows tsgolint lints to the end, while tsgolint-rust exits with code 2 at once. The WASI build does the same.
+- **Profiling flags.** `-trace`, `-cpuprof`, `-heap` and `-allocs` are accepted, but the files they write are empty: there is no Go runtime to profile.
+- **Error texts.** The `<rule>: failed to unmarshal options: ...` message keeps tsgolint's prefix, with Rust's wording after it. Payload errors keep Go's wording, except that Go picks "cannot" or "unable to" at random and tsgolint-rust always says "cannot".
+- **Regular expressions in options.** Valid patterns behave the same, but the engines differ on edge cases:
+  - `switch-exhaustiveness-check` `defaultCaseCommentPattern`: tsgolint uses regexp2 in ECMAScript mode, tsgolint-rust uses `regress`.
+  - `dot-notation` `allowPattern`: tsgolint uses Go's RE2, tsgolint-rust uses `regex`.
+  - `prefer-regexp-exec` and `prefer-includes` check whether a pattern is valid with ts-rust's own checker, so .NET-only syntax such as `(?i)` is invalid here.
 
-The `wasm32-wasip1` build runs on one thread and gives the same output as the native build. Its stream order is deterministic. It reads the current directory from `PWD`, and it needs the file system preopened at the same paths (`--dir /::/` with wasmtime), because path resolution walks parent directories from the root.
+## The wasm build
+
+The `wasm32-wasip1` build runs on one thread and gives the same output as the native build. It reads the current directory from `PWD` and needs `/` preopened at `/`; the `@tsgolint-rust/wasm32-wasip1` package sets both up.

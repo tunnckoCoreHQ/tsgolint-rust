@@ -171,7 +171,7 @@ Read the Go rule and its helpers, then map each call. ts-rust keeps typescript-g
 cargo test -p tsgolint-rules --test rules -- <rule-name or case key> --test-threads 4
 ```
 
-Trials are `<rule>::<GoTest>/valid-<i>` and `<rule>::<GoTest>/invalid-<i>`. Cases that tsgolint skips are ignored. Each case builds a program over `tests/data/fixtures` with the case file in an overlay, runs the rule as `"test"` with fixes and suggestions on, and checks the diagnostics, positions, fix passes, suggestion outputs and the snapshot entry in `tests/data/snapshots/<rule>.snap`. Accepted differences from tsgolint are pinned in `tests/data/divergences/` (see `tests/data/divergences.md`). An entry that names no case fails the run.
+Trials are `<rule>::<GoTest>/valid-<i>` and `<rule>::<GoTest>/invalid-<i>`. Cases that tsgolint skips are ignored. Each case builds a program over `tests/data/fixtures` with the case file in an overlay, runs the rule as `"test"` with fixes and suggestions on, and checks the diagnostics, positions, fix passes and suggestion outputs that the Go test expects, and the snapshot entry in `tests/data/snapshots/<rule>.snap`. The snapshots are our own output on ts-rust: `TSGOLINT_UPDATE_SNAPSHOTS=1` rewrites the entries of the cases that run.
 
 ## Running the engine
 

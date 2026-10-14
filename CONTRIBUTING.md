@@ -20,9 +20,19 @@ The Go sources to compare with are tsgolint at that tag and the typescript-go re
 ## Tests
 
 - `pnpm exec turbo run check test` runs fmt, clippy, the Rust tests and the e2e suite on the native and the wasm build.
-- `cargo test -p tsgolint-rules --test rules -- <rule-name or case key>` runs tsgolint's rule cases for one rule against tsgolint's snapshots.
+- `cargo test -p tsgolint-rules --test rules -- <rule-name or case key>` runs tsgolint's rule cases for one rule against their expectations and our snapshots.
 - `tsgolint-compare` compares the Go binary (`node_modules/.bin/tsgolint`, from the root `oxlint-tsgolint` devDependency) with this one on a real project.
 
-## Differences from tsgolint
+## Reference output
 
-ts-rust ports a newer TypeScript (7.1.0-dev) than tsgolint (7.0). When a case fails only because the newer checker returns another type, type string or diagnostic, pin it in `tsgolint-rules/tests/data/divergences/` and list it in `tsgolint-rules/tests/data/divergences.md` and [DIFFERENCES.md](DIFFERENCES.md), with the evidence: what Go prints, what we print, and the TypeScript change or checker function that explains it. A minimal repro that `typescript@7.0.2` and `typescript@7.1.0-dev.20261008.1` compile differently is the usual proof. Never pin a difference that comes from a bug in the port.
+tsgolint-rust's own output, on the ts-rust commit in `Cargo.lock`, is the reference. The rule snapshots (`tsgolint-rules/tests/data/snapshots`) and the e2e snapshot hold it. When a change of ours or a ts-rust bump changes them, regenerate both and review the diff:
+
+```sh
+TSGOLINT_UPDATE_SNAPSHOTS=1 cargo test -p tsgolint-rules --test rules
+cargo build -p tsgolint-rust
+TSGOLINT_BIN=$PWD/target/debug/tsgolint pnpm --dir tsgolint-rust/e2e run e2e -- --update
+```
+
+Every changed entry needs a cause: a TypeScript change in ts-rust, or a fix in the port. The case files (`tsgolint-rules/tests/data/cases`) keep the message ids, positions and fix outputs that tsgolint's Go tests expect. When a TypeScript change breaks one of those, edit the case and give the cause in the commit message.
+
+The Go tsgolint is the reference only when porting a new or changed rule from a newer tsgolint release. Port the rule, add the cases of its Go tests to `tsgolint-rules/tests/data/cases`, then run `tsgolint-compare` with the Go binary of that release on the cases and on real projects. Each difference that remains must come from the TypeScript revision; [DIFFERENCES.md](DIFFERENCES.md) describes those. Never keep a difference that comes from a bug in the port.
