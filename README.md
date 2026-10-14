@@ -90,6 +90,8 @@ When another package brings `oxlint-tsgolint` in, override it everywhere instead
 
 Where no native build runs, or native binaries are not allowed, use the wasm build on Node's WASI: `"oxlint-tsgolint": "npm:@tsgolint-rust/wasm32-wasip1@0.1.0"`. It gives the same output on one thread, on Linux and macOS.
 
+Each push to `master` with unreleased changes publishes a nightly: `npm:tsgolint-rust@nightly`. Releases are on `latest`.
+
 ## Build from source
 
 ```sh

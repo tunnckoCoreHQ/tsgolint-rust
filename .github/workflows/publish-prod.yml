@@ -1,0 +1,92 @@
+name: Publish prod
+
+# After CI passes on the merged release PR, publishes its version to npm with
+# latest: tsgolint-rust, its platform packages and its wasm package, then
+# creates the GitHub release v<version> with the binaries. Run it by hand on
+# master to publish whatever a failed release left missing.
+#
+# SECURITY: npm trusts this workflow file in the latest environment, which
+# allows only master. npm accepts OIDC tokens only from GitHub-hosted runners,
+# so the publish job runs on one; the builds run on Namespace. The job token
+# creates the tag and the GitHub release.
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [master]
+  workflow_dispatch:
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: publish-prod
+  cancel-in-progress: false
+
+jobs:
+  plan:
+    name: Plan
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master') ||
+      (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      startsWith(github.event.workflow_run.head_commit.message, 'chore: release tsgolint-rust'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      publish: ${{ steps.changesets.outputs.none }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      # The release PR consumes the changesets. With pending ones, the
+      # version on master is not the one to release.
+      - id: changesets
+        run: |
+          if compgen -G '.changeset/*.md' > /dev/null; then
+            echo "Not published: pending changesets; merge the release PR first" | tee -a "$GITHUB_STEP_SUMMARY"
+          else
+            echo none=true >> "$GITHUB_OUTPUT"
+          fi
+
+  build:
+    name: Build
+    needs: plan
+    if: needs.plan.outputs.publish == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build.yml
+    with:
+      ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+  publish:
+    name: Publish to npm with latest
+    needs: build
+    environment: latest
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # the tag and the GitHub release
+      id-token: write # npm trusted publishing and provenance
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: tsgolint-*
+          path: artifacts
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash scripts/release/publish.sh latest artifacts

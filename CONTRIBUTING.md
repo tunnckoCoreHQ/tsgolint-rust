@@ -39,8 +39,10 @@ The Go tsgolint is the reference only when porting a new or changed rule from a 
 
 ## Releases
 
-1. Set the new version in `Cargo.toml` (`[workspace.package]`) and in `npm/tsgolint-rust/package.json` (`version` and the `optionalDependencies`) and `npm/wasm32-wasip1/package.json`. `pnpm exec turbo run check` fails while they differ.
-2. Add a row to the compatibility table in the README.
-3. Merge, then tag the commit `v<version>` on `master` and push the tag.
+Releases use [changesets](https://github.com/changesets/changesets) and run on GitHub only.
 
-The release workflow builds every target, makes the platform packages from `npm/platform`, publishes them, `@tsgolint-rust/wasm32-wasip1` and `tsgolint-rust` to npm with provenance, and creates the GitHub release with the binaries. A tag with a `-` publishes under the `next` dist-tag.
+1. A pull request with a user-facing change adds a changeset: `pnpm changeset`, for `tsgolint-rust`. `@tsgolint-rust/wasm32-wasip1` and the platform packages always take the same version. The ts-rust bump adds its own.
+2. When CI passes on `master` with pending changesets, `publish-nightly` publishes a snapshot version of them with the `nightly` dist-tag, and `release-pr` opens or updates the release PR, "chore: release tsgolint-rust <version>". The release PR bumps the npm packages, writes the changelog, sets the Cargo workspace version and adds the version's row to the README's compatibility table (`node npm/scripts/packages.mjs sync`).
+3. Merging the release PR runs `publish-prod` once CI passes: it publishes the version with `latest` and creates the GitHub release `v<version>` with the binaries. Run `publish-prod` by hand on `master` to publish whatever a failed release left missing.
+
+Both publish workflows build every target (`build.yml`), make the platform packages from `npm/platform`, and publish them, `@tsgolint-rust/wasm32-wasip1` and `tsgolint-rust` through npm trusted publishing, with provenance. A version that is on npm already is skipped.
