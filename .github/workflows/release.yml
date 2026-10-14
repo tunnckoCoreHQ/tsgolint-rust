@@ -111,7 +111,10 @@ jobs:
           echo "CARGO_BUILD=xwin build" >> "$GITHUB_ENV"
 
       - name: Build
-        run: cargo ${CARGO_BUILD:-build} --release --locked -p tsgolint-rust --target ${{ matrix.target }}
+        run: |
+          # CARGO_BUILD is `xwin build` for Windows: split it into words.
+          # shellcheck disable=SC2086
+          cargo ${CARGO_BUILD:-build} --release --locked -p tsgolint-rust --target ${{ matrix.target }}
 
       - name: Collect the binary
         run: |
@@ -197,7 +200,7 @@ jobs:
               esac
             done
           done
-          (cd release && sha256sum * > SHA256SUMS)
+          (cd release && sha256sum -- * > SHA256SUMS)
           ls -l release
 
       - uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
