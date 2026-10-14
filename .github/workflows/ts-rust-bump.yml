@@ -88,19 +88,28 @@ jobs:
           if [ -z "$summary" ] && [ "$TESTS" = success ]; then
             echo "automerge=true" >> "$GITHUB_OUTPUT"
           fi
+          # The changeset puts the move in the next nightly and release.
+          cat > ".changeset/ts-rust-${TO:0:8}.md" <<CHANGESET
+          ---
+          "tsgolint-rust": patch
+          ---
+
+          Move ts-rust to [\`${TO:0:8}\`](https://github.com/pingdotgg/ts-rust/commit/$TO), which ports TypeScript [\`${TYPESCRIPT:0:12}\`](https://github.com/microsoft/TypeScript/commit/$TYPESCRIPT).
+          CHANGESET
 
       # A pull request opened with GITHUB_TOKEN starts no workflow, so CI
-      # would never run on it: TS_RUST_BUMP_TOKEN is a token that can.
+      # would never run on it: BOT_TOKEN is a personal token that can.
       - name: Open the pull request
         id: pr
         if: steps.bump.outputs.bump == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.TS_RUST_BUMP_TOKEN || github.token }}
+          token: ${{ secrets.BOT_TOKEN || github.token }}
           branch: deps/ts-rust
           delete-branch: true
           signoff: true
           add-paths: |
+            .changeset
             Cargo.lock
             UPSTREAM.json
             tsgolint-rules/tests/data/snapshots
@@ -113,6 +122,6 @@ jobs:
       - name: Merge when CI passes
         if: steps.body.outputs.automerge == 'true' && steps.pr.outputs.pull-request-number
         env:
-          GH_TOKEN: ${{ secrets.TS_RUST_BUMP_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.BOT_TOKEN || github.token }}
           PR: ${{ steps.pr.outputs.pull-request-number }}
         run: gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --squash
