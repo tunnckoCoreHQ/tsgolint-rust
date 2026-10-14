@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  ci:
+    name: Check, test and build
+    # linux/amd64, 4 vCPU, 8 GB, with a cache volume that only master commits to.
+    runs-on: namespace-profile-tsgolint-rust
+    timeout-minutes: 60
+    env:
+      # Pull requests read the turbo remote cache but never write to it.
+      TURBO_CACHE: ${{ github.event_name == 'pull_request' && 'local:rw,remote:r' || 'local:rw,remote:rw' }}
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          wasmtime: "true"
+
+      - name: Set up the turbo remote cache
+        uses: namespace-actions/setup-turbocache@3b82149ffb545cab670093f13bc0bad156917e18 # v0.0.4
+
+      # fmt and clippy.
+      - name: Check
+        run: pnpm exec turbo run check
+
+      # The Rust tests, then tsgolint's e2e suite on the native binary and on
+      # the wasm32-wasip1 build under wasmtime.
+      - name: Test
+        run: pnpm exec turbo run test
+
+      # The release builds, native and wasm32-wasip1.
+      - name: Build
+        run: pnpm exec turbo run build

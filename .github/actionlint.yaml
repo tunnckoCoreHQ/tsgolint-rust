@@ -1,0 +1,5 @@
+# Namespace runner labels, for actionlint.
+self-hosted-runner:
+  labels:
+    - namespace-profile-*
+    - nscloud-*
