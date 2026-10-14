@@ -45,7 +45,6 @@ runs:
       if: inputs.wasmtime == 'true'
       shell: bash
       env:
-        # renovate: datasource=github-releases depName=bytecodealliance/wasmtime
         WASMTIME_VERSION: 44.0.1
       run: |
         case "$(uname -m)" in

@@ -1,0 +1,100 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    // config:recommended plus: pinned action digests, config migration PRs,
+    // abandoned-package warnings, weekly lockfile maintenance, npm release-age guard.
+    "config:best-practices",
+    // Every non-major update in one PR, like Dependabot's minor-and-patch group.
+    "group:allNonMajor",
+    // Early Monday mornings, before 04:00.
+    "schedule:weekly",
+    ":semanticCommits",
+    ":semanticCommitTypeAll(chore)",
+    ":semanticCommitScope(deps)",
+  ],
+  // best-practices pins devDependencies to exact versions; the catalogs keep ranges.
+  ignorePresets: [":pinDevDependencies"],
+  timezone: "Etc/UTC",
+  labels: ["dependencies"],
+
+  // Never take a release younger than a week, like Dependabot's cooldown and pnpm's minimumReleaseAge.
+  minimumReleaseAge: "7 days",
+
+  // GitHub auto-merge: GitHub merges once the required checks pass.
+  automerge: true,
+  automergeType: "pr",
+  platformAutomerge: true,
+  automergeStrategy: "squash",
+  rebaseWhen: "behind-base-branch",
+
+  prConcurrentLimit: 5,
+  // A table of every update in the squash commit body.
+  commitBodyTable: true,
+  postUpdateOptions: ["pnpmDedupe"],
+
+  lockFileMaintenance: { enabled: true, automerge: true },
+
+  // Majors wait for a tick in the Dependency Dashboard issue; no PR until then.
+  major: { automerge: false, dependencyDashboardApproval: true },
+
+  // Security fixes skip the schedule and the release-age wait.
+  osvVulnerabilityAlerts: true,
+  vulnerabilityAlerts: { labels: ["security"], automerge: true, minimumReleaseAge: null },
+
+  customManagers: [
+    {
+      // wasmtime runs the e2e suite on the wasm build: `WASMTIME_VERSION: 44.0.1`.
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/.+\\.ya?ml$/"],
+      matchStrings: ["WASMTIME_VERSION: (?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      depNameTemplate: "bytecodealliance/wasmtime",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+    },
+    {
+      // The Rust toolchain: `channel = "1.95.0"`.
+      customType: "regex",
+      managerFilePatterns: ["/^rust-toolchain\\.toml$/"],
+      matchStrings: ['channel = "(?<currentValue>\\d+\\.\\d+\\.\\d+)"'],
+      depNameTemplate: "rust",
+      packageNameTemplate: "rust-lang/rust",
+      datasourceTemplate: "github-releases",
+    },
+  ],
+
+  packageRules: [
+    {
+      description: "ts-rust moves with the ts-rust bump workflow (.github/workflows/ts-rust-bump.yml), which regenerates the snapshots.",
+      matchManagers: ["cargo"],
+      matchPackageNames: ["goport_core", "goport_util"],
+      enabled: false,
+    },
+    {
+      description: "Pinned with `=` to the versions goport_core builds; they move with ts-rust.",
+      matchManagers: ["cargo"],
+      matchPackageNames: ["jiff", "signal-hook", "tikv-jemallocator"],
+      enabled: false,
+    },
+    {
+      description: "Cargo's lockfile maintenance runs a full `cargo update`, which would move the ts-rust pin too.",
+      matchManagers: ["cargo"],
+      matchUpdateTypes: ["lockFileMaintenance"],
+      enabled: false,
+    },
+    {
+      description: "The Go tsgolint that tsgolint-rust ports. It moves with a port to a newer release (see the tsgolint watch workflow).",
+      matchPackageNames: ["oxlint-tsgolint"],
+      enabled: false,
+    },
+    {
+      description: "The @types/node that the rule tests' fixtures were written against. Bump by hand.",
+      matchFileNames: ["tsgolint-rules/tests/data/package.json"],
+      enabled: false,
+    },
+    {
+      description: "The published packages: their versions follow the Cargo workspace version.",
+      matchFileNames: ["npm/**"],
+      enabled: false,
+    },
+  ],
+}
