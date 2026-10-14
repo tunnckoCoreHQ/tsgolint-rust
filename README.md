@@ -15,6 +15,14 @@ It is a drop-in replacement. oxlint spawns it the same way, sends the same `head
 
 ts-rust ports TypeScript 7.1.0-dev, a few months newer than the TypeScript 7.0 inside tsgolint. That accounts for most of the differences: some type strings in messages are cut short at another point, and a few diagnostics changed upstream.
 
+## Compatibility
+
+tsgolint-rust has its own version numbers. Each release ports one tsgolint release (its rules and its `headless` protocol) on one ts-rust commit, and is tested with the oxlint versions below.
+
+| tsgolint-rust | tsgolint rules and protocol | TypeScript | ts-rust | Tested with oxlint |
+|---|---|---|---|---|
+| 0.1.0 | [v7.0.2003](https://github.com/oxc-project/tsgolint/tree/v7.0.2003) | [`fed0bf24149f`](https://github.com/microsoft/TypeScript/commit/fed0bf24149f) (7.1.0-dev) | [`598e6416`](https://github.com/pingdotgg/ts-rust/commit/598e6416) | 1.86.0 |
+
 ## Speed and memory
 
 Lint with fixes and suggestions on real projects, all 60 rules, against the Go tsgolint on the same 12-core machine (median of 7 interleaved runs):
