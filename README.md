@@ -17,7 +17,7 @@ ts-rust ports TypeScript 7.1.0-dev, a few months newer than the TypeScript 7.0 i
 
 ## Compatibility
 
-tsgolint-rust has its own version numbers. Each release ports one tsgolint release (its rules and its `headless` protocol) on one ts-rust commit, and is tested with the oxlint versions below.
+tsgolint-rust has its own version numbers. Each release ports one tsgolint release (its rules and its `headless` protocol) on one ts-rust commit, and is tested with the oxlint versions below. [UPSTREAM.json](UPSTREAM.json) records the pins of the current source.
 
 | tsgolint-rust | tsgolint rules and protocol | TypeScript | ts-rust | Tested with oxlint |
 |---|---|---|---|---|
@@ -119,4 +119,4 @@ Each tsconfig becomes one ts-rust program. ts-rust gives every file a checker, a
 
 ## Development
 
-`pnpm exec turbo run check test build` runs fmt and clippy, the Rust tests and both e2e runs, and the release builds. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, now `598e6416`.
+`pnpm exec turbo run check test build` runs fmt and clippy, the Rust tests and both e2e runs, and the release builds. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, and [UPSTREAM.json](UPSTREAM.json) records it with the TypeScript commit it ports and the ported tsgolint release. A daily workflow moves ts-rust when its compiler sources change, regenerates the snapshots and opens a pull request; another opens an issue when tsgolint releases a newer version.

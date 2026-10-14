@@ -7,6 +7,10 @@ on:
 
 permissions: {}
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: release-${{ github.ref }}
 
@@ -73,7 +77,6 @@ jobs:
           persist-credentials: false
 
       - name: Install the Rust toolchain
-        shell: bash
         run: |
           rustup toolchain install
           rustup target add ${{ matrix.target }}
@@ -93,11 +96,9 @@ jobs:
           } >> "$GITHUB_ENV"
 
       - name: Build
-        shell: bash
         run: cargo build --release --locked -p tsgolint-rust --target ${{ matrix.target }}
 
       - name: Collect the binary
-        shell: bash
         run: |
           dir=target/${{ matrix.target }}/release
           mkdir -p dist
@@ -111,7 +112,11 @@ jobs:
       - name: Check that the binary is static
         if: endsWith(matrix.target, '-linux-musl')
         run: |
-          ldd dist/tsgolint 2>&1 | tee /dev/stderr | grep -q 'statically linked\|not a dynamic executable'
+          # A static binary has no program interpreter (no ld.so to load).
+          if readelf -l dist/tsgolint | grep -q 'INTERP'; then
+            readelf -l dist/tsgolint | grep -A1 INTERP
+            exit 1
+          fi
           echo '{"version":2}' | dist/tsgolint headless
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

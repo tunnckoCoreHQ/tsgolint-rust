@@ -1,0 +1,17 @@
+{
+  "tsgolint": {
+    "repository": "oxc-project/tsgolint",
+    "tag": "v7.0.2003",
+    "commit": "eb9339115edde6811ca94c3433adf69ea9852880"
+  },
+  "ts-rust": {
+    "repository": "pingdotgg/ts-rust",
+    "branch": "main",
+    "commit": "598e6416bfc04962605209911451a3f45f15495c"
+  },
+  "typescript": {
+    "repository": "microsoft/TypeScript",
+    "commit": "fed0bf24149fb1ed36039212648bafdafc1ea10e",
+    "version": "7.1.0-dev"
+  }
+}
