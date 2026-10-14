@@ -1,11 +1,16 @@
 packages:
   - "tsgolint-rust/e2e"
   - "tsgolint-rules/tests/data"
+  # The published packages, which changesets versions.
+  - "npm/tsgolint-rust"
+  - "npm/wasm32-wasip1"
 
 catalogMode: prefer
 
 catalogs:
   default:
+    "@changesets/changelog-github": 1.0.1
+    "@changesets/cli": 3.0.3
     fast-glob: ^3.3.3
     # oxlint runs tsgolint-rust on oxc's tsgolint CLI fixtures
     # (tsgolint-compare/oxlint-fixtures.sh); the README lists the tested versions.

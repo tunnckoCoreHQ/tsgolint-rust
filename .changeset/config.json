@@ -1,0 +1,19 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config/schema.json",
+  "changelog": ["@changesets/changelog-github", { "repo": "tunnckoCoreHQ/tsgolint-rust" }],
+  "commit": false,
+  "fixed": [["tsgolint-rust", "@tsgolint-rust/wasm32-wasip1"]],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "master",
+  "updateInternalDependencies": "patch",
+  "privatePackages": {
+    "version": false,
+    "tag": false
+  },
+  "ignore": [],
+  "snapshot": {
+    "useCalculatedVersion": true,
+    "prereleaseTemplate": "{tag}.{datetime}.{commit-short}"
+  }
+}

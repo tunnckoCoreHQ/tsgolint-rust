@@ -2,7 +2,13 @@
   "name": "tsgolint-rust",
   "version": "0.1.0",
   "description": "A Rust port of tsgolint on ts-rust: the type-aware linter that oxlint runs for --type-aware and --type-check. Install it as oxlint-tsgolint.",
-  "keywords": ["oxlint", "tsgolint", "typescript", "linter", "type-aware"],
+  "keywords": [
+    "oxlint",
+    "tsgolint",
+    "typescript",
+    "linter",
+    "type-aware"
+  ],
   "license": "MIT",
   "author": "tunnckoCore",
   "repository": {
@@ -16,17 +22,11 @@
   "bin": {
     "tsgolint": "bin/tsgolint.js"
   },
-  "files": ["bin"],
+  "files": [
+    "bin"
+  ],
   "engines": {
     "node": ">=20"
-  },
-  "optionalDependencies": {
-    "@tsgolint-rust/darwin-arm64": "0.1.0",
-    "@tsgolint-rust/darwin-x64": "0.1.0",
-    "@tsgolint-rust/linux-arm64": "0.1.0",
-    "@tsgolint-rust/linux-x64": "0.1.0",
-    "@tsgolint-rust/win32-arm64": "0.1.0",
-    "@tsgolint-rust/win32-x64": "0.1.0"
   },
   "publishConfig": {
     "access": "public"

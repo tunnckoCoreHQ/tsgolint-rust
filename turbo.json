@@ -14,7 +14,10 @@
         "tsgolint-*/**/*.rs",
         "tsgolint-*/Cargo.toml",
         "npm/scripts/**",
-        "npm/*/package.json"
+        "npm/*/package.json",
+        "README.md",
+        "UPSTREAM.json",
+        "pnpm-workspace.yaml"
       ],
       "passThroughEnv": [
         "CARGO_*",

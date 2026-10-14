@@ -1,19 +1,28 @@
 #!/usr/bin/env node
-// The npm packages of tsgolint-rust, at the version of the Cargo workspace.
+// The npm packages of tsgolint-rust. The version is the one of
+// npm/tsgolint-rust/package.json, which changesets bumps.
 //
 //   node npm/scripts/packages.mjs version
-//     Prints the version of the Cargo workspace.
+//     Prints the version of tsgolint-rust.
 //
 //   node npm/scripts/packages.mjs check
-//     Checks that npm/tsgolint-rust and npm/wasm32-wasip1 have that version.
+//     Checks that npm/wasm32-wasip1 and the Cargo workspace have that version,
+//     and that the README's compatibility table has a row for it.
 //
-//   node npm/scripts/packages.mjs generate <artifacts> [tag]
-//     For a release: fails unless `tag` is `v<version>`, writes a platform
-//     package per target to npm/platforms/<target> from the npm/platform
-//     template, and copies the wasm module, LICENSE and README.md into the
-//     committed packages. <artifacts> holds the build of each target as
-//     tsgolint-<target>/tsgolint[.exe], and tsgolint-wasm32-wasip1/tsgolint.wasm.
-//     Prints the package directories in publish order: platforms, wasm, main.
+//   node npm/scripts/packages.mjs sync
+//     Sets the Cargo workspace version, in Cargo.toml and Cargo.lock, to that
+//     version, and writes its row of the README's compatibility table from
+//     UPSTREAM.json and the oxlint of the catalog. The release PR runs it
+//     after `changeset version`.
+//
+//   node npm/scripts/packages.mjs generate <artifacts>
+//     For a publish: writes a platform package per target to
+//     npm/platforms/<target> from the npm/platform template, adds them to the
+//     optionalDependencies of tsgolint-rust, and copies the wasm module,
+//     LICENSE and README.md into the committed packages. <artifacts> holds the
+//     build of each target as tsgolint-<target>/tsgolint[.exe], and
+//     tsgolint-wasm32-wasip1/tsgolint.wasm. Prints the package directories in
+//     publish order: platforms, wasm, main.
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -32,39 +41,90 @@ const root = path.resolve(import.meta.dirname, '../..');
 const npm = path.join(root, 'npm');
 const mainDir = path.join(npm, 'tsgolint-rust');
 const wasmDir = path.join(npm, 'wasm32-wasip1');
-
-function cargoVersion() {
-  const toml = fs.readFileSync(path.join(root, 'Cargo.toml'), 'utf8');
-  const section = toml.split(/^\[workspace\.package\]$/m)[1]?.split(/^\[/m)[0] ?? '';
-  const version = section.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
-  assert.ok(version, 'no version in [workspace.package] of Cargo.toml');
-  return version;
-}
+const cargoToml = path.join(root, 'Cargo.toml');
+const cargoLock = path.join(root, 'Cargo.lock');
+const readmeMd = path.join(root, 'README.md');
 
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const writeJson = (file, value) => fs.writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`);
 
-function check(version) {
-  const errors = [];
-  const main = readJson(path.join(mainDir, 'package.json'));
+const WORKSPACE_VERSION = /(^\[workspace\.package\]\n(?:(?!\[).*\n)*?version\s*=\s*")([^"]+)(")/m;
+
+function cargoVersion() {
+  const version = fs.readFileSync(cargoToml, 'utf8').match(WORKSPACE_VERSION)?.[2];
+  assert.ok(version, 'no version in [workspace.package] of Cargo.toml');
+  return version;
+}
+
+// The rows of the README's compatibility table start with the version.
+const compatibilityRow = (version) => new RegExp(`^\\| ${version.replaceAll('.', '\\.')} \\|.*$`, 'm');
+
+function compatibility(version) {
+  const { tsgolint, 'ts-rust': tsRust, typescript } = readJson(path.join(root, 'UPSTREAM.json'));
+  const workspace = fs.readFileSync(path.join(root, 'pnpm-workspace.yaml'), 'utf8');
+  const oxlint = workspace.match(/^ {4}oxlint: (\S+)$/m)?.[1];
+  assert.ok(oxlint, 'no oxlint in the catalog of pnpm-workspace.yaml');
+  const ts = typescript.commit.slice(0, 12);
+  const rust = tsRust.commit.slice(0, 8);
+  const cells = [
+    version,
+    `[${tsgolint.tag}](https://github.com/${tsgolint.repository}/tree/${tsgolint.tag})`,
+    `[\`${ts}\`](https://github.com/${typescript.repository}/commit/${ts}) (${typescript.version})`,
+    `[\`${rust}\`](https://github.com/${tsRust.repository}/commit/${rust})`,
+    oxlint,
+  ];
+  return `| ${cells.join(' | ')} |`;
+}
+
+function checkWasm(version) {
   const wasm = readJson(path.join(wasmDir, 'package.json'));
-  for (const pkg of [main, wasm]) {
-    if (pkg.version !== version) {
-      errors.push(`${pkg.name} has version ${pkg.version}, the Cargo workspace ${version}`);
-    }
+  return wasm.version === version ? [] : [`${wasm.name} has version ${wasm.version}, tsgolint-rust ${version}`];
+}
+
+function check(version) {
+  const errors = checkWasm(version);
+  const cargo = cargoVersion();
+  if (cargo !== version) {
+    errors.push(`the Cargo workspace has version ${cargo}, tsgolint-rust ${version}: run \`node npm/scripts/packages.mjs sync\``);
   }
-  const expected = Object.fromEntries(TARGETS.map((t) => [`@tsgolint-rust/${t.os}-${t.cpu}`, version]));
-  try {
-    assert.deepEqual(main.optionalDependencies, expected);
-  } catch {
-    errors.push(`tsgolint-rust's optionalDependencies must be ${JSON.stringify(expected)}`);
+  if (!compatibilityRow(version).test(fs.readFileSync(readmeMd, 'utf8'))) {
+    errors.push(`the compatibility table of README.md has no row for ${version}: run \`node npm/scripts/packages.mjs sync\``);
+  }
+  // The platform packages of a version exist only once it is published, so
+  // the workspace cannot install them: generate adds them.
+  if (readJson(path.join(mainDir, 'package.json')).optionalDependencies) {
+    errors.push('npm/tsgolint-rust/package.json must have no optionalDependencies: generate adds them');
   }
   return errors;
 }
 
-function generate(version, artifacts, tag) {
-  assert.equal(tag, `v${version}`, `the tag ${tag} does not match the Cargo workspace version ${version}`);
-  const errors = check(version);
+function sync(version) {
+  const toml = fs.readFileSync(cargoToml, 'utf8');
+  fs.writeFileSync(cargoToml, toml.replace(WORKSPACE_VERSION, (_, start, _old, end) => `${start}${version}${end}`));
+
+  // The workspace crates are the packages of Cargo.lock without a source.
+  const separator = '\n[[package]]\n';
+  const lock = fs.readFileSync(cargoLock, 'utf8').split(separator);
+  const synced = lock.map((entry, i) =>
+    i === 0 || /^source = /m.test(entry) ? entry : entry.replace(/^version = "[^"]+"$/m, () => `version = "${version}"`),
+  );
+  fs.writeFileSync(cargoLock, synced.join(separator));
+
+  // The newest version is the first row, under the header.
+  const row = compatibility(version);
+  const readme = fs.readFileSync(readmeMd, 'utf8');
+  const header = /^\| tsgolint-rust \|.*\n\|[-|]+\|\n/m;
+  assert.match(readme, header, 'no compatibility table in README.md');
+  fs.writeFileSync(
+    readmeMd,
+    compatibilityRow(version).test(readme)
+      ? readme.replace(compatibilityRow(version), () => row)
+      : readme.replace(header, (table) => `${table}${row}\n`),
+  );
+}
+
+function generate(version, artifacts) {
+  const errors = checkWasm(version);
   assert.deepEqual(errors, [], errors.join('\n'));
 
   const template = readJson(path.join(npm, 'platform/package.json'));
@@ -97,16 +157,21 @@ function generate(version, artifacts, tag) {
     dirs.push(dir);
   }
 
+  const mainJson = path.join(mainDir, 'package.json');
+  const main = readJson(mainJson);
+  main.optionalDependencies = Object.fromEntries(TARGETS.map((t) => [`@tsgolint-rust/${t.os}-${t.cpu}`, version]));
+  writeJson(mainJson, main);
+
   fs.copyFileSync(path.join(artifacts, 'tsgolint-wasm32-wasip1', 'tsgolint.wasm'), path.join(wasmDir, 'tsgolint.wasm'));
   fs.copyFileSync(license, path.join(wasmDir, 'LICENSE'));
   fs.copyFileSync(license, path.join(mainDir, 'LICENSE'));
-  fs.copyFileSync(path.join(root, 'README.md'), path.join(mainDir, 'README.md'));
+  fs.copyFileSync(readmeMd, path.join(mainDir, 'README.md'));
   dirs.push(wasmDir, mainDir);
   return dirs;
 }
 
 const [command, ...args] = process.argv.slice(2);
-const version = cargoVersion();
+const { version } = readJson(path.join(mainDir, 'package.json'));
 if (command === 'version') {
   console.log(version);
 } else if (command === 'check') {
@@ -115,13 +180,15 @@ if (command === 'version') {
     console.error(error);
   }
   process.exitCode = errors.length ? 1 : 0;
+} else if (command === 'sync') {
+  sync(version);
 } else if (command === 'generate') {
-  const [artifacts, tag = process.env.GITHUB_REF_NAME] = args;
-  assert.ok(artifacts, 'usage: packages.mjs generate <artifacts> [tag]');
-  for (const dir of generate(version, path.resolve(artifacts), tag)) {
+  const [artifacts] = args;
+  assert.ok(artifacts, 'usage: packages.mjs generate <artifacts>');
+  for (const dir of generate(version, path.resolve(artifacts))) {
     console.log(path.relative(root, dir));
   }
 } else {
-  console.error('usage: packages.mjs version | check | generate <artifacts> [tag]');
+  console.error('usage: packages.mjs version | check | sync | generate <artifacts>');
   process.exitCode = 2;
 }
