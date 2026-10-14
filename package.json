@@ -11,7 +11,7 @@
   },
   "scripts": {
     "build": "cargo build --release -p tsgolint-rust && cargo build --release --target wasm32-wasip1 -p tsgolint-rust",
-    "check": "cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings",
+    "check": "node npm/scripts/packages.mjs check && cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings",
     "test": "sh scripts/test.sh"
   },
   "devDependencies": {

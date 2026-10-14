@@ -1,0 +1,22 @@
+{
+  "name": "@tsgolint-rust/{target}",
+  "version": "0.0.0",
+  "description": "The {target} binary of tsgolint-rust. Install tsgolint-rust, which picks the binary of its platform.",
+  "license": "MIT",
+  "author": "tunnckoCore",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tunnckoCoreHQ/tsgolint-rust.git",
+    "directory": "npm/platform"
+  },
+  "bugs": "https://github.com/tunnckoCoreHQ/tsgolint-rust/issues",
+  "homepage": "https://github.com/tunnckoCoreHQ/tsgolint-rust#readme",
+  "os": [],
+  "cpu": [],
+  "files": [],
+  "preferUnplugged": true,
+  "publishConfig": {
+    "access": "public",
+    "executableFiles": []
+  }
+}

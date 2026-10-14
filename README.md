@@ -47,7 +47,50 @@ The wasm build needs about half the memory of the native build, because it keeps
 
 ts-rust has the [Effect](https://effect.website) language service diagnostics built in. When a tsconfig enables the `@effect/language-service` plugin, `--type-check` also reports Effect's diagnostics (codes TS377xxx), from the same check.
 
-## Try it
+## Install
+
+oxlint runs the `tsgolint` bin of the `oxlint-tsgolint` package. tsgolint-rust ships the same bin in the [`tsgolint-rust`](https://www.npmjs.com/package/tsgolint-rust) package, so you install it under the name `oxlint-tsgolint`. It picks its binary from one of `@tsgolint-rust/darwin-arm64`, `darwin-x64`, `linux-arm64`, `linux-x64` (static, for glibc and musl), `win32-arm64` and `win32-x64`.
+
+oxlint declares an optional peer dependency on `oxlint-tsgolint@>=7.0.2003`. tsgolint-rust has its own versions, so tell your package manager to accept it, as below. Otherwise pnpm warns about an unmet peer and npm refuses to install.
+
+With pnpm, alias it in `package.json`:
+
+```json
+{
+  "devDependencies": {
+    "oxlint": "^1.86.0",
+    "oxlint-tsgolint": "npm:tsgolint-rust@0.1.0"
+  }
+}
+```
+
+and accept the version in `pnpm-workspace.yaml`:
+
+```yaml
+peerDependencyRules:
+  allowedVersions:
+    "oxlint>oxlint-tsgolint": "*"
+```
+
+With npm, add the same alias and an override that names it:
+
+```json
+{
+  "devDependencies": {
+    "oxlint": "^1.86.0",
+    "oxlint-tsgolint": "npm:tsgolint-rust@0.1.0"
+  },
+  "overrides": {
+    "oxlint-tsgolint": "$oxlint-tsgolint"
+  }
+}
+```
+
+When another package brings `oxlint-tsgolint` in, override it everywhere instead: `overrides: { oxlint-tsgolint: npm:tsgolint-rust@0.1.0 }` in `pnpm-workspace.yaml` (with the peer rule above), or `"overrides": { "oxlint-tsgolint": "npm:tsgolint-rust@0.1.0" }` in npm's `package.json`. Going back to the Go tsgolint is removing the alias or the override.
+
+Where no native build runs, or native binaries are not allowed, use the wasm build on Node's WASI: `"oxlint-tsgolint": "npm:@tsgolint-rust/wasm32-wasip1@0.1.0"`. It gives the same output on one thread, on Linux and macOS.
+
+## Build from source
 
 ```sh
 cargo build --release -p tsgolint-rust

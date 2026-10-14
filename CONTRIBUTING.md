@@ -36,3 +36,11 @@ TSGOLINT_BIN=$PWD/target/debug/tsgolint pnpm --dir tsgolint-rust/e2e run e2e -- 
 Every changed entry needs a cause: a TypeScript change in ts-rust, or a fix in the port. The case files (`tsgolint-rules/tests/data/cases`) keep the message ids, positions and fix outputs that tsgolint's Go tests expect. When a TypeScript change breaks one of those, edit the case and give the cause in the commit message.
 
 The Go tsgolint is the reference only when porting a new or changed rule from a newer tsgolint release. Port the rule, add the cases of its Go tests to `tsgolint-rules/tests/data/cases`, then run `tsgolint-compare` with the Go binary of that release on the cases and on real projects. Each difference that remains must come from the TypeScript revision; [DIFFERENCES.md](DIFFERENCES.md) describes those. Never keep a difference that comes from a bug in the port.
+
+## Releases
+
+1. Set the new version in `Cargo.toml` (`[workspace.package]`) and in `npm/tsgolint-rust/package.json` (`version` and the `optionalDependencies`) and `npm/wasm32-wasip1/package.json`. `pnpm exec turbo run check` fails while they differ.
+2. Add a row to the compatibility table in the README.
+3. Merge, then tag the commit `v<version>` on `master` and push the tag.
+
+The release workflow builds every target, makes the platform packages from `npm/platform`, publishes them, `@tsgolint-rust/wasm32-wasip1` and `tsgolint-rust` to npm with provenance, and creates the GitHub release with the binaries. A tag with a `-` publishes under the `next` dist-tag.

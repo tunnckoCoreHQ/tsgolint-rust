@@ -3,8 +3,19 @@
   "agentGuidance": false,
   "tasks": {
     "//#check": {
-      "inputs": ["Cargo.toml", "Cargo.lock", "rust-toolchain.toml", "tsgolint-*/**/*.rs", "tsgolint-*/Cargo.toml"],
-      "passThroughEnv": ["CARGO_*", "RUSTUP_*"],
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        "tsgolint-*/**/*.rs",
+        "tsgolint-*/Cargo.toml",
+        "npm/scripts/**",
+        "npm/*/package.json"
+      ],
+      "passThroughEnv": [
+        "CARGO_*",
+        "RUSTUP_*"
+      ],
       "outputs": []
     },
     "//#test": {
@@ -18,7 +29,12 @@
         "!tsgolint-*/**/node_modules/**",
         "!**/*.md"
       ],
-      "passThroughEnv": ["CARGO_*", "RUSTUP_*", "WASMTIME", "TSGOLINT_ORACLE"],
+      "passThroughEnv": [
+        "CARGO_*",
+        "RUSTUP_*",
+        "WASMTIME",
+        "TSGOLINT_ORACLE"
+      ],
       "outputs": []
     },
     "//#build": {
@@ -34,8 +50,14 @@
         "tsgolint-rust/build.rs",
         "tsgolint-rust/Cargo.toml"
       ],
-      "passThroughEnv": ["CARGO_*", "RUSTUP_*"],
-      "outputs": ["target/release/tsgolint", "target/wasm32-wasip1/release/tsgolint.wasm"]
+      "passThroughEnv": [
+        "CARGO_*",
+        "RUSTUP_*"
+      ],
+      "outputs": [
+        "target/release/tsgolint",
+        "target/wasm32-wasip1/release/tsgolint.wasm"
+      ]
     }
   }
 }
