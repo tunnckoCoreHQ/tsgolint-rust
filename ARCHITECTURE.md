@@ -8,9 +8,9 @@ The port matches tsgolint's behavior, not its code. Same command line, same `hea
 
 | Crate | Kind | Owns |
 |---|---|---|
-| `crates/tsgolint-core` | lib | Program loading over ts-rust, the file systems (overlay, cache, in-memory), the rule framework (`RuleDefinition`, `RuleContext`, listeners, diagnostics, fixes, suggestions), the AST traversal, the per-program lint engine with TypeScript diagnostics, fix application, options decoding, text helpers (ECMA lines, UTF-16 columns, trimmed node ranges). |
-| `crates/tsgolint-rules` | lib | The 60 rules, the helpers they share (`src/utils`), the rule registry, and the rule test harness (`tests/rules`) with tsgolint's test cases and snapshots. |
-| `crates/tsgolint-rust` | bin `tsgolint` + lib | The command line (Go `flag` syntax), the `headless` protocol (payload decoding, message framing, JSON encoding), the rules of each payload file, tsconfig discovery, the multi-program driver on tsgolint-core, the legacy CLI output, the WASI build, and the e2e suite. |
+| `tsgolint-core` | lib | Program loading over ts-rust, the file systems (overlay, cache, in-memory), the rule framework (`RuleDefinition`, `RuleContext`, listeners, diagnostics, fixes, suggestions), the AST traversal, the per-program lint engine with TypeScript diagnostics, fix application, options decoding, text helpers (ECMA lines, UTF-16 columns, trimmed node ranges). |
+| `tsgolint-rules` | lib | The 60 rules, the helpers they share (`src/utils`), the rule registry, and the rule test harness (`tests/rules`) with tsgolint's test cases and snapshots. |
+| `tsgolint-rust` | bin `tsgolint` + lib | The command line (Go `flag` syntax), the `headless` protocol (payload decoding, message framing, JSON encoding), the rules of each payload file, tsconfig discovery, the multi-program driver on tsgolint-core, the legacy CLI output, the WASI build, and the e2e suite. |
 
 Dependency direction: `tsgolint-rust` uses `tsgolint-rules` and `tsgolint-core`; `tsgolint-rules` uses `tsgolint-core`. All three use `goport_core` (ts-rust) directly. Nothing uses ts-rust's `ts_goport` crate (language server, project service), so the build stays at `goport_core` + `goport_util`. `goport_core` compiles its modules from `crates/ts_goport/src` of the ts-rust repository.
 
@@ -22,7 +22,7 @@ ts-rust keeps the program as per-thread state, and each checker lives on its own
 2. A loading thread with a large stack (`gostd::stack::max_stack_size()`) resolves each file to a tsconfig (or to the inferred program), then handles one program at a time: create the program, check program diagnostics, bind, collect TypeScript diagnostics, lint, release the program. The driver calls tsgolint-core directly (`create_program`, `create_inferred_program`, `lint_program_with`).
 3. Linting runs as checker jobs. The engine groups the files of a program by the checker that ts-rust assigns to them, and sends one job per group. A job builds the rule instances for each file on the checker thread, walks the AST, and sends each diagnostic as plain data to the loading thread. Rules get `&mut Checker`; no rule state crosses threads. A rule panic, or the `unknown rule: <name>` panic of a file whose config names an unknown rule, comes back to the loading thread when the jobs end and ends the process with exit code 2.
 4. The loading thread also writes the output. It frames each diagnostic (u32 LE length, type byte, compact JSON) into a 400 KB buffer, which it flushes when less than 4 KB is free and at the end, as tsgolint does. So the output streams while later files are linted. When stdout's reader has gone, the next write ends the process by SIGPIPE, as in Go.
-5. Under `target_os = "wasi"` there are no threads. The same code runs on the main thread, and ts-rust runs checker jobs inline on wasm. ts-rust makes each checker on its first job, and the engine drops it after its jobs, so one checker's tables are alive at a time. The binary links a 4 MiB wasm shadow stack, takes the current directory from `PWD`, and needs `/` preopened at `/` (see `crates/tsgolint-rust/README.md`).
+5. Under `target_os = "wasi"` there are no threads. The same code runs on the main thread, and ts-rust runs checker jobs inline on wasm. ts-rust makes each checker on its first job, and the engine drops it after its jobs, so one checker's tables are alive at a time. The binary links a 4 MiB wasm shadow stack, takes the current directory from `PWD`, and needs `/` preopened at `/` (see `tsgolint-rust/README.md`).
 
 A panic on any thread prints `panic: <message>` on stderr and ends the process with exit code 2, as a Go panic does.
 
@@ -63,8 +63,8 @@ The core crate exposes program creation (configured and inferred, with tsgolint'
 ## Tests
 
 - **Rule tests.** `cargo test -p tsgolint-rules --test rules [-- <filter>]` runs the 7,574 test cases that tsgolint's Go tests define (`tests/data/cases/*.json`, dumped from the Go tests with options serialized as the rules receive them). Each case checks the diagnostics, message ids, positions, fix passes and suggestion outputs, and each invalid case checks the snapshot in `tests/data/snapshots` (tsgolint's `.snap` files, verbatim). Accepted differences that come from ts-rust's newer TypeScript revision are listed, with the reason, in `tests/data/divergences.md` and recorded in `tests/data/divergences/`.
-- **e2e.** `crates/tsgolint-rust/e2e` is tsgolint's vitest suite with its fixtures. It spawns the binary named by `TSGOLINT_BIN`.
-- **Oracle comparison.** The Go binary is the repository's `oxlint-tsgolint` devDependency. `crates/tsgolint-rust/tests/cli.rs` runs its platform binary next to this binary on flag errors, payload errors and empty payloads. `crates/tsgolint-compare` runs both binaries on the payload of a real project, normalizes the outputs and diffs them.
+- **e2e.** `tsgolint-rust/e2e` is tsgolint's vitest suite with its fixtures. It spawns the binary named by `TSGOLINT_BIN`.
+- **Oracle comparison.** The Go binary is the repository's `oxlint-tsgolint` devDependency. `tsgolint-rust/tests/cli.rs` runs its platform binary next to this binary on flag errors, payload errors and empty payloads. `tsgolint-compare` runs both binaries on the payload of a real project, normalizes the outputs and diffs them.
 
 ## TypeScript version
 

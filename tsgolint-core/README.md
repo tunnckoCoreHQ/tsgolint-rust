@@ -1,6 +1,6 @@
 # tsgolint-core
 
-Program loading, the rule framework and the lint engine of tsgolint-rust. Read `crates/ARCHITECTURE.md` and `crates/CONTRIBUTING.md` first.
+Program loading, the rule framework and the lint engine of tsgolint-rust. Read [ARCHITECTURE.md](../ARCHITECTURE.md) and [CONTRIBUTING.md](../CONTRIBUTING.md) first.
 
 ## Modules
 
@@ -19,7 +19,7 @@ Program loading, the rule framework and the lint engine of tsgolint-rust. Read `
 
 ## Writing a rule
 
-A rule module in `crates/tsgolint-rules/src/rules/<snake_name>.rs` exports `RULE`, and `src/rules/mod.rs` lists it in `ALL_RULES`. `create` runs once per linted file. It gets the context and the rule's JSON options (`null` when none), may report at once, and returns its listeners. A listener is a `Listener` (a `SyntaxKind` means "enter") and a handler `fn(&mut State, &mut RuleContext, Node)`. `State` is the rule's value for this file: its options, and any stack it keeps between enter and exit events. Handlers are plain functions or non-capturing closures; everything they need is in the state or the context.
+A rule module in `tsgolint-rules/src/rules/<snake_name>.rs` exports `RULE`, and `src/rules/mod.rs` lists it in `ALL_RULES`. `create` runs once per linted file. It gets the context and the rule's JSON options (`null` when none), may report at once, and returns its listeners. A listener is a `Listener` (a `SyntaxKind` means "enter") and a handler `fn(&mut State, &mut RuleContext, Node)`. `State` is the rule's value for this file: its options, and any stack it keeps between enter and exit events. Handlers are plain functions or non-capturing closures; everything they need is in the state or the context.
 
 This is `no-meaningless-void-operator`, complete (`src/rules/no_meaningless_void_operator.rs`):
 

@@ -4,23 +4,23 @@ tsgolint's end-to-end suite (Vitest), with its fixtures. It runs whichever binar
 
 ## Running
 
-The root `pnpm install` installs the suite's dependencies. `crates/scripts/test.sh` (the crates' `test` task) builds both binaries and runs the suite twice. To run it by hand:
+The root `pnpm install` installs the suite's dependencies. `scripts/test.sh` (the `test` task) builds both binaries and runs the suite twice. To run it by hand:
 
 ```bash
 cargo build -p tsgolint-rust
-TSGOLINT_BIN=$PWD/target/debug/tsgolint pnpm --dir crates/tsgolint-rust/e2e run e2e
+TSGOLINT_BIN=$PWD/target/debug/tsgolint pnpm --dir tsgolint-rust/e2e run e2e
 
 # The wasm build, under wasmtime
 cargo build -p tsgolint-rust --target wasm32-wasip1
 TSGOLINT_WASM=$PWD/target/wasm32-wasip1/debug/tsgolint.wasm \
-  TSGOLINT_BIN=$PWD/crates/tsgolint-rust/e2e/tsgolint-wasm.sh \
-  pnpm --dir crates/tsgolint-rust/e2e run e2e
+  TSGOLINT_BIN=$PWD/tsgolint-rust/e2e/tsgolint-wasm.sh \
+  pnpm --dir tsgolint-rust/e2e run e2e
 
 # The Go binary, from the root oxlint-tsgolint devDependency
-TSGOLINT_BIN=$PWD/node_modules/.bin/tsgolint pnpm --dir crates/tsgolint-rust/e2e run e2e
+TSGOLINT_BIN=$PWD/node_modules/.bin/tsgolint pnpm --dir tsgolint-rust/e2e run e2e
 ```
 
-Add `-- --update` to rewrite the Vitest snapshot. The snapshot comes from tsgolint; change it only for a listed difference (see `crates/DIFFERENCES.md`).
+Add `-- --update` to rewrite the Vitest snapshot. The snapshot comes from tsgolint; change it only for a listed difference (see [DIFFERENCES.md](../../DIFFERENCES.md)).
 
 ## How it works
 

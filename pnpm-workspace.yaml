@@ -1,0 +1,21 @@
+packages:
+  - "tsgolint-rust/e2e"
+  - "tsgolint-rules/tests/data"
+
+catalogMode: prefer
+
+catalogs:
+  default:
+    fast-glob: ^3.3.3
+    # oxlint runs tsgolint-rust on oxc's tsgolint CLI fixtures
+    # (tsgolint-compare/oxlint-fixtures.sh); the README lists the tested versions.
+    oxlint: 1.86.0
+    # The Go tsgolint that tsgolint-rust ports, at the tag in UPSTREAM.json. It is
+    # the oracle of tsgolint-rust/tests/cli.rs and tsgolint-compare, and moves
+    # only with a port to a newer tsgolint.
+    oxlint-tsgolint: 7.0.2003
+    turbo: 2.11.7
+    vitest: 5.0.3
+  types:
+    "@types/node": ^24
+    typescript: 7.0.2

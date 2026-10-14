@@ -6,8 +6,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/tunnckoCoreHQ/monarch.git",
-    "directory": "crates/tsgolint-rules/tests/data"
+    "url": "git+https://github.com/tunnckoCoreHQ/tsgolint-rust.git",
+    "directory": "tsgolint-rules/tests/data"
   },
   "devDependencies": {
     "@types/node": "24.13.2"

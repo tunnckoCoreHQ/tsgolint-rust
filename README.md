@@ -51,7 +51,7 @@ The wasm build, under [wasmtime](https://wasmtime.dev):
 ```sh
 cargo build --release --target wasm32-wasip1 -p tsgolint-rust
 TSGOLINT_WASM=$PWD/target/wasm32-wasip1/release/tsgolint.wasm \
-  OXLINT_TSGOLINT_PATH=$PWD/crates/tsgolint-rust/e2e/tsgolint-wasm.sh \
+  OXLINT_TSGOLINT_PATH=$PWD/tsgolint-rust/e2e/tsgolint-wasm.sh \
   pnpm exec oxlint --type-aware --type-check
 ```
 
@@ -68,4 +68,4 @@ Each tsconfig becomes one ts-rust program. ts-rust gives every file a checker, a
 
 ## Development
 
-`pnpm exec turbo run check test build --filter=./crates` runs fmt and clippy, the Rust tests and both e2e runs, and the release builds. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, now `598e6416`.
+`pnpm exec turbo run check test build` runs fmt and clippy, the Rust tests and both e2e runs, and the release builds. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, now `598e6416`.
