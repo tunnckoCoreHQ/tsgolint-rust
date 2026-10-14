@@ -14,10 +14,26 @@ concurrency:
 
 jobs:
   ci:
-    name: Check, test and build
-    # linux/amd64, 4 vCPU, 8 GB, with a cache volume that only master commits to.
-    runs-on: namespace-profile-tsgolint-rust
-    timeout-minutes: 60
+    name: Check, test and build (${{ matrix.name }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # linux/amd64, 4 vCPU, 8 GB, with a cache volume that only master
+          # commits to.
+          - name: linux
+            runs-on: [namespace-profile-tsgolint-rust]
+          # macOS arm64 with its own cache volume, also committed by master
+          # only. The account has no Windows machines, so Windows is not
+          # tested; its release builds cross-compile on Linux.
+          - name: macos
+            runs-on:
+              - nscloud-macos-tahoe-arm64-6x14-with-cache
+              - nscloud-cache-tag-tsgolint-rust-macos
+              - nscloud-cache-size-50gb
+              - nscloud-cache-allow-commit-from-master
+    runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 90
     env:
       # Pull requests read the turbo remote cache but never write to it.
       TURBO_CACHE: ${{ github.event_name == 'pull_request' && 'local:rw,remote:r' || 'local:rw,remote:rw' }}
