@@ -56,14 +56,15 @@ jobs:
           - npm: darwin-x64
             target: x86_64-apple-darwin
             runner: nscloud-macos-tahoe-arm64-6x14
-          # Windows uses the default allocator. One x64 machine; arm64 is a
-          # cross build with MSVC's ARM64 tools.
+          # Windows has no C dependency (jemalloc is off there), so both
+          # targets cross-compile on Linux with cargo-xwin and the MSVC SDK.
+          # The Namespace account cannot create Windows machines.
           - npm: win32-x64
             target: x86_64-pc-windows-msvc
-            runner: nscloud-windows-2022-amd64-8x16
+            runner: namespace-profile-tsgolint-rust
           - npm: win32-arm64
             target: aarch64-pc-windows-msvc
-            runner: nscloud-windows-2022-amd64-8x16
+            runner: namespace-profile-tsgolint-rust
           - npm: wasm32-wasip1
             target: wasm32-wasip1
             runner: namespace-profile-tsgolint-rust
@@ -95,8 +96,22 @@ jobs:
             echo "JEMALLOC_SYS_WITH_MALLOC_CONF=narenas:4,thp:always,metadata_thp:disabled,cache_oblivious:false"
           } >> "$GITHUB_ENV"
 
+      - name: Install cargo-xwin
+        if: endsWith(matrix.target, '-windows-msvc')
+        env:
+          CARGO_XWIN_VERSION: 0.23.1
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang lld llvm
+          # clang-cl, lld-link and llvm-lib, unversioned.
+          llvm-config --bindir >> "$GITHUB_PATH"
+          curl -fsSL "https://github.com/rust-cross/cargo-xwin/releases/download/v$CARGO_XWIN_VERSION/cargo-xwin-v$CARGO_XWIN_VERSION.x86_64-unknown-linux-musl.tar.gz" \
+            | tar -xz -C "$HOME/.cargo/bin" cargo-xwin
+          cargo xwin --version
+          echo "CARGO_BUILD=xwin build" >> "$GITHUB_ENV"
+
       - name: Build
-        run: cargo build --release --locked -p tsgolint-rust --target ${{ matrix.target }}
+        run: cargo ${CARGO_BUILD:-build} --release --locked -p tsgolint-rust --target ${{ matrix.target }}
 
       - name: Collect the binary
         run: |

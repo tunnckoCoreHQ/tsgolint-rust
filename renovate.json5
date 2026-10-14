@@ -43,6 +43,15 @@
 
   customManagers: [
     {
+      // cargo-xwin cross-compiles the Windows release builds: `CARGO_XWIN_VERSION: 0.23.1`.
+      customType: "regex",
+      managerFilePatterns: ["/^\\.github/.+\\.ya?ml$/"],
+      matchStrings: ["CARGO_XWIN_VERSION: (?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      depNameTemplate: "rust-cross/cargo-xwin",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+    },
+    {
       // wasmtime runs the e2e suite on the wasm build: `WASMTIME_VERSION: 44.0.1`.
       customType: "regex",
       managerFilePatterns: ["/^\\.github/.+\\.ya?ml$/"],
