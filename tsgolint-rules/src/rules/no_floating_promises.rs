@@ -274,7 +274,7 @@ fn is_known_safe_promise_return(
     }
     let callee = node.expression();
     let t = c.get_type_at_location(callee);
-    value_matches_some_specifier(c, fs, callee, &options.allow_for_known_safe_calls, t)
+    value_matches_some_specifier(c, fs, callee, &options.allow_for_known_safe_calls)
         || type_matches_some_specifier(c, fs, t, &options.allow_for_known_safe_calls)
 }
 

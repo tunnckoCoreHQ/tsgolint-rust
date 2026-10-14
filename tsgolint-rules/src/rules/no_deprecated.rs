@@ -6,7 +6,7 @@ use goport_core::ast::{
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::{Checker, LiteralValue};
 use goport_core::core::{Node, SymbolId, TypeId};
-use goport_core::flags::{CheckMode, ContextFlags, SymbolFlags, TypeFlags};
+use goport_core::flags::{CheckMode, ContextFlags, NodeFlags, SymbolFlags, TypeFlags};
 use serde::Deserialize;
 use serde_json::Value;
 use tsgolint_core::{
@@ -121,7 +121,7 @@ fn check_identifier(options: &mut Options, ctx: &mut RuleContext<'_>, node: Node
         let fs = ctx.fs();
         // TODO in tsgolint: skip when the type or the value is allowed.
         if type_matches_some_specifier(ctx.checker, &*fs, t, &options.allow)
-            || value_matches_some_specifier(ctx.checker, &*fs, node, &options.allow, t)
+            || value_matches_some_specifier(ctx.checker, &*fs, node, &options.allow)
         {
             return;
         }
@@ -276,8 +276,18 @@ fn object_literal_property_name(c: &mut Checker, name: Node) -> Option<String> {
     }
 }
 
-/// The text of the first `@deprecated` tag in the JSDoc of `node`, or "".
-fn js_doc_deprecation_text(node: Node) -> String {
+/// The text of the first `@deprecated` tag in the JSDoc of `node`, or of the
+/// nearest ancestor that may have one, or "".
+fn js_doc_deprecation_text(mut node: Node) -> String {
+    // As IsDeprecatedDeclaration looks it up: a variable declaration can take
+    // its @deprecated tag from the statement around it.
+    while node.is_some()
+        && !node
+            .flags()
+            .intersects(NodeFlags::POSSIBLY_CONTAINS_DEPRECATED_TAG)
+    {
+        node = node.parent();
+    }
     if node.is_nil() {
         return String::new();
     }

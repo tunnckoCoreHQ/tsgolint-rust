@@ -13,7 +13,7 @@ catalogs:
     # The Go tsgolint that tsgolint-rust ports, at the tag in UPSTREAM.json. It is
     # the oracle of tsgolint-rust/tests/cli.rs and tsgolint-compare, and moves
     # only with a port to a newer tsgolint.
-    oxlint-tsgolint: 7.0.2003
+    oxlint-tsgolint: 7.0.2004
     turbo: 2.11.7
     vitest: 5.0.3
   types:

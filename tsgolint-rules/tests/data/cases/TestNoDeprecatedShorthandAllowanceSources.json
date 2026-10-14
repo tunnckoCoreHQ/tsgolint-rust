@@ -1,0 +1,79 @@
+{
+  "test": "TestNoDeprecatedShorthandAllowanceSources",
+  "rule": "no-deprecated",
+  "tsconfig": "tsconfig.minimal.json",
+  "valid": [
+    {
+      "index": 0,
+      "code": "import { deprecatedValue } from './deprecated';\nvoid { deprecatedValue };",
+      "options": {
+        "allow": [
+          {
+            "from": "file",
+            "name": [
+              "deprecatedValue"
+            ],
+            "path": "./deprecated.ts"
+          }
+        ]
+      },
+      "files": {
+        "deprecated.ts": "/** @deprecated */\nexport const deprecatedValue = 1;"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "index": 0,
+      "code": "import { deprecatedValue } from './deprecated';\nvoid { deprecatedValue };",
+      "options": {
+        "allow": [
+          {
+            "path": "./file.ts",
+            "from": "file",
+            "name": [
+              "deprecatedValue"
+            ]
+          }
+        ]
+      },
+      "files": {
+        "deprecated.ts": "/** @deprecated */\nexport const deprecatedValue = 1;"
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecated",
+          "line": 2,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "code": "import { deprecatedValue } from './deprecated';\nvoid { deprecatedValue };",
+      "options": {
+        "allow": [
+          {
+            "name": [
+              "deprecatedValue"
+            ],
+            "path": "./missing.ts",
+            "from": "file"
+          }
+        ]
+      },
+      "files": {
+        "deprecated.ts": "/** @deprecated */\nexport const deprecatedValue = 1;"
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecated",
+          "line": 2,
+          "suggestions": []
+        }
+      ]
+    }
+  ]
+}

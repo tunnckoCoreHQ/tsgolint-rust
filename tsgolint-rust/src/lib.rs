@@ -1,6 +1,6 @@
 //! tsgolint-rust: the `tsgolint` command line, its `headless` protocol,
 //! tsconfig discovery and the multi-program driver. It is a drop-in
-//! replacement for tsgolint v7.0.2003: oxlint spawns `tsgolint headless`,
+//! replacement for tsgolint v7.0.2004: oxlint spawns `tsgolint headless`,
 //! writes a JSON payload to stdin and reads framed diagnostics from stdout.
 //! Program loading, the lint engine and the rules are tsgolint-core and
 //! tsgolint-rules.

@@ -147,6 +147,30 @@
       "index": 28,
       "code": "\n      class Foo {\n        public foo(): this {\n          return this;\n        }\n\n        protected then(resolve: () => void): void {\n          resolve();\n        }\n      }\n    ",
       "options": null
+    },
+    {
+      "index": 29,
+      "code": "\ninterface Schema<Output = any> {\n  readonly _output: Output;\n  parse(input: unknown): Output;\n}\ntype Infer<S extends Schema> = S['_output'];\nconst parse = <S extends Schema>(schema: S, input: unknown): Infer<S> =>\n  schema.parse(input) as Infer<S>;\n    ",
+      "options": null
+    },
+    {
+      "index": 30,
+      "code": "\nfunction f<T extends Set<any>>(x: T): Set<string> {\n  return x;\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 31,
+      "code": "\n/** @callback Fn */\n\n/** @type {Fn} */\nconst f = function () {\n  return 1;\n};",
+      "fileName": "repro.js",
+      "options": null,
+      "tsconfig": "tsconfig.checkJs.json"
+    },
+    {
+      "index": 32,
+      "code": "\n/** @callback Fn */\n\n/** @type {Fn} */\nconst f = () => 1;",
+      "fileName": "repro.js",
+      "options": null,
+      "tsconfig": "tsconfig.checkJs.json"
     }
   ],
   "invalid": [
@@ -364,14 +388,14 @@
           "messageId": "unsafeReturnThis",
           "line": 3,
           "column": 3,
-          "endColumn": 9,
+          "endColumn": 15,
           "suggestions": []
         },
         {
           "messageId": "unsafeReturnThis",
           "line": 7,
-          "column": 13,
-          "endColumn": 15,
+          "column": 16,
+          "endColumn": 20,
           "suggestions": []
         }
       ]
@@ -385,8 +409,8 @@
         {
           "messageId": "unsafeReturn",
           "line": 3,
-          "column": 8,
-          "endColumn": 10,
+          "column": 11,
+          "endColumn": 23,
           "suggestions": []
         }
       ]
@@ -401,7 +425,7 @@
           "messageId": "unsafeReturn",
           "line": 5,
           "column": 3,
-          "endColumn": 9,
+          "endColumn": 16,
           "suggestions": []
         }
       ]
@@ -593,16 +617,76 @@
       "code": "\nimport type { Fn } from 'return-types';\nconst foo: Fn = () => new Set<any>();\n      ",
       "options": null,
       "files": {
-        "node_modules/return-types/package.json": "{\n  \"name\": \"return-types\",\n  \"version\": \"1.0.0\",\n  \"types\": \"index.d.ts\"\n}",
-        "node_modules/return-types/index.d.ts": "export type Fn = () => Set<string>;"
+        "node_modules/return-types/index.d.ts": "export type Fn = () => Set<string>;",
+        "node_modules/return-types/package.json": "{\n  \"name\": \"return-types\",\n  \"version\": \"1.0.0\",\n  \"types\": \"index.d.ts\"\n}"
       },
       "output": [],
       "errors": [
         {
           "messageId": "unsafeReturnAssignment",
           "line": 3,
+          "column": 23,
+          "endColumn": 37,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 33,
+      "code": "\ninterface Schema<Output = any> {\n  readonly _output: Output;\n}\ntype Infer<S extends Schema> = S['_output'];\nconst getOutput = <S extends Schema>(schema: S): Infer<S> =>\n  schema._output;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "unsafeReturn",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 34,
+      "code": "\n/**\n * @callback Fn\n * @param {*} value\n */\n\n/** @type {Fn} */\nconst f = function (value) {\n  return value;\n};",
+      "fileName": "repro.js",
+      "options": null,
+      "tsconfig": "tsconfig.checkJs.json",
+      "output": [],
+      "errors": [
+        {
+          "messageId": "unsafeReturn",
+          "line": 9,
+          "column": 3,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 35,
+      "code": "\n/**\n * @callback Fn\n * @param {*} value\n */\n\n/** @type {Fn} */\nconst f = value => value;",
+      "fileName": "repro.js",
+      "options": null,
+      "tsconfig": "tsconfig.checkJs.json",
+      "output": [],
+      "errors": [
+        {
+          "messageId": "unsafeReturn",
+          "line": 8,
           "column": 20,
-          "endColumn": 22,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 36,
+      "code": "\n/**\n * @callback Fn\n * @param {*} value\n * @returns {number}\n */\n\n/** @type {Fn} */\nconst f = value => value;",
+      "fileName": "repro.js",
+      "options": null,
+      "tsconfig": "tsconfig.checkJs.json",
+      "output": [],
+      "errors": [
+        {
+          "messageId": "unsafeReturn",
+          "line": 9,
+          "column": 20,
           "suggestions": []
         }
       ]

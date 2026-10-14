@@ -4,10 +4,10 @@
 use goport_core::ast::{
     TextRange, get_source_file_of_node, is_arrow_function, is_assignment_expression,
     is_big_int_literal, is_binary_expression, is_call_expression, is_computed_property_name,
-    is_function_like, is_identifier, is_logical_expression, is_method_declaration,
-    is_numeric_literal, is_object_literal_expression, is_private_identifier,
-    is_property_assignment, is_shorthand_property_assignment, is_static, is_string_literal,
-    skip_parentheses,
+    is_function_like, is_identifier, is_logical_expression,
+    is_logical_or_coalescing_binary_expression, is_method_declaration, is_numeric_literal,
+    is_object_literal_expression, is_private_identifier, is_property_assignment,
+    is_shorthand_property_assignment, is_static, is_string_literal, skip_parentheses,
 };
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
@@ -169,7 +169,7 @@ fn create(_ctx: &mut RuleContext<'_>, options: &Value) -> RuleListeners {
         checked_nodes: FxHashSet::default(),
     })
     .on(SyntaxKind::BinaryExpression, |state, ctx, node| {
-        if state.checks_conditionals {
+        if state.checks_conditionals && is_logical_or_coalescing_binary_expression(node) {
             check_conditional(state, ctx, node, false);
         }
         if state.void_return.as_ref().is_some_and(|v| v.variables)

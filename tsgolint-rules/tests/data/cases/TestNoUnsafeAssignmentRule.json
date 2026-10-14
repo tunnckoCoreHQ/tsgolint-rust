@@ -202,8 +202,8 @@
       "errors": [
         {
           "messageId": "anyAssignment",
-          "column": 9,
-          "endColumn": 10,
+          "column": 7,
+          "endColumn": 19,
           "suggestions": []
         }
       ]
@@ -317,8 +317,8 @@
         {
           "messageId": "anyAssignment",
           "line": 4,
-          "column": 7,
-          "endColumn": 8,
+          "column": 1,
+          "endColumn": 15,
           "suggestions": []
         }
       ]
@@ -355,8 +355,8 @@
       "errors": [
         {
           "messageId": "unsafeAssignment",
-          "column": 22,
-          "endColumn": 23,
+          "column": 7,
+          "endColumn": 38,
           "suggestions": []
         }
       ]
@@ -661,8 +661,8 @@
         {
           "messageId": "unsafeAssignment",
           "line": 1,
-          "column": 11,
-          "endColumn": 12,
+          "column": 1,
+          "endColumn": 23,
           "suggestions": []
         }
       ]
@@ -677,7 +677,7 @@
           "messageId": "unsafeArraySpread",
           "line": 2,
           "column": 12,
-          "endColumn": 15,
+          "endColumn": 25,
           "suggestions": []
         }
       ]
@@ -692,7 +692,7 @@
           "messageId": "unsafeArraySpread",
           "line": 2,
           "column": 12,
-          "endColumn": 15,
+          "endColumn": 28,
           "suggestions": []
         }
       ]
@@ -885,8 +885,8 @@
       "errors": [
         {
           "messageId": "anyAssignment",
-          "column": 14,
-          "endColumn": 15,
+          "column": 13,
+          "endColumn": 24,
           "suggestions": []
         }
       ]
@@ -899,8 +899,8 @@
       "errors": [
         {
           "messageId": "anyAssignment",
-          "column": 19,
-          "endColumn": 20,
+          "column": 18,
+          "endColumn": 29,
           "suggestions": []
         }
       ]
@@ -913,8 +913,8 @@
       "errors": [
         {
           "messageId": "unsafeAssignment",
-          "column": 44,
-          "endColumn": 45,
+          "column": 43,
+          "endColumn": 70,
           "suggestions": []
         }
       ]
@@ -927,8 +927,8 @@
       "errors": [
         {
           "messageId": "anyAssignment",
-          "column": 9,
-          "endColumn": 10,
+          "column": 7,
+          "endColumn": 28,
           "suggestions": []
         }
       ]
@@ -943,8 +943,8 @@
         {
           "messageId": "anyAssignment",
           "line": 4,
-          "column": 7,
-          "endColumn": 8,
+          "column": 9,
+          "endColumn": 17,
           "suggestions": []
         }
       ]
@@ -958,8 +958,8 @@
         {
           "messageId": "anyAssignmentThis",
           "line": 3,
-          "column": 13,
-          "endColumn": 14,
+          "column": 9,
+          "endColumn": 19,
           "suggestions": []
         }
       ]
@@ -973,8 +973,8 @@
         {
           "messageId": "anyAssignment",
           "line": 3,
-          "column": 15,
-          "endColumn": 16,
+          "column": 7,
+          "endColumn": 38,
           "suggestions": []
         }
       ]
@@ -1003,8 +1003,8 @@
         {
           "messageId": "anyAssignment",
           "line": 9,
-          "column": 33,
-          "endColumn": 34,
+          "column": 5,
+          "endColumn": 54,
           "suggestions": []
         }
       ]
@@ -1018,8 +1018,8 @@
         {
           "messageId": "anyAssignment",
           "line": 4,
-          "column": 5,
-          "endColumn": 6,
+          "column": 1,
+          "endColumn": 24,
           "suggestions": []
         }
       ]

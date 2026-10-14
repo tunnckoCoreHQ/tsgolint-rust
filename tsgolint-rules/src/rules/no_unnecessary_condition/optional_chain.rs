@@ -282,8 +282,7 @@ pub(super) fn check_optional_chain(st: &State, ctx: &mut RuleContext<'_>, node: 
     let type_name = label.unwrap_or_else(|| type_name_for_node(c, expression_type, expression));
     let report = typed_value_report(
         never_optional_chain_message(),
-        ctx.trim_node_text_range(question_dot),
-        ctx.trim_node_text_range(expression),
+        ctx.trim_node_text_range(node),
         type_name,
     );
     let replacement = if node.kind() == SyntaxKind::PropertyAccessExpression {

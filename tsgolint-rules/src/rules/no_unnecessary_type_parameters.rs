@@ -199,6 +199,7 @@ fn is_weak_precedence_constraint(node: Node) -> bool {
                 | SyntaxKind::IntersectionType
                 | SyntaxKind::ConditionalType
                 | SyntaxKind::TypeOperator
+                | SyntaxKind::OptionalType
                 | SyntaxKind::FunctionType
                 | SyntaxKind::ConstructorType
         )
@@ -219,6 +220,7 @@ fn is_weak_precedence_type_parent(reference: Node) -> bool {
                 | SyntaxKind::UnionType
                 | SyntaxKind::ConditionalType
                 | SyntaxKind::TypeOperator
+                | SyntaxKind::OptionalType
         )
 }
 

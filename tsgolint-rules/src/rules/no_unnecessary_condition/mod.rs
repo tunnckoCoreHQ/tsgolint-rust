@@ -8,7 +8,7 @@ mod types;
 
 use goport_core::ast::{
     TextRange, get_source_file_of_node, get_text_of_property_name, is_assignment_target,
-    is_binary_expression, is_logical_expression, is_parenthesized_expression, skip_parentheses,
+    is_logical_expression, is_parenthesized_expression, skip_parentheses,
 };
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
@@ -119,6 +119,7 @@ fn never_optional_chain_message() -> RuleMessage {
         "neverOptionalChain",
         "Unnecessary optional chain on a non-nullish value.",
     )
+    .with_help("Remove the optional chain; the value cannot be `null` or `undefined`.")
 }
 
 fn suggest_remove_optional_chain_message() -> RuleMessage {
@@ -155,60 +156,50 @@ fn type_guard_already_is_type_message() -> RuleMessage {
     )
 }
 
-/// A report with a `Type: <name>` label on `type_range`, or no label when
-/// the name is empty.
-fn typed_value_report(
-    message: RuleMessage,
-    primary: TextRange,
-    type_range: TextRange,
-    type_name: String,
-) -> Report {
-    let report = Report::new(primary, message);
-    if type_name.is_empty() {
-        report
-    } else {
-        report.with_label(format!("Type: {type_name}"), type_range)
+/// A report whose help starts with the type of the checked value, when the
+/// name is not empty.
+fn typed_value_report(mut message: RuleMessage, range: TextRange, type_name: String) -> Report {
+    if !type_name.is_empty() {
+        let mut help = format!("The checked value has type `{type_name}`.");
+        if !message.help.is_empty() {
+            help.push(' ');
+            help.push_str(&message.help);
+        }
+        message.help = help;
     }
+    Report::new(range, message)
 }
 
-/// Like [`typed_value_report`], with a `Return type: <name>` label.
-fn typed_return_report(
-    message: RuleMessage,
-    primary: TextRange,
-    type_range: TextRange,
-    type_name: String,
-) -> Report {
-    let report = Report::new(primary, message);
-    if type_name.is_empty() {
-        report
-    } else {
-        report.with_label(format!("Return type: {type_name}"), type_range)
+/// A report whose help names the return type of the callback, when the name
+/// is not empty.
+fn typed_return_report(mut message: RuleMessage, range: TextRange, type_name: String) -> Report {
+    if !type_name.is_empty() {
+        message.help = format!("The callback returns type `{type_name}`.");
     }
+    Report::new(range, message)
 }
 
-fn type_guard_report(
-    primary: TextRange,
-    type_range: TextRange,
-    value_type: &str,
-    predicate_type: &str,
-) -> Report {
-    Report::new(primary, type_guard_already_is_type_message()).with_label(
-        format!("Type {value_type} already satisfies predicate type {predicate_type}"),
-        type_range,
+fn type_guard_report(range: TextRange, value_type: &str, predicate_type: &str) -> Report {
+    Report::new(
+        range,
+        type_guard_already_is_type_message().with_help(format!(
+            "Type `{value_type}` already satisfies predicate type `{predicate_type}`. Remove the redundant type check."
+        )),
     )
 }
 
 fn comparison_report(
     message: RuleMessage,
-    primary: TextRange,
+    range: TextRange,
     left_type: &str,
-    left_range: TextRange,
     right_type: &str,
-    right_range: TextRange,
 ) -> Report {
-    Report::new(primary, message)
-        .with_label(format!("Type: {left_type}"), left_range)
-        .with_label(format!("Type: {right_type}"), right_range)
+    Report::new(
+        range,
+        message.with_help(format!(
+            "The left side has type `{left_type}`, and the right side has type `{right_type}`."
+        )),
+    )
 }
 
 fn type_name(c: &mut Checker, t: TypeId) -> String {
@@ -458,12 +449,7 @@ fn check_node(
         }
     };
     let name = type_name_for_node(c, node_type, expression);
-    let report = typed_value_report(
-        message,
-        ctx.trim_node_text_range(report_node),
-        ctx.trim_node_text_range(expression),
-        name,
-    );
+    let report = typed_value_report(message, ctx.trim_node_text_range(report_node), name);
     ctx.report_diagnostic(report);
 }
 
@@ -661,17 +647,12 @@ fn check_node_for_nullish(st: &State, ctx: &mut RuleContext<'_>, node: Node) {
         }
         let name = type_name_for_node(c, node_type, node);
         let range = ctx.trim_node_text_range(node);
-        ctx.report_diagnostic(typed_value_report(
-            never_nullish_message(),
-            range,
-            range,
-            name,
-        ));
+        ctx.report_diagnostic(typed_value_report(never_nullish_message(), range, name));
         return;
     };
     let name = type_name_for_node(c, node_type, node);
     let range = ctx.trim_node_text_range(node);
-    ctx.report_diagnostic(typed_value_report(message, range, range, name));
+    ctx.report_diagnostic(typed_value_report(message, range, name));
 }
 
 /// Whether a value of type `t` can equal a value with one of `flags`.
@@ -731,26 +712,15 @@ fn check_comparison(
     if left_type.is_nil() || right_type.is_nil() {
         return;
     }
-    // A `case` expression that is itself a binary expression is reported at
-    // its operator too.
-    let primary_range = |ctx: &RuleContext<'_>| {
-        if is_binary_expression(node) {
-            ctx.trim_node_text_range(node.operator_token())
-        } else {
-            ctx.trim_node_text_range(node)
-        }
-    };
 
     if is_static_value(c, left_type) && is_static_value(c, right_type) {
         let left_name = type_name(c, left_type);
         let right_name = type_name(c, right_type);
         let report = comparison_report(
             literal_binary_expression_message(),
-            primary_range(ctx),
+            ctx.trim_node_text_range(node),
             &left_name,
-            ctx.trim_node_text_range(left),
             &right_name,
-            ctx.trim_node_text_range(right),
         );
         ctx.report_diagnostic(report);
         return;
@@ -777,14 +747,11 @@ fn check_comparison(
     }
     let left_name = type_name(c, left_type);
     let right_name = type_name(c, right_type);
-    // tsgolint labels the untrimmed ranges of the operands here.
     let report = comparison_report(
         no_overlap_message(),
-        primary_range(ctx),
+        ctx.trim_node_text_range(node),
         &left_name,
-        left.loc(),
         &right_name,
-        right.loc(),
     );
     ctx.report_diagnostic(report);
 }
@@ -877,12 +844,7 @@ fn check_type_predicate_call(st: &State, ctx: &mut RuleContext<'_>, node: Node) 
     let value_name = type_name(c, argument_type);
     let predicate_name = type_name(c, predicate_type);
     let range = ctx.trim_node_text_range(argument);
-    ctx.report_diagnostic(type_guard_report(
-        range,
-        range,
-        &value_name,
-        &predicate_name,
-    ));
+    ctx.report_diagnostic(type_guard_report(range, &value_name, &predicate_name));
 }
 
 /// Checks the predicate of `arr.filter(...)` and similar calls: a type guard
@@ -929,7 +891,7 @@ fn check_predicate_function(ctx: &mut RuleContext<'_>, function: Node, check_typ
         };
         let name = type_name_for_node(c, return_type, report_node);
         let range = ctx.trim_node_text_range(report_node);
-        ctx.report_diagnostic(typed_return_report(message, range, range, name));
+        ctx.report_diagnostic(typed_return_report(message, range, name));
     }
 }
 
@@ -970,11 +932,6 @@ fn check_type_guard(
         };
     let value_name = type_name(c, parameter_type);
     let predicate_name = type_name(c, predicate_type);
-    ctx.report_diagnostic(type_guard_report(
-        primary,
-        primary,
-        &value_name,
-        &predicate_name,
-    ));
+    ctx.report_diagnostic(type_guard_report(primary, &value_name, &predicate_name));
     true
 }

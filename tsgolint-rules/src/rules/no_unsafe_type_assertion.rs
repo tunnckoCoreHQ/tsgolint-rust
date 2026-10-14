@@ -1,14 +1,12 @@
 //! `no-unsafe-type-assertion`: disallows type assertions that narrow a
 //! type.
 
-use goport_core::ast::is_as_expression;
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
 use goport_core::core::{Node, TypeId};
 use goport_core::flags::ObjectFlags;
 use serde_json::Value;
 use tsgolint_core::diagnostic::TextRange;
-use tsgolint_core::text::token_range_at;
 use tsgolint_core::{Listeners, Report, RuleContext, RuleDefinition, RuleListeners, RuleMessage};
 
 use crate::utils::{
@@ -26,7 +24,7 @@ fn unsafe_of_any_type_assertion_message(type_name: &str) -> RuleMessage {
         "unsafeOfAnyTypeAssertion",
         format!("Unsafe assertion from {type_name} detected."),
     )
-    .with_help("Consider using type guards or a safer assertion.")
+    .with_help("Use a type guard to check the value before asserting its type.")
 }
 
 fn unsafe_to_any_type_assertion_message(type_name: &str) -> RuleMessage {
@@ -34,7 +32,7 @@ fn unsafe_to_any_type_assertion_message(type_name: &str) -> RuleMessage {
         "unsafeToAnyTypeAssertion",
         format!("Unsafe assertion to {type_name} detected."),
     )
-    .with_help("Consider using a more specific type to ensure safety.")
+    .with_help("Keep the original type or use `unknown` and narrow the value before use.")
 }
 
 fn unsafe_to_unconstrained_type_assertion_message(type_name: &str) -> RuleMessage {
@@ -85,14 +83,27 @@ fn is_object_literal_type(checker: &Checker, t: TypeId) -> bool {
             .intersects(ObjectFlags::OBJECT_LITERAL)
 }
 
-/// `as T` for an `as` expression, `<T>` for an angle-bracket assertion.
-fn assertion_range(source_file: Node, node: Node, expression: Node, type_node: Node) -> TextRange {
-    if is_as_expression(node) {
-        return token_range_at(source_file, expression.end()).with_end(type_node.end());
+/// The report of an assertion, with the original and asserted types in its
+/// help.
+fn assertion_report(
+    range: TextRange,
+    original: &str,
+    asserted: &str,
+    mut message: RuleMessage,
+) -> Report {
+    let mut help = format!(
+        "The original expression has type `{original}`, and the assertion changes it to `{asserted}`."
+    );
+    if message.help.is_empty() {
+        help.push_str(
+            " Use a type guard to narrow the value before asserting a more specific type.",
+        );
+    } else {
+        help.push(' ');
+        help.push_str(&message.help);
     }
-    let opening = token_range_at(source_file, node.pos());
-    let closing = token_range_at(source_file, type_node.end());
-    opening.with_end(closing.end())
+    message.help = help;
+    Report::new(range, message)
 }
 
 fn check_assertion(_: &mut (), ctx: &mut RuleContext<'_>, node: Node) {
@@ -102,18 +113,14 @@ fn check_assertion(_: &mut (), ctx: &mut RuleContext<'_>, node: Node) {
     let asserted_type = ctx.checker.get_type_at_location(type_node);
 
     let report = |ctx: &mut RuleContext<'_>, message: RuleMessage| {
-        let range = assertion_range(ctx.source_file, node, expression, type_node);
         let original = type_to_string_or_error(ctx.checker, expression_type);
         let asserted = type_to_string_or_error(ctx.checker, asserted_type);
-        let report = Report::new(range, message)
-            .with_label(
-                format!("Original expression has type `{original}`."),
-                ctx.trim_node_text_range(expression),
-            )
-            .with_label(
-                format!("Asserted type is `{asserted}`."),
-                ctx.trim_node_text_range(type_node),
-            );
+        let report = assertion_report(
+            ctx.trim_node_text_range(node),
+            &original,
+            &asserted,
+            message,
+        );
         ctx.report_diagnostic(report);
     };
 

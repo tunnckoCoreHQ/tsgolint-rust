@@ -42,7 +42,7 @@ The typescript-go submodule, its patches, the linter, the rule framework and the
 
 ${other:-None.}
 
-Port the changed rules with the Go tsgolint as the reference (see CONTRIBUTING.md), then update \`tsgolint\` in UPSTREAM.json, the \`oxlint-tsgolint\` catalog entry and the README's compatibility table.
+Dump the new cases with `scripts/upstream/dump-cases.sh $latest <dir>`, port the changed rules with the Go tsgolint as the reference (see CONTRIBUTING.md), then update \`tsgolint\` in UPSTREAM.json, the \`oxlint-tsgolint\` catalog entry and the README's compatibility table.
 BODY
 )
 

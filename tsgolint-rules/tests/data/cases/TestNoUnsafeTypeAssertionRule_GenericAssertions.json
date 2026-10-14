@@ -39,7 +39,7 @@
         {
           "messageId": "unsafeTypeAssertionAssignableToConstraint",
           "line": 4,
-          "column": 31,
+          "column": 17,
           "endLine": 4,
           "endColumn": 35,
           "suggestions": []
@@ -55,7 +55,7 @@
         {
           "messageId": "unsafeTypeAssertionAssignableToConstraint",
           "line": 5,
-          "column": 19,
+          "column": 17,
           "endLine": 5,
           "endColumn": 23,
           "suggestions": []
@@ -71,7 +71,7 @@
         {
           "messageId": "unsafeTypeAssertion",
           "line": 5,
-          "column": 33,
+          "column": 27,
           "endLine": 5,
           "endColumn": 49,
           "suggestions": []
@@ -87,7 +87,7 @@
         {
           "messageId": "unsafeTypeAssertionAssignableToConstraint",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 9,
           "suggestions": []
@@ -103,7 +103,7 @@
         {
           "messageId": "unsafeToUnconstrainedTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 9,
           "suggestions": []
@@ -119,7 +119,7 @@
         {
           "messageId": "unsafeTypeAssertionAssignableToConstraint",
           "line": 5,
-          "column": 5,
+          "column": 3,
           "endLine": 5,
           "endColumn": 9,
           "suggestions": []
@@ -135,7 +135,7 @@
         {
           "messageId": "unsafeTypeAssertionAssignableToConstraint",
           "line": 6,
-          "column": 5,
+          "column": 3,
           "endLine": 6,
           "endColumn": 9,
           "suggestions": []
@@ -151,7 +151,7 @@
         {
           "messageId": "unsafeTypeAssertionAssignableToConstraint",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 9,
           "suggestions": []
@@ -167,7 +167,7 @@
         {
           "messageId": "unsafeTypeAssertion",
           "line": 6,
-          "column": 5,
+          "column": 3,
           "endLine": 6,
           "endColumn": 9,
           "suggestions": []
@@ -183,7 +183,7 @@
         {
           "messageId": "unsafeOfAnyTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 9,
           "suggestions": []
@@ -199,7 +199,7 @@
         {
           "messageId": "unsafeTypeAssertionAssignableToConstraint",
           "line": 6,
-          "column": 5,
+          "column": 3,
           "endLine": 6,
           "endColumn": 9,
           "suggestions": []
@@ -215,7 +215,7 @@
         {
           "messageId": "unsafeToUnconstrainedTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 9,
           "suggestions": []
@@ -231,7 +231,7 @@
         {
           "messageId": "unsafeToUnconstrainedTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 9,
           "suggestions": []
@@ -247,7 +247,7 @@
         {
           "messageId": "unsafeTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 14,
           "suggestions": []
@@ -263,7 +263,7 @@
         {
           "messageId": "unsafeToAnyTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 11,
           "suggestions": []
@@ -279,7 +279,7 @@
         {
           "messageId": "unsafeToAnyTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 11,
           "suggestions": []
@@ -295,7 +295,7 @@
         {
           "messageId": "unsafeTypeAssertion",
           "line": 3,
-          "column": 5,
+          "column": 3,
           "endLine": 3,
           "endColumn": 17,
           "suggestions": []

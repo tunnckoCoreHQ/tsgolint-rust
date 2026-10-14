@@ -1892,6 +1892,69 @@
           ]
         }
       ]
+    },
+    {
+      "index": 76,
+      "code": "declare function foo<T extends string | number>(arg: [T?]): void;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "sole",
+          "line": 1,
+          "column": 22,
+          "endLine": 1,
+          "endColumn": 47,
+          "suggestions": [
+            {
+              "messageId": "replaceUsagesWithConstraint",
+              "output": "declare function foo(arg: [(string | number)?]): void;"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 77,
+      "code": "declare function foo<T extends () => void>(arg: [T?]): void;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "sole",
+          "line": 1,
+          "column": 22,
+          "endLine": 1,
+          "endColumn": 42,
+          "suggestions": [
+            {
+              "messageId": "replaceUsagesWithConstraint",
+              "output": "declare function foo(arg: [(() => void)?]): void;"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 78,
+      "code": "declare function foo<T extends string>(arg: [T?]): void;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "sole",
+          "line": 1,
+          "column": 22,
+          "endLine": 1,
+          "endColumn": 38,
+          "suggestions": [
+            {
+              "messageId": "replaceUsagesWithConstraint",
+              "output": "declare function foo(arg: [string?]): void;"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

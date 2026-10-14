@@ -13,6 +13,7 @@ use goport_core::ast::{self, get_source_file_of_node, source_file_file_name};
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
 use goport_core::core::{Node, SymbolId, TypeId};
+use goport_core::flags::SymbolFlags;
 use goport_core::frontend::tspath::{
     combine_paths, get_directory_path, get_normalized_absolute_path, normalize_slashes,
 };
@@ -517,48 +518,59 @@ fn get_static_name(node: Node) -> &'static str {
 }
 
 fn value_matches_specifier(
-    c: &Checker,
+    c: &mut Checker,
     fs: &dyn Fs,
     node: Node,
     specifier: &TypeOrValueSpecifier,
-    t: TypeId,
 ) -> bool {
     let node_name = get_static_name(node);
     if node_name.is_empty() || !specifier.name.iter().any(|n| n == node_name) {
         return false;
     }
-    if get_source_file_of_node(node).is_nil() {
-        return false;
-    }
-    // Only `package` checks the source; `file` and `lib` match on the name.
-    if specifier.from != TypeOrValueSpecifierFrom::Package {
+    if specifier.from == TypeOrValueSpecifierFrom::Name {
         return true;
     }
-    let symbol = if t.is_some() {
-        c.ty(t).symbol
-    } else {
-        SymbolId::NIL
-    };
-    if symbol.is_nil() {
-        return false;
+    let mut symbol = c.get_symbol_at_location_exported(node);
+    if symbol.is_some() {
+        let declaration = c.sym(symbol).value_declaration;
+        if declaration.is_some() && ast::is_shorthand_property_assignment(declaration) {
+            symbol = c.get_shorthand_assignment_value_symbol(declaration);
+        }
     }
-    let (declarations, files) = declarations_and_files(c, symbol);
-    type_declared_in_package_declaration_file(fs, &specifier.package, &declarations, &files)
+    if symbol.is_some() {
+        let declaration = c.sym(symbol).value_declaration;
+        if declaration.is_some()
+            && ast::is_binding_element(declaration)
+            && ast::is_object_binding_pattern(declaration.parent())
+            && declaration.dot_dot_dot_token().is_nil()
+        {
+            let property_name = get_static_name(declaration.property_name_or_name());
+            if property_name.is_empty() {
+                return false;
+            }
+            let source_type = c.get_type_at_location(declaration.parent());
+            symbol = c.get_property_of_type(source_type, property_name);
+        }
+    }
+    if symbol.is_some() && c.sym(symbol).flags.intersects(SymbolFlags::ALIAS) {
+        symbol = c.get_aliased_symbol(symbol);
+    }
+    symbol_matches_specifier_name_and_source(c, fs, symbol, node_name, specifier)
 }
 
 /// typescript-eslint `valueMatchesSomeSpecifier`: the static name of `node`
-/// is in a specifier; for `package` specifiers the symbol of `t` must also
-/// be declared in that package.
+/// is in a specifier, and the symbol it refers to (through shorthand
+/// properties, object destructuring and aliases) is declared where the
+/// specifier says.
 pub fn value_matches_some_specifier(
-    c: &Checker,
+    c: &mut Checker,
     fs: &dyn Fs,
     node: Node,
     specifiers: &[TypeOrValueSpecifier],
-    t: TypeId,
 ) -> bool {
     specifiers
         .iter()
-        .any(|specifier| value_matches_specifier(c, fs, node, specifier, t))
+        .any(|specifier| value_matches_specifier(c, fs, node, specifier))
 }
 
 #[cfg(test)]

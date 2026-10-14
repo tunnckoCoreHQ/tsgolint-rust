@@ -1332,9 +1332,9 @@
         {
           "messageId": "comparisonBetweenLiteralTypes",
           "line": 3,
-          "column": 12,
+          "column": 10,
           "endLine": 3,
-          "endColumn": 15,
+          "endColumn": 19,
           "suggestions": []
         }
       ]
@@ -1360,9 +1360,9 @@
         {
           "messageId": "comparisonBetweenLiteralTypes",
           "line": 3,
-          "column": 7,
+          "column": 5,
           "endLine": 3,
-          "endColumn": 10,
+          "endColumn": 12,
           "suggestions": []
         }
       ]
@@ -1472,9 +1472,9 @@
         {
           "messageId": "comparisonBetweenLiteralTypes",
           "line": 8,
-          "column": 7,
+          "column": 5,
           "endLine": 8,
-          "endColumn": 10,
+          "endColumn": 16,
           "suggestions": []
         }
       ]
@@ -1584,9 +1584,9 @@
         {
           "messageId": "noOverlapBooleanExpression",
           "line": 3,
-          "column": 16,
+          "column": 14,
           "endLine": 3,
-          "endColumn": 19,
+          "endColumn": 29,
           "suggestions": []
         },
         {
@@ -2153,7 +2153,7 @@
     },
     {
       "index": 69,
-      "code": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo ?. bar;\nfoo ?.\n  bar;\nfoo\n  ?. bar;\n      ",
+      "code": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo ?. bar;\nfoo ?.\n  bar;\nfoo\n  ?. bar;",
       "options": null,
       "output": [],
       "errors": [
@@ -2162,7 +2162,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = { bar: true };\nfoo.bar;\nfoo ?. bar;\nfoo ?.\n  bar;\nfoo\n  ?. bar;\n      "
+              "output": "\nlet foo = { bar: true };\nfoo.bar;\nfoo ?. bar;\nfoo ?.\n  bar;\nfoo\n  ?. bar;"
             }
           ]
         },
@@ -2171,7 +2171,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo . bar;\nfoo ?.\n  bar;\nfoo\n  ?. bar;\n      "
+              "output": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo . bar;\nfoo ?.\n  bar;\nfoo\n  ?. bar;"
             }
           ]
         },
@@ -2180,7 +2180,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo ?. bar;\nfoo .\n  bar;\nfoo\n  ?. bar;\n      "
+              "output": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo ?. bar;\nfoo .\n  bar;\nfoo\n  ?. bar;"
             }
           ]
         },
@@ -2189,7 +2189,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo ?. bar;\nfoo ?.\n  bar;\nfoo\n  . bar;\n      "
+              "output": "\nlet foo = { bar: true };\nfoo?.bar;\nfoo ?. bar;\nfoo ?.\n  bar;\nfoo\n  . bar;"
             }
           ]
         }
@@ -2197,7 +2197,7 @@
     },
     {
       "index": 70,
-      "code": "\nlet foo = () => {};\nfoo?.();\nfoo ?. ();\nfoo ?.\n  ();\nfoo\n  ?. ();\n      ",
+      "code": "\nlet foo = () => {};\nfoo?.();\nfoo ?. ();\nfoo ?.\n  ();\nfoo\n  ?. ();",
       "options": null,
       "output": [],
       "errors": [
@@ -2206,7 +2206,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo();\nfoo ?. ();\nfoo ?.\n  ();\nfoo\n  ?. ();\n      "
+              "output": "\nlet foo = () => {};\nfoo();\nfoo ?. ();\nfoo ?.\n  ();\nfoo\n  ?. ();"
             }
           ]
         },
@@ -2215,7 +2215,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo?.();\nfoo  ();\nfoo ?.\n  ();\nfoo\n  ?. ();\n      "
+              "output": "\nlet foo = () => {};\nfoo?.();\nfoo  ();\nfoo ?.\n  ();\nfoo\n  ?. ();"
             }
           ]
         },
@@ -2224,7 +2224,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo?.();\nfoo ?. ();\nfoo \n  ();\nfoo\n  ?. ();\n      "
+              "output": "\nlet foo = () => {};\nfoo?.();\nfoo ?. ();\nfoo \n  ();\nfoo\n  ?. ();"
             }
           ]
         },
@@ -2233,7 +2233,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo?.();\nfoo ?. ();\nfoo ?.\n  ();\nfoo\n   ();\n      "
+              "output": "\nlet foo = () => {};\nfoo?.();\nfoo ?. ();\nfoo ?.\n  ();\nfoo\n   ();"
             }
           ]
         }
@@ -2241,7 +2241,7 @@
     },
     {
       "index": 71,
-      "code": "\nlet foo = () => {};\nfoo?.(bar);\nfoo ?. (bar);\nfoo ?.\n  (bar);\nfoo\n  ?. (bar);\n      ",
+      "code": "\nlet foo = () => {};\nfoo?.(bar);\nfoo ?. (bar);\nfoo ?.\n  (bar);\nfoo\n  ?. (bar);",
       "options": null,
       "output": [],
       "errors": [
@@ -2250,7 +2250,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo(bar);\nfoo ?. (bar);\nfoo ?.\n  (bar);\nfoo\n  ?. (bar);\n      "
+              "output": "\nlet foo = () => {};\nfoo(bar);\nfoo ?. (bar);\nfoo ?.\n  (bar);\nfoo\n  ?. (bar);"
             }
           ]
         },
@@ -2259,7 +2259,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo?.(bar);\nfoo  (bar);\nfoo ?.\n  (bar);\nfoo\n  ?. (bar);\n      "
+              "output": "\nlet foo = () => {};\nfoo?.(bar);\nfoo  (bar);\nfoo ?.\n  (bar);\nfoo\n  ?. (bar);"
             }
           ]
         },
@@ -2268,7 +2268,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo?.(bar);\nfoo ?. (bar);\nfoo \n  (bar);\nfoo\n  ?. (bar);\n      "
+              "output": "\nlet foo = () => {};\nfoo?.(bar);\nfoo ?. (bar);\nfoo \n  (bar);\nfoo\n  ?. (bar);"
             }
           ]
         },
@@ -2277,7 +2277,7 @@
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
-              "output": "\nlet foo = () => {};\nfoo?.(bar);\nfoo ?. (bar);\nfoo ?.\n  (bar);\nfoo\n   (bar);\n      "
+              "output": "\nlet foo = () => {};\nfoo?.(bar);\nfoo ?. (bar);\nfoo ?.\n  (bar);\nfoo\n   (bar);"
             }
           ]
         }
@@ -2292,9 +2292,9 @@
         {
           "messageId": "neverOptionalChain",
           "line": 1,
-          "column": 22,
+          "column": 13,
           "endLine": 1,
-          "endColumn": 24,
+          "endColumn": 27,
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",
@@ -2580,9 +2580,9 @@
         {
           "messageId": "neverOptionalChain",
           "line": 7,
-          "column": 11,
+          "column": 1,
           "endLine": 7,
-          "endColumn": 13,
+          "endColumn": 17,
           "suggestions": [
             {
               "messageId": "suggestRemoveOptionalChain",

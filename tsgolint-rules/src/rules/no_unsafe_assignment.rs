@@ -2,16 +2,14 @@
 //! variable, a property, a parameter default or a destructuring target.
 
 use goport_core::ast::{
-    get_source_file_of_node, is_array_binding_pattern, is_array_literal_expression,
-    is_assignment_expression, is_computed_property_name, is_literal_expression,
-    is_object_binding_pattern, is_object_literal_expression, is_property_assignment,
-    is_shorthand_property_assignment, is_spread_assignment, is_spread_element, skip_parentheses,
-    source_file_text,
+    is_array_binding_pattern, is_array_literal_expression, is_assignment_expression,
+    is_computed_property_name, is_literal_expression, is_object_binding_pattern,
+    is_object_literal_expression, is_property_assignment, is_shorthand_property_assignment,
+    is_spread_assignment, is_spread_element, skip_parentheses,
 };
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
 use goport_core::core::{Node, TypeId};
-use goport_core::frontend::scanner::scanner_ls::get_scanner_for_source_file;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
 use tsgolint_core::diagnostic::TextRange;
@@ -22,7 +20,7 @@ use tsgolint_core::{
 use crate::utils::{
     any_typed_this_expression, get_contextual_type, is_intrinsic_error_type,
     is_type_any_array_type, is_type_any_type, is_type_unknown_type, is_unsafe_assignment,
-    trim_node_text_range, type_to_string_or_error,
+    type_to_string_or_error,
 };
 
 pub static RULE: RuleDefinition = RuleDefinition {
@@ -48,11 +46,9 @@ fn any_assignment_message(sender: &str) -> RuleMessage {
 fn any_assignment_this_message(sender: &str) -> RuleMessage {
     RuleMessage::new(
         "anyAssignmentThis",
-        format!("Unsafe assignment of an {sender} value. `this` is typed as `any`.\n"),
+        format!("Unsafe assignment of an {sender} value. `this` is typed as `any`."),
     )
-    .with_help(
-        "You can try to fix this by turning on the `noImplicitThis` compiler option, or adding a `this` parameter to the function.",
-    )
+    .with_help("Enable `noImplicitThis` or add an explicit `this` parameter to the function.")
 }
 
 fn unsafe_array_pattern_message(sender: &str) -> RuleMessage {
@@ -123,35 +119,31 @@ fn create(ctx: &mut RuleContext<'_>, _options: &Value) -> RuleListeners {
         .into()
 }
 
-/// The `=` (or else the `:`) between the receiver and the sender, or the
-/// receiver itself.
-fn assignment_relation_range(source_file: Node, receiver: Node, sender: Node) -> TextRange {
-    let text = source_file_text(source_file);
-    let mut scanner = get_scanner_for_source_file(source_file, &text, receiver.end());
-    let mut colon = None;
-    while scanner.token() != SyntaxKind::EndOfFile && scanner.token_range().pos() < sender.end() {
-        match scanner.token() {
-            SyntaxKind::EqualsToken => return scanner.token_range(),
-            SyntaxKind::ColonToken => colon = Some(scanner.token_range()),
-            _ => {}
-        }
-        if scanner.token_range().pos() >= sender.pos() {
-            break;
-        }
-        scanner.scan();
-    }
-    colon.unwrap_or_else(|| trim_node_text_range(source_file, receiver))
-}
-
-/// The type annotation when it is in this file, else the receiver.
-fn local_target_range(source_file: Node, receiver: Node, type_annotation: Node) -> TextRange {
-    if type_annotation.is_some() && get_source_file_of_node(type_annotation) == source_file {
-        trim_node_text_range(source_file, type_annotation)
+/// The report of an assignment, with the sender and receiver types in its
+/// help. `inferred` is for a receiver whose type comes from the sender.
+fn assignment_report(
+    range: TextRange,
+    sender_type: &str,
+    receiver_type: &str,
+    inferred: bool,
+    mut message: RuleMessage,
+) -> Report {
+    let mut help = if inferred {
+        format!(
+            "Assigned value has type `{sender_type}`, so the target is also inferred as `{receiver_type}`."
+        )
     } else {
-        trim_node_text_range(source_file, receiver)
+        format!("Assigned value has type `{sender_type}`; the target has type `{receiver_type}`.")
+    };
+    if message.help.is_empty() {
+        help.push_str(" Use a safely typed value or `unknown`, and narrow it before use.");
+    } else {
+        help.push(' ');
+        help.push_str(&message.help);
     }
+    message.help = help;
+    Report::new(range, message)
 }
-
 /// Whether the sender's syntax rules out an `any` type.
 fn can_skip_sender_type_check(node: Node, comparison: Comparison) -> bool {
     let node = skip_parentheses(node);
@@ -184,22 +176,15 @@ fn can_skip_sender_type_check(node: Node, comparison: Comparison) -> bool {
 fn report_destructure(
     ctx: &mut RuleContext<'_>,
     receiver: Node,
-    sender: Node,
     sender_type: TypeId,
     unsafe_type: &str,
     message: RuleMessage,
 ) {
-    let receiver_range = ctx.trim_node_text_range(receiver);
     let sender_type = type_to_string_or_error(ctx.checker, sender_type);
-    let report = Report::new(receiver_range, message)
-        .with_label(
-            format!("Destructured source provides type `{sender_type}`."),
-            ctx.trim_node_text_range(sender),
-        )
-        .with_label(
-            format!("This binding receives type `{unsafe_type}`."),
-            receiver_range,
-        );
+    let message = message.with_help(format!(
+        "The destructured value has type `{sender_type}`, and this binding receives `{unsafe_type}`. Use a safely typed source or narrow the value before destructuring it."
+    ));
+    let report = Report::new(ctx.trim_node_text_range(receiver), message);
     ctx.report_diagnostic(report);
 }
 
@@ -217,7 +202,7 @@ fn check_destructured_element(
         // tsgolint uses the tuple message for object properties too.
         let message =
             unsafe_array_pattern_from_tuple_message(sender_type_name(ctx.checker, sender_type));
-        report_destructure(ctx, receiver, sender, sender_type, &unsafe_type, message);
+        report_destructure(ctx, receiver, sender_type, &unsafe_type, message);
         true
     } else if is_array_binding_pattern(receiver) || is_array_literal_expression(receiver) {
         check_array_destructure(ctx, receiver, sender_type, sender)
@@ -300,7 +285,7 @@ fn check_array_destructure(
     // `const [x] = [] as any[]`
     if is_type_any_array_type(ctx.checker, sender_type) {
         let message = unsafe_array_pattern_message(sender_type_name(ctx.checker, sender_type));
-        report_destructure(ctx, receiver, sender, sender_type, "any", message);
+        report_destructure(ctx, receiver, sender_type, "any", message);
         // tsgolint returns false here, so the object check still runs.
         return false;
     }
@@ -389,8 +374,7 @@ fn check_assignment(
     ctx: &mut RuleContext<'_>,
     receiver: Node,
     sender: Node,
-    type_annotation: Node,
-    primary: TextRange,
+    reporting_node: Node,
     comparison: Comparison,
 ) -> bool {
     if can_skip_sender_type_check(sender, comparison) {
@@ -401,42 +385,28 @@ fn check_assignment(
 
     if is_type_any_type(ctx.checker, sender_type) {
         let receiver_type = receiver_type(ctx, receiver, sender, comparison);
-        let receiver_range = local_target_range(ctx.source_file, receiver, type_annotation);
         // `any` to `unknown` is allowed.
         if is_type_unknown_type(ctx.checker, receiver_type) {
             return false;
         }
-        let receiver_text = type_to_string_or_error(ctx.checker, receiver_type);
-        let receiver_label = if comparison == Comparison::None {
-            format!("Target is inferred as `{receiver_text}`.")
-        } else {
-            format!("Target expects type `{receiver_text}`.")
-        };
         let sender_name = sender_type_name(ctx.checker, sender_type);
-
         // `var foo = this`
-        if !state.no_implicit_this
-            && let Some((this_expression, this_type)) =
-                any_typed_this_expression(ctx.checker, sender)
+        let message = if !state.no_implicit_this
+            && any_typed_this_expression(ctx.checker, sender).is_some()
         {
-            let this_text = type_to_string_or_error(ctx.checker, this_type);
-            let report = Report::new(primary, any_assignment_this_message(sender_name))
-                .with_label(
-                    format!("`this` has type `{this_text}`."),
-                    ctx.trim_node_text_range(this_expression),
-                )
-                .with_label(receiver_label, receiver_range);
-            ctx.report_diagnostic(report);
-            return true;
-        }
-
+            any_assignment_this_message(sender_name)
+        } else {
+            any_assignment_message(sender_name)
+        };
         let sender_text = type_to_string_or_error(ctx.checker, sender_type);
-        let report = Report::new(primary, any_assignment_message(sender_name))
-            .with_label(
-                format!("Assigned value has type `{sender_text}`."),
-                ctx.trim_node_text_range(sender),
-            )
-            .with_label(receiver_label, receiver_range);
+        let receiver_text = type_to_string_or_error(ctx.checker, receiver_type);
+        let report = assignment_report(
+            ctx.trim_node_text_range(reporting_node),
+            &sender_text,
+            &receiver_text,
+            comparison == Comparison::None,
+            message,
+        );
         ctx.report_diagnostic(report);
         return true;
     }
@@ -453,15 +423,13 @@ fn check_assignment(
     };
     let sender_text = type_to_string_or_error(ctx.checker, unsafe_assignment.sender);
     let receiver_text = type_to_string_or_error(ctx.checker, unsafe_assignment.receiver);
-    let report = Report::new(primary, unsafe_assignment_message())
-        .with_label(
-            format!("Assigned value has type `{sender_text}`."),
-            ctx.trim_node_text_range(sender),
-        )
-        .with_label(
-            format!("Target expects type `{receiver_text}`."),
-            local_target_range(ctx.source_file, receiver, type_annotation),
-        );
+    let report = assignment_report(
+        ctx.trim_node_text_range(reporting_node),
+        &sender_text,
+        &receiver_text,
+        false,
+        unsafe_assignment_message(),
+    );
     ctx.report_diagnostic(report);
     true
 }
@@ -473,9 +441,7 @@ fn check_assignment_full(
     ctx: &mut RuleContext<'_>,
     receiver: Node,
     sender: Node,
-    type_annotation: Node,
-    primary: TextRange,
-    comparison: Comparison,
+    reporting_node: Node,
 ) {
     if receiver.is_nil() || sender.is_nil() {
         return;
@@ -485,9 +451,8 @@ fn check_assignment_full(
         ctx,
         receiver,
         sender,
-        type_annotation,
-        primary,
-        comparison,
+        reporting_node,
+        Comparison::Basic,
     ) || check_array_destructure_helper(ctx, receiver, sender);
     if !did_report {
         check_object_destructure_helper(ctx, receiver, sender);
@@ -509,15 +474,12 @@ fn check_property_declaration(state: &mut State, ctx: &mut RuleContext<'_>, node
     if initializer.is_nil() {
         return;
     }
-    let name = node.name();
-    let primary = assignment_relation_range(ctx.source_file, name, initializer);
     check_assignment(
         state,
         ctx,
-        name,
+        node.name(),
         initializer,
-        node.type_(),
-        primary,
+        node,
         comparison_of(node),
     );
 }
@@ -526,16 +488,7 @@ fn check_binary_expression(state: &mut State, ctx: &mut RuleContext<'_>, node: N
     if !is_assignment_expression(node, true) {
         return;
     }
-    let primary = ctx.trim_node_text_range(node.operator_token());
-    check_assignment_full(
-        state,
-        ctx,
-        node.left(),
-        node.right(),
-        Node::NIL,
-        primary,
-        Comparison::Basic,
-    );
+    check_assignment_full(state, ctx, node.left(), node.right(), node);
 }
 
 /// Binding elements and parameters with a default value.
@@ -544,17 +497,7 @@ fn check_initialized_declaration(state: &mut State, ctx: &mut RuleContext<'_>, n
     if initializer.is_nil() {
         return;
     }
-    let name = node.name();
-    let primary = assignment_relation_range(ctx.source_file, name, initializer);
-    check_assignment_full(
-        state,
-        ctx,
-        name,
-        initializer,
-        node.type_(),
-        primary,
-        Comparison::Basic,
-    );
+    check_assignment_full(state, ctx, node.name(), initializer, node);
 }
 
 fn check_shorthand_default(state: &mut State, ctx: &mut RuleContext<'_>, node: Node) {
@@ -562,17 +505,7 @@ fn check_shorthand_default(state: &mut State, ctx: &mut RuleContext<'_>, node: N
     if initializer.is_nil() {
         return;
     }
-    let name = node.name();
-    let primary = assignment_relation_range(ctx.source_file, name, initializer);
-    check_assignment_full(
-        state,
-        ctx,
-        name,
-        initializer,
-        Node::NIL,
-        primary,
-        Comparison::Basic,
-    );
+    check_assignment_full(state, ctx, node.name(), initializer, node);
 }
 
 fn check_variable_declaration(state: &mut State, ctx: &mut RuleContext<'_>, node: Node) {
@@ -581,16 +514,11 @@ fn check_variable_declaration(state: &mut State, ctx: &mut RuleContext<'_>, node
         return;
     }
     let name = node.name();
-    let primary = assignment_relation_range(ctx.source_file, name, initializer);
-    check_assignment_full(
-        state,
-        ctx,
-        name,
-        initializer,
-        node.type_(),
-        primary,
-        comparison_of(node),
-    );
+    let did_report = check_assignment(state, ctx, name, initializer, node, comparison_of(node))
+        || check_array_destructure_helper(ctx, name, initializer);
+    if !did_report {
+        check_object_destructure_helper(ctx, name, initializer);
+    }
 }
 
 /// Object literal properties outside destructuring patterns.
@@ -612,15 +540,12 @@ fn check_object_literal(state: &mut State, ctx: &mut RuleContext<'_>, node: Node
         if is_assignment_expression(initializer, false) {
             return;
         }
-        let name = property.name();
-        let primary = assignment_relation_range(ctx.source_file, name, initializer);
         check_assignment(
             state,
             ctx,
-            name,
+            property.name(),
             initializer,
-            Node::NIL,
-            primary,
+            property,
             Comparison::Contextual,
         );
     }
@@ -632,20 +557,16 @@ fn check_array_literal(_: &mut State, ctx: &mut RuleContext<'_>, node: Node) {
         if !is_spread_element(element) {
             continue;
         }
-        let expression = element.expression();
-        let rest_type = ctx.checker.get_type_at_location(expression);
+        let rest_type = ctx.checker.get_type_at_location(element.expression());
         if is_type_any_type(ctx.checker, rest_type)
             || is_type_any_array_type(ctx.checker, rest_type)
         {
-            let element_range = ctx.trim_node_text_range(element);
-            // The `...` token.
-            let spread_range = TextRange::new(element_range.pos(), element_range.pos() + 3);
             let rest_text = type_to_string_or_error(ctx.checker, rest_type);
-            let message = unsafe_array_spread_message(sender_type_name(ctx.checker, rest_type));
-            let report = Report::new(spread_range, message).with_label(
-                format!("Spread value has type `{rest_text}`."),
-                ctx.trim_node_text_range(expression),
-            );
+            let message = unsafe_array_spread_message(sender_type_name(ctx.checker, rest_type))
+                .with_help(format!(
+                    "The spread value has type `{rest_text}`. Use a safely typed array or narrow the value before spreading it."
+                ));
+            let report = Report::new(ctx.trim_node_text_range(element), message);
             ctx.report_diagnostic(report);
         }
     }
@@ -660,15 +581,12 @@ fn check_jsx_attribute(state: &mut State, ctx: &mut RuleContext<'_>, node: Node)
     if expression.is_nil() {
         return;
     }
-    let name = node.name();
-    let primary = assignment_relation_range(ctx.source_file, name, expression);
     check_assignment(
         state,
         ctx,
-        name,
+        node.name(),
         expression,
-        Node::NIL,
-        primary,
+        expression,
         Comparison::Contextual,
     );
 }

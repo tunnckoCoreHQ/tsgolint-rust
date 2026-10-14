@@ -1,0 +1,53 @@
+{
+  "test": "TestNoFloatingPromisesSafeCallSources/baseline",
+  "rule": "no-floating-promises",
+  "tsconfig": "tsconfig.minimal.json",
+  "valid": [],
+  "invalid": [
+    {
+      "index": 0,
+      "code": "import { trusted as frameworkTrusted } from \"./trusted.js\";\nframeworkTrusted();\nfunction trusted(): Promise<void> { return Promise.resolve(); }\ntrusted();\nPromise.resolve();",
+      "options": {
+        "checkThenables": false,
+        "ignoreIIFE": false,
+        "ignoreVoid": false
+      },
+      "files": {
+        "trusted.d.ts": "export declare function trusted(): Promise<void>;"
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "floating",
+          "line": 2,
+          "suggestions": [
+            {
+              "messageId": "floatingFixAwait",
+              "output": "import { trusted as frameworkTrusted } from \"./trusted.js\";\nawait frameworkTrusted();\nfunction trusted(): Promise<void> { return Promise.resolve(); }\ntrusted();\nPromise.resolve();"
+            }
+          ]
+        },
+        {
+          "messageId": "floating",
+          "line": 4,
+          "suggestions": [
+            {
+              "messageId": "floatingFixAwait",
+              "output": "import { trusted as frameworkTrusted } from \"./trusted.js\";\nframeworkTrusted();\nfunction trusted(): Promise<void> { return Promise.resolve(); }\nawait trusted();\nPromise.resolve();"
+            }
+          ]
+        },
+        {
+          "messageId": "floating",
+          "line": 5,
+          "suggestions": [
+            {
+              "messageId": "floatingFixAwait",
+              "output": "import { trusted as frameworkTrusted } from \"./trusted.js\";\nframeworkTrusted();\nfunction trusted(): Promise<void> { return Promise.resolve(); }\ntrusted();\nawait Promise.resolve();"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "test": "TestNoFloatingPromisesDestructuredSafeCalls",
+  "rule": "no-floating-promises",
+  "tsconfig": "tsconfig.minimal.json",
+  "valid": [
+    {
+      "index": 0,
+      "code": "async function probe() {\n  const { trusted } = await import('./destructured-safe-call');\n  trusted();\n}",
+      "options": {
+        "allowForKnownSafeCalls": [
+          {
+            "path": "./destructured-safe-call.ts",
+            "from": "file",
+            "name": [
+              "trusted"
+            ]
+          }
+        ],
+        "checkThenables": false,
+        "ignoreIIFE": false,
+        "ignoreVoid": false
+      },
+      "files": {
+        "destructured-safe-call.ts": "export const trusted: () => Promise<void> = () => Promise.resolve();"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "index": 0,
+      "code": "async function probe() {\n  const { trusted } = await import('./destructured-safe-call');\n  trusted();\n}",
+      "options": {
+        "allowForKnownSafeCalls": [
+          {
+            "from": "file",
+            "name": [
+              "trusted"
+            ],
+            "path": "./file.ts"
+          }
+        ],
+        "checkThenables": false,
+        "ignoreIIFE": false,
+        "ignoreVoid": false
+      },
+      "files": {
+        "destructured-safe-call.ts": "export const trusted: () => Promise<void> = () => Promise.resolve();"
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "floating",
+          "line": 3,
+          "suggestions": [
+            {
+              "messageId": "floatingFixAwait",
+              "output": "async function probe() {\n  const { trusted } = await import('./destructured-safe-call');\n  await trusted();\n}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

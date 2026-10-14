@@ -361,11 +361,11 @@
       "options": {
         "allow": [
           {
+            "from": "package",
             "name": [
               "exists"
             ],
-            "package": "fs",
-            "from": "package"
+            "package": "fs"
           }
         ]
       }
@@ -499,10 +499,10 @@
       "options": {
         "allow": [
           {
+            "from": "file",
             "name": [
               "statusCode"
-            ],
-            "from": "file"
+            ]
           }
         ]
       }
@@ -513,11 +513,11 @@
       "options": {
         "allow": [
           {
-            "from": "package",
             "name": [
               "statusCode"
             ],
-            "package": "error-options"
+            "package": "error-options",
+            "from": "package"
           }
         ]
       }
@@ -638,7 +638,7 @@
       "output": [],
       "errors": [
         {
-          "messageId": "deprecated",
+          "messageId": "deprecatedWithReason",
           "suggestions": []
         }
       ]
@@ -2078,11 +2078,11 @@
       "options": {
         "allow": [
           {
+            "package": "hoge",
+            "from": "package",
             "name": [
               "exists"
-            ],
-            "package": "hoge",
-            "from": "package"
+            ]
           }
         ]
       },
@@ -2407,11 +2407,11 @@
       "options": {
         "allow": [
           {
-            "path": "other-file.ts",
             "from": "file",
             "name": [
               "statusCode"
-            ]
+            ],
+            "path": "other-file.ts"
           }
         ]
       },
@@ -2495,6 +2495,96 @@
       "errors": [
         {
           "messageId": "deprecated",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 152,
+      "code": "/** @deprecated Use replacementConst instead. */\nconst oldConst = 1;\n/** @deprecated Use replacementLet instead. */\nlet oldLet: number = 1;\n/** @deprecated Use replacementVar instead. */\nvar oldVar = 1;\noldConst;\noldLet;\noldVar;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 7,
+          "suggestions": []
+        },
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 8,
+          "suggestions": []
+        },
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 9,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 153,
+      "code": "import { constA, constMultiline, constTyped, letA, constReexported, constInline } from './variable-reasons';\nconstA;\nconstMultiline();\nconstTyped;\nletA;\nconstReexported;\nconstInline;",
+      "options": null,
+      "files": {
+        "variable-reasons.ts": "/** @deprecated reason for constA */\nexport const constA = 1;\n/**\n * @deprecated reason for constMultiline\n */\nexport const constMultiline = () => 1;\n/** @deprecated reason for constTyped */\nexport const constTyped: number = 1;\n/** @deprecated reason for letA */\nexport let letA = 1;\n/** @deprecated reason for constReexported */\nconst constReexported = 1;\nexport { constReexported };\nexport const /** @deprecated reason for constInline */ constInline = 1;"
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 2,
+          "suggestions": []
+        },
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 3,
+          "suggestions": []
+        },
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 4,
+          "suggestions": []
+        },
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 5,
+          "suggestions": []
+        },
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 6,
+          "suggestions": []
+        },
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 7,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 154,
+      "code": "/** @deprecated Statement reason. */\nconst /** @deprecated Inline reason. */ oldValue = 1;\noldValue;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecatedWithReason",
+          "line": 3,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 155,
+      "code": "/** @deprecated Statement reason. */\nconst /** @deprecated */ oldValue = 1;\noldValue;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecated",
+          "line": 3,
           "suggestions": []
         }
       ]

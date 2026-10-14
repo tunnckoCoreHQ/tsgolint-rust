@@ -24,7 +24,7 @@
         {
           "messageId": "unsafeToAnyTypeAssertion",
           "line": 3,
-          "column": 9,
+          "column": 1,
           "endLine": 3,
           "endColumn": 15,
           "suggestions": []
@@ -40,7 +40,7 @@
         {
           "messageId": "unsafeTypeAssertion",
           "line": 3,
-          "column": 10,
+          "column": 1,
           "endLine": 3,
           "endColumn": 18,
           "suggestions": []

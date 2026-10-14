@@ -1,8 +1,8 @@
 {
   "tsgolint": {
     "repository": "oxc-project/tsgolint",
-    "tag": "v7.0.2003",
-    "commit": "eb9339115edde6811ca94c3433adf69ea9852880"
+    "tag": "v7.0.2004",
+    "commit": "a61289117febcb1a60cf3bc75ef2b6bbccc4b665"
   },
   "ts-rust": {
     "repository": "pingdotgg/ts-rust",

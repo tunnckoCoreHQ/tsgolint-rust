@@ -1,6 +1,6 @@
 # tsgolint-rust architecture
 
-tsgolint-rust is a Rust port of [oxc-project/tsgolint](https://github.com/oxc-project/tsgolint) at tag v7.0.2003. It is the type-aware linter that oxlint spawns for `--type-aware` and `--type-check`. It builds on [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust) (tsc-rs, a Rust port of TypeScript 7) as the parser, binder and checker.
+tsgolint-rust is a Rust port of [oxc-project/tsgolint](https://github.com/oxc-project/tsgolint) at tag v7.0.2004. It is the type-aware linter that oxlint spawns for `--type-aware` and `--type-check`. It builds on [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust) (tsc-rs, a Rust port of TypeScript 7) as the parser, binder and checker.
 
 The port matches tsgolint's behavior, not its code. Same command line, same `headless` protocol, same rules, options, messages, fixes and suggestions. The design is a Rust design: no goroutine, channel-everywhere or `defer` patterns copied from Go.
 
@@ -62,10 +62,10 @@ The core crate exposes program creation (configured and inferred, with tsgolint'
 
 ## Tests
 
-- **Rule tests.** `cargo test -p tsgolint-rules --test rules [-- <filter>]` runs the 7,574 test cases that tsgolint's Go tests define (`tests/data/cases/*.json`, dumped from the Go tests with options serialized as the rules receive them). Each case checks the diagnostics, message ids, positions, fix passes and suggestion outputs, and each invalid case checks its entry in `tests/data/snapshots` (tsgolint's `.snap` format). The snapshots hold tsgolint-rust's output on the ts-rust commit in `Cargo.lock`, not tsgolint's: ts-rust is the reference. `TSGOLINT_UPDATE_SNAPSHOTS=1` rewrites them.
+- **Rule tests.** `cargo test -p tsgolint-rules --test rules [-- <filter>]` runs the 7,619 test cases that tsgolint's Go tests define (`tests/data/cases/*.json`, dumped from the Go tests by `scripts/upstream/dump-cases.sh`, with options serialized as the rules receive them). Each case checks the diagnostics, message ids, positions, fix passes and suggestion outputs, and each invalid case checks its entry in `tests/data/snapshots` (tsgolint's `.snap` format). The snapshots hold tsgolint-rust's output on the ts-rust commit in `Cargo.lock`, not tsgolint's: ts-rust is the reference. `TSGOLINT_UPDATE_SNAPSHOTS=1` rewrites them.
 - **e2e.** `tsgolint-rust/e2e` is tsgolint's vitest suite with its fixtures. It spawns the binary named by `TSGOLINT_BIN`.
 - **Oracle comparison.** The Go binary is the repository's `oxlint-tsgolint` devDependency, pinned to the ported tsgolint release. It is the reference for the command line and the protocol, and for rule output only while a new or changed rule is ported. `tsgolint-rust/tests/cli.rs` runs its platform binary next to this binary on flag errors, payload errors and empty payloads. `tsgolint-compare` runs both binaries on the payload of a real project, normalizes the outputs and diffs them.
 
 ## TypeScript version
 
-tsgolint v7.0.2003 uses typescript-go `2bd066d87f5b` (the TypeScript 7.0 release branch, 2026-07-07). ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`, at the commit in `Cargo.lock`. [UPSTREAM.json](UPSTREAM.json) records that commit and the microsoft/TypeScript commit it ports (`fed0bf24149f`, 7.1.0-dev, 2026-10-08, at the time of writing). Checker output can differ between the two revisions, so some type strings in messages, and rarely a diagnostic, can differ. [DIFFERENCES.md](DIFFERENCES.md) describes the kinds of differences.
+tsgolint v7.0.2004 uses typescript-go `2bd066d87f5b` (the TypeScript 7.0 release branch, 2026-07-07). ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`, at the commit in `Cargo.lock`. [UPSTREAM.json](UPSTREAM.json) records that commit and the microsoft/TypeScript commit it ports (`fed0bf24149f`, 7.1.0-dev, 2026-10-08, at the time of writing). Checker output can differ between the two revisions, so some type strings in messages, and rarely a diagnostic, can differ. [DIFFERENCES.md](DIFFERENCES.md) describes the kinds of differences.

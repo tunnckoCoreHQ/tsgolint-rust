@@ -1,0 +1,98 @@
+{
+  "test": "TestNoDeprecatedDestructuredAllowanceSources",
+  "rule": "no-deprecated",
+  "tsconfig": "tsconfig.minimal.json",
+  "valid": [
+    {
+      "index": 0,
+      "code": "async function probe() {\n  const { deprecatedValue } = await import('./deprecated');\n}",
+      "options": {
+        "allow": [
+          {
+            "from": "file",
+            "name": [
+              "deprecatedValue"
+            ],
+            "path": "./deprecated.ts"
+          }
+        ]
+      },
+      "files": {
+        "deprecated.ts": "/** @deprecated */\nexport const deprecatedValue = 1;"
+      }
+    },
+    {
+      "index": 1,
+      "code": "async function probe() {\n  const { deprecatedValue: renamed } = await import('./deprecated');\n}",
+      "options": {
+        "allow": [
+          {
+            "name": [
+              "deprecatedValue",
+              "renamed"
+            ],
+            "path": "./deprecated.ts",
+            "from": "file"
+          }
+        ]
+      },
+      "files": {
+        "deprecated.ts": "/** @deprecated */\nexport const deprecatedValue = 1;"
+      }
+    }
+  ],
+  "invalid": [
+    {
+      "index": 0,
+      "code": "async function probe() {\n  const { deprecatedValue } = await import('./deprecated');\n}",
+      "options": {
+        "allow": [
+          {
+            "from": "file",
+            "name": [
+              "deprecatedValue"
+            ],
+            "path": "./file.ts"
+          }
+        ]
+      },
+      "files": {
+        "deprecated.ts": "/** @deprecated */\nexport const deprecatedValue = 1;"
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecated",
+          "line": 2,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "code": "async function probe() {\n  const { deprecatedValue } = await import('./deprecated');\n}",
+      "options": {
+        "allow": [
+          {
+            "from": "file",
+            "name": [
+              "deprecatedValue"
+            ],
+            "path": "./missing.ts"
+          }
+        ]
+      },
+      "files": {
+        "deprecated.ts": "/** @deprecated */\nexport const deprecatedValue = 1;"
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "deprecated",
+          "line": 2,
+          "suggestions": []
+        }
+      ]
+    }
+  ]
+}

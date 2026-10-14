@@ -1,14 +1,14 @@
 # tsgolint-rust
 
-A Rust port of [oxc-project/tsgolint](https://github.com/oxc-project/tsgolint) (v7.0.2003), the type-aware linter that [oxlint](https://oxc.rs) runs for `--type-aware` and `--type-check`. It runs on [ts-rust](https://github.com/pingdotgg/ts-rust), a Rust port of TypeScript 7, instead of typescript-go.
+A Rust port of [oxc-project/tsgolint](https://github.com/oxc-project/tsgolint) (v7.0.2004), the type-aware linter that [oxlint](https://oxc.rs) runs for `--type-aware` and `--type-check`. It runs on [ts-rust](https://github.com/pingdotgg/ts-rust), a Rust port of TypeScript 7, instead of typescript-go.
 
 It is a drop-in replacement. oxlint spawns it the same way, sends the same `headless` payload, and gets the same diagnostics, fixes and suggestions back. One ts-rust program and one checker pass give both the lint results and the type errors.
 
 ## Status
 
 - **Rules.** All 60 tsgolint rules, with their options, messages, fixes and suggestions.
-- **tsgolint's own tests.** The 7,574 rule test cases of tsgolint's Go suite run with their expectations. 7,546 pass; the other 28 are skipped in tsgolint itself. The snapshots hold our own output on ts-rust; they differ from tsgolint's in one message, where TypeScript 7.1 orders a union differently.
-- **e2e.** tsgolint's end-to-end suite passes, with the native binary and with the wasm build: 20 tests, plus 3 that run only on Windows or case-insensitive file systems.
+- **tsgolint's own tests.** The 7,619 rule test cases of tsgolint's Go suite run with their expectations. 7,591 pass; the other 28 are skipped in tsgolint itself. The snapshots hold our own output on ts-rust; they differ from tsgolint's in one message, where TypeScript 7.1 orders a union differently.
+- **e2e.** tsgolint's end-to-end suite passes, with the native binary and with the wasm build: 21 tests, plus 3 that run only on Windows or case-insensitive file systems.
 - **oxlint.** oxlint 1.86.0 gives the same output on oxc's 25 tsgolint CLI fixtures with either binary, `--fix` included.
 - **Real projects.** Compared with the Go binary on 12 projects (hono, TanStack Query, tRPC, h3, Effect, t3code, vercel/commerce). Every remaining difference comes from the TypeScript revision, from tsgolint's own run-to-run variation, or from the Effect diagnostics. [DIFFERENCES.md](DIFFERENCES.md) explains them.
 - **wasm32-wasip1.** The WASI build runs on one thread, so it runs where threads are not available. Its output equals the native output.
@@ -21,7 +21,7 @@ tsgolint-rust has its own version numbers. Each release ports one tsgolint relea
 
 | tsgolint-rust | tsgolint rules and protocol | TypeScript | ts-rust | Tested with oxlint |
 |---|---|---|---|---|
-| 0.1.0 | [v7.0.2003](https://github.com/oxc-project/tsgolint/tree/v7.0.2003) | [`fed0bf24149f`](https://github.com/microsoft/TypeScript/commit/fed0bf24149f) (7.1.0-dev) | [`598e6416`](https://github.com/pingdotgg/ts-rust/commit/598e6416) | 1.86.0 |
+| 0.1.0 | [v7.0.2004](https://github.com/oxc-project/tsgolint/tree/v7.0.2004) | [`fed0bf24149f`](https://github.com/microsoft/TypeScript/commit/fed0bf24149f) (7.1.0-dev) | [`598e6416`](https://github.com/pingdotgg/ts-rust/commit/598e6416) | 1.86.0 |
 
 ## Speed and memory
 
