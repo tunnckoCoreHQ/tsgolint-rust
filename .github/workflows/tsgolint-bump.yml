@@ -88,9 +88,9 @@ jobs:
             UPSTREAM.json
             pnpm-workspace.yaml
             pnpm-lock.yaml
-            tsgolint-rules/tests/data/cases
-            tsgolint-rules/tests/data/snapshots
-            tsgolint-rust/e2e
+            crates/tsgolint-rules/tests/data/cases
+            crates/tsgolint-rules/tests/data/snapshots
+            crates/tsgolint-rust/e2e
           commit-message: "feat: port tsgolint ${{ steps.bump.outputs.to }}"
           title: "feat: port tsgolint ${{ steps.bump.outputs.to }}"
           body-path: ${{ runner.temp }}/pr-body.md

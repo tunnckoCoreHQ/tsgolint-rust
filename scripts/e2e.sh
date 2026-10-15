@@ -7,7 +7,7 @@ set -eu
 
 root=$(cd "$(dirname "$0")/.." && pwd)
 target=${CARGO_TARGET_DIR:-$root/target}
-e2e=$root/tsgolint-rust/e2e
+e2e=$root/crates/tsgolint-rust/e2e
 
 cd "$root"
 case "${1:-}" in

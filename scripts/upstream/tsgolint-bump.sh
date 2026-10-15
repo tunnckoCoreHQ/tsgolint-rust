@@ -3,7 +3,7 @@
 # UPSTREAM.json, with the mechanical part of the port:
 #
 # - tsgolint's diff of e2e/ and of its rule snapshots, applied to
-#   tsgolint-rust/e2e and tsgolint-rules/tests/data/snapshots. A hunk that
+#   crates/tsgolint-rust/e2e and crates/tsgolint-rules/tests/data/snapshots. A hunk that
 #   does not apply (ours differs there, from the TypeScript revision) is
 #   listed in the body instead.
 # - the new and changed rule test cases (dump-cases.sh, which needs Go).
@@ -46,14 +46,14 @@ echo "tsgolint $from..$to ($commit)" >&2
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 
-# tsgolint's e2e/ is tsgolint-rust/e2e, and its internal/rule_tester/__snapshots__
-# is tsgolint-rules/tests/data/snapshots.
+# tsgolint's e2e/ is crates/tsgolint-rust/e2e, and its internal/rule_tester/__snapshots__
+# is crates/tsgolint-rules/tests/data/snapshots.
 gh api -H 'Accept: application/vnd.github.diff' "repos/$repo/compare/$from...$to" |
-  sed 's#^\(diff --git a/\|--- a/\|+++ b/\)internal/rule_tester/__snapshots__/#\1tsgolint-rules/tests/data/snapshots/#; s#\( b/\)internal/rule_tester/__snapshots__/#\1tsgolint-rules/tests/data/snapshots/#' \
+  sed 's#^\(diff --git a/\|--- a/\|+++ b/\)internal/rule_tester/__snapshots__/#\1crates/tsgolint-rules/tests/data/snapshots/#; s#\( b/\)internal/rule_tester/__snapshots__/#\1crates/tsgolint-rules/tests/data/snapshots/#' \
     > "$work/upstream.diff"
-git apply --reject --whitespace=nowarn --include='tsgolint-rules/tests/data/snapshots/*' "$work/upstream.diff" 2> "$work/apply-snapshots.log" || true
-git apply --reject --whitespace=nowarn --directory=tsgolint-rust --include='tsgolint-rust/e2e/*' "$work/upstream.diff" 2> "$work/apply-e2e.log" || true
-rejected=$(find tsgolint-rules/tests/data/snapshots tsgolint-rust/e2e -name '*.rej' -not -path '*/node_modules/*' | sort)
+git apply --reject --whitespace=nowarn --include='crates/tsgolint-rules/tests/data/snapshots/*' "$work/upstream.diff" 2> "$work/apply-snapshots.log" || true
+git apply --reject --whitespace=nowarn --directory=crates/tsgolint-rust --include='crates/tsgolint-rust/e2e/*' "$work/upstream.diff" 2> "$work/apply-e2e.log" || true
+rejected=$(find crates/tsgolint-rules/tests/data/snapshots crates/tsgolint-rust/e2e -name '*.rej' -not -path '*/node_modules/*' | sort)
 for file in $rejected; do
   cp "$file" "$work/"
   rm "$file"

@@ -1,6 +1,6 @@
 # tsgolint-rust
 
-The `tsgolint` binary: the command line, the `headless` protocol that oxlint speaks, tsconfig discovery and the multi-program driver. Program loading, the lint engine and the rules are `tsgolint-core` and `tsgolint-rules`. See [ARCHITECTURE.md](../ARCHITECTURE.md) for the whole port.
+The `tsgolint` binary: the command line, the `headless` protocol that oxlint speaks, tsconfig discovery and the multi-program driver. Program loading, the lint engine and the rules are `tsgolint-core` and `tsgolint-rules`. See [ARCHITECTURE.md](../../ARCHITECTURE.md) for the whole port.
 
 ## Layout
 
@@ -70,4 +70,4 @@ wasmtime run --dir /::/ --env PWD="$PWD" /path/to/target/wasm32-wasip1/release/t
 
 ## Differences from tsgolint
 
-[DIFFERENCES.md](../DIFFERENCES.md) lists them: the TypeScript 7.1 changes, the deterministic checker per file, the payload order of programs, the empty profiling files, and the error texts after their fixed prefixes.
+[DIFFERENCES.md](../../DIFFERENCES.md) lists them: the TypeScript 7.1 changes, the deterministic checker per file, the payload order of programs, the empty profiling files, and the error texts after their fixed prefixes.

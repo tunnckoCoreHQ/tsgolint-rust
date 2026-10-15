@@ -55,17 +55,13 @@ importers:
         specifier: 'catalog:'
         version: 2.11.7
 
-  npm/tsgolint-rust: {}
-
-  npm/wasm32-wasip1: {}
-
-  tsgolint-rules/tests/data:
+  crates/tsgolint-rules/tests/data:
     devDependencies:
       '@types/node':
         specifier: 24.13.2
         version: 24.13.2
 
-  tsgolint-rust/e2e:
+  crates/tsgolint-rust/e2e:
     devDependencies:
       '@types/node':
         specifier: catalog:types
@@ -79,6 +75,10 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 5.0.3(@types/node@24.13.2)(vite@8.3.4(@types/node@24.13.2)(yaml@2.9.1))
+
+  npm/tsgolint-rust: {}
+
+  npm/wasm32-wasip1: {}
 
 packages:
 

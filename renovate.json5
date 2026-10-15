@@ -97,7 +97,7 @@
     },
     {
       description: "The @types/node that the rule tests' fixtures were written against. Bump by hand.",
-      matchFileNames: ["tsgolint-rules/tests/data/package.json"],
+      matchFileNames: ["crates/tsgolint-rules/tests/data/package.json"],
       enabled: false,
     },
     {

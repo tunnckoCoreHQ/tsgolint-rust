@@ -11,8 +11,8 @@
         "Cargo.toml",
         "Cargo.lock",
         "rust-toolchain.toml",
-        "tsgolint-*/**/*.rs",
-        "tsgolint-*/Cargo.toml",
+        "crates/**/*.rs",
+        "crates/*/Cargo.toml",
         "npm/scripts/**",
         "npm/*/package.json",
         "README.md",
@@ -31,9 +31,9 @@
         "Cargo.lock",
         "rust-toolchain.toml",
         "pnpm-lock.yaml",
-        "tsgolint-*/**",
-        "!tsgolint-*/**/node_modules/**",
-        "!tsgolint-rust/e2e/**",
+        "crates/**",
+        "!crates/**/node_modules/**",
+        "!crates/tsgolint-rust/e2e/**",
         "!**/*.md"
       ],
       "passThroughEnv": [
@@ -50,8 +50,8 @@
         "rust-toolchain.toml",
         "pnpm-lock.yaml",
         "scripts/e2e.sh",
-        "tsgolint-*/**",
-        "!tsgolint-*/**/node_modules/**",
+        "crates/**",
+        "!crates/**/node_modules/**",
         "!**/*.md"
       ],
       "passThroughEnv": [
@@ -67,8 +67,8 @@
         "rust-toolchain.toml",
         "pnpm-lock.yaml",
         "scripts/e2e.sh",
-        "tsgolint-*/**",
-        "!tsgolint-*/**/node_modules/**",
+        "crates/**",
+        "!crates/**/node_modules/**",
         "!**/*.md"
       ],
       "passThroughEnv": [
@@ -83,13 +83,13 @@
         "Cargo.toml",
         "Cargo.lock",
         "rust-toolchain.toml",
-        "tsgolint-core/src/**",
-        "tsgolint-core/Cargo.toml",
-        "tsgolint-rules/src/**",
-        "tsgolint-rules/Cargo.toml",
-        "tsgolint-rust/src/**",
-        "tsgolint-rust/build.rs",
-        "tsgolint-rust/Cargo.toml"
+        "crates/tsgolint-core/src/**",
+        "crates/tsgolint-core/Cargo.toml",
+        "crates/tsgolint-rules/src/**",
+        "crates/tsgolint-rules/Cargo.toml",
+        "crates/tsgolint-rust/src/**",
+        "crates/tsgolint-rust/build.rs",
+        "crates/tsgolint-rust/Cargo.toml"
       ],
       "passThroughEnv": [
         "CARGO_*",

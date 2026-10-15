@@ -8,19 +8,19 @@ The root `pnpm install` installs the suite's dependencies. `scripts/e2e.sh nativ
 
 ```bash
 cargo build -p tsgolint-rust
-TSGOLINT_BIN=$PWD/target/debug/tsgolint pnpm --dir tsgolint-rust/e2e run e2e
+TSGOLINT_BIN=$PWD/target/debug/tsgolint pnpm --dir crates/tsgolint-rust/e2e run e2e
 
 # The wasm build, under wasmtime
 cargo build -p tsgolint-rust --target wasm32-wasip1
 TSGOLINT_WASM=$PWD/target/wasm32-wasip1/debug/tsgolint.wasm \
   TSGOLINT_BIN=$PWD/tsgolint-rust/e2e/tsgolint-wasm.sh \
-  pnpm --dir tsgolint-rust/e2e run e2e
+  pnpm --dir crates/tsgolint-rust/e2e run e2e
 
 # The Go binary, from the root oxlint-tsgolint devDependency
-TSGOLINT_BIN=$PWD/node_modules/.bin/tsgolint pnpm --dir tsgolint-rust/e2e run e2e
+TSGOLINT_BIN=$PWD/node_modules/.bin/tsgolint pnpm --dir crates/tsgolint-rust/e2e run e2e
 ```
 
-Add `-- --update` to rewrite the Vitest snapshot from the binary under test. The snapshot holds the native tsgolint-rust output; the wasm build must give the same. [DIFFERENCES.md](../../DIFFERENCES.md) says how it differs from the Go tsgolint.
+Add `-- --update` to rewrite the Vitest snapshot from the binary under test. The snapshot holds the native tsgolint-rust output; the wasm build must give the same. [DIFFERENCES.md](../../../DIFFERENCES.md) says how it differs from the Go tsgolint.
 
 ## How it works
 

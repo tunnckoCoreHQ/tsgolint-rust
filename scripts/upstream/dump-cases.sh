@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Dumps the rule test cases of a tsgolint release into
-# tsgolint-rules/tests/data/cases, and its rule snapshots into a directory
+# crates/tsgolint-rules/tests/data/cases, and its rule snapshots into a directory
 # to compare with (the Go reference when porting).
 #
 #   scripts/upstream/dump-cases.sh <tag> [<snapshots-out>]
@@ -16,7 +16,7 @@ set -euo pipefail
 tag=${1:?usage: dump-cases.sh <tag> [<snapshots-out>]}
 snapshots_out=${2:-}
 root=$(cd "$(dirname "$0")/../.." && pwd)
-cases="$root/tsgolint-rules/tests/data/cases"
+cases="$root/crates/tsgolint-rules/tests/data/cases"
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 

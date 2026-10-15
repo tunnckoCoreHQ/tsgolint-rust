@@ -7,7 +7,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tunnckoCoreHQ/tsgolint-rust.git",
-    "directory": "tsgolint-rust/e2e"
+    "directory": "crates/tsgolint-rust/e2e"
   },
   "type": "module",
   "scripts": {
