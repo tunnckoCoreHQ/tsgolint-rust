@@ -10,6 +10,11 @@ set -euo pipefail
 WASMTIME_VERSION=44.0.1
 
 cd "$(dirname "$0")/../.."
+# CircleCI's checkout sends every github.com URL over SSH with a deploy key
+# that reads only this repository. Cargo fetches ts-rust from GitHub, and the
+# release and bump jobs push over HTTPS with a token.
+git config --global --unset-all url.ssh://git@github.com.insteadof || true
+
 bin=$HOME/.local/bin
 mkdir -p "$bin"
 # The pnpm store at one path on every OS, for the CI cache.
