@@ -132,15 +132,11 @@ Each tsconfig becomes one ts-rust program. ts-rust gives every file a checker, a
 
 ## Provenance
 
-Each [GitHub release](https://github.com/tunnckoCoreHQ/tsgolint-rust/releases) has `provenance.sigstore.json`, a [Sigstore](https://www.sigstore.dev) attestation that the CircleCI job that published the release signed. Its SLSA provenance names the commit, and every npm tarball and binary of the release by its SHA-256 and SHA-512 digest. npm shows no provenance for these packages: it makes provenance only on GitHub Actions and GitLab.
-
-Verify a binary of the release, or a tarball from `npm pack`, with [cosign](https://github.com/sigstore/cosign):
+Each [GitHub release](https://github.com/tunnckoCoreHQ/tsgolint-rust/releases) has `provenance.sigstore.json`, a [Sigstore](https://www.sigstore.dev)-signed SLSA provenance of every npm tarball and binary of the release, from the CircleCI job that published it. npm shows no provenance for publishes from CircleCI. Verify a file with [cosign](https://github.com/sigstore/cosign):
 
 ```sh
-npm pack @tsgolint-rust/linux-x64@0.1.0
-cosign verify-blob-attestation --bundle provenance.sigstore.json \
-  --type https://slsa.dev/provenance/v1 \
-  --certificate-oidc-issuer https://oidc.circleci.com/org/<org-id> \
-  --certificate-identity https://circleci.com/api/v2/projects/<project-id>/pipeline-definitions/<pipeline-definition-id> \
-  tsgolint-rust-linux-x64-0.1.0.tgz
+cosign verify-blob-attestation --bundle provenance.sigstore.json --type https://slsa.dev/provenance/v1 \
+  --certificate-oidc-issuer https://oidc.circleci.com/org/34fb47d2-eada-4025-980d-7e9a7d912ca8 \
+  --certificate-identity-regexp '^https://circleci\.com/api/v2/projects/46741416-4ff4-48ad-8ee4-2e315fe8db18/' \
+  tsgolint-linux-x64
 ```
