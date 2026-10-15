@@ -8,9 +8,8 @@ version: 2.1
 # are few. On master, the release jobs run once every other job passes; see
 # scripts/ci/plan.sh for what a pipeline publishes.
 #
-# Only master pipelines save the caches and write to the turbo remote cache,
-# which takes TURBO_TOKEN and TURBO_TEAM from the project's environment
-# variables. CI_OS puts the OS in turbo's task hashes. The contexts hold the
+# Only master pipelines save the cargo and pnpm caches. Every run saves turbo's
+# cache, whose entries are keyed by the task inputs. The contexts hold the
 # secrets and allow only master pipelines:
 # - tsgolint-rust-publish: NPM_TOKEN and GITHUB_TOKEN (contents: write).
 # - tsgolint-rust-bot: GITHUB_TOKEN, the personal token that opens the
@@ -32,30 +31,25 @@ executors:
     docker:
       - image: cimg/rust:1.95.0-node
     resource_class: large
-    environment: &linux
-      CI_OS: linux
+    environment: &environment
       # CircleCI's terminal crashes turbo's UI.
       TURBO_UI: "false"
   linux-arm64:
     docker:
       - image: cimg/rust:1.95.0-node
     resource_class: arm.large
-    environment: *linux
+    environment: *environment
   macos:
     macos:
       xcode: 27.0.0
     resource_class: m4pro.medium
-    environment:
-      CI_OS: macos
-      TURBO_UI: "false"
+    environment: *environment
   windows:
     machine:
       image: windows-server-2025-gui:current
     resource_class: windows.medium
     shell: bash.exe -eo pipefail
-    environment:
-      CI_OS: windows
-      TURBO_UI: "false"
+    environment: *environment
 
 commands:
   setup:
@@ -133,7 +127,14 @@ jobs:
       - setup:
           os: << parameters.os >>
           cache: check-<< parameters.os >>
+      - restore_cache:
+          keys:
+            - v1-turbo-check-<< parameters.os >>-
       - run: pnpm exec turbo run check
+      - save_cache:
+          key: v1-turbo-check-<< parameters.os >>-{{ .Revision }}
+          paths: [.turbo/cache]
+          when: always
       - save:
           cache: check-<< parameters.os >>
 
@@ -150,6 +151,9 @@ jobs:
           os: << parameters.os >>
           cache: test-<< parameters.os >>
           args: --wasmtime
+      - restore_cache:
+          keys:
+            - v1-turbo-test-<< parameters.os >>-
       # On Windows, node cannot spawn the wasm build's shell wrapper
       # (crates/tsgolint-rust/e2e/tsgolint-wasm.sh), so e2e:wasm runs on
       # Linux and macOS only.
@@ -163,6 +167,10 @@ jobs:
             equal: [windows, << parameters.os >>]
           steps:
             - run: pnpm exec turbo run test e2e e2e:wasm
+      - save_cache:
+          key: v1-turbo-test-<< parameters.os >>-{{ .Revision }}
+          paths: [.turbo/cache]
+          when: always
       - save:
           cache: test-<< parameters.os >>
 

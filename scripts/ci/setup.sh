@@ -23,10 +23,6 @@ export PATH=$HOME/.cargo/bin:$bin:$PATH pnpm_config_store_dir=$HOME/.pnpm-store
   echo "export PATH=\"$HOME/.cargo/bin:$bin:\$PATH\""
   echo "export pnpm_config_store_dir=\"$HOME/.pnpm-store\""
 } >> "${BASH_ENV:-/dev/null}"
-# Pull requests read the turbo remote cache; only master writes to it.
-if [ "${CIRCLE_BRANCH:-}" != master ]; then
-  echo "export TURBO_CACHE=local:rw,remote:r" >> "${BASH_ENV:-/dev/null}"
-fi
 
 case "$(uname -m)" in
   x86_64) arch=x86_64 cpu=x64 ;;

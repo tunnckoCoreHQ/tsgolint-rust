@@ -1,9 +1,6 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "agentGuidance": false,
-  "globalEnv": [
-    "CI_OS"
-  ],
   "tasks": {
     "//#check": {
       "inputs": [

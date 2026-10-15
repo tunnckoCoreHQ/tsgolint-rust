@@ -45,7 +45,7 @@ CI runs on [CircleCI](https://circleci.com), from `.circleci/config.yml`. Every 
 - `check (<os>)` runs `turbo run check`, then `test (<os>)` runs `turbo run test e2e e2e:wasm`, on Linux, macOS and Windows. Windows skips `e2e:wasm`: node cannot spawn the wasm build's shell wrapper there. Each OS runs on its own, so Linux never waits on macOS.
 - The release builds run after the test job of their OS: `build (linux-x64)`, `build (linux-arm64)` on an arm64 machine, `build (wasm)`, `build (windows)` with both Windows targets, cross-compiled on Linux with cargo-xwin, and `build (macos)` with both macOS targets.
 
-Turbo's remote cache skips a task whose inputs did not change; pull requests only read it. The macOS and Windows jobs pass at once when the pull request changes nothing in `crates/`, `scripts/`, `npm/`, `.circleci/`, `Cargo.*`, `rust-toolchain.toml`, `package.json`, `pnpm-lock.yaml`, `turbo.json` or `.gitattributes`: the free credits for those machines are few. A new commit cancels the older pipelines of its branch. CircleCI starts no pipeline for a pull request from a fork.
+Each run keeps turbo's cache in the CircleCI cache, so a task whose inputs did not change is skipped. The macOS and Windows jobs pass at once when the pull request changes nothing in `crates/`, `scripts/`, `npm/`, `.circleci/`, `Cargo.*`, `rust-toolchain.toml`, `package.json`, `pnpm-lock.yaml`, `turbo.json` or `.gitattributes`: the free credits for those machines are few. A new commit cancels the older pipelines of its branch. CircleCI starts no pipeline for a pull request from a fork.
 
 ## Releases
 
