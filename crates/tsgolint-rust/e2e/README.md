@@ -13,7 +13,7 @@ TSGOLINT_BIN=$PWD/target/debug/tsgolint pnpm --dir crates/tsgolint-rust/e2e run 
 # The wasm build, under wasmtime
 cargo build -p tsgolint-rust --target wasm32-wasip1
 TSGOLINT_WASM=$PWD/target/wasm32-wasip1/debug/tsgolint.wasm \
-  TSGOLINT_BIN=$PWD/tsgolint-rust/e2e/tsgolint-wasm.sh \
+  TSGOLINT_BIN=$PWD/crates/tsgolint-rust/e2e/tsgolint-wasm.sh \
   pnpm --dir crates/tsgolint-rust/e2e run e2e
 
 # The Go binary, from the root oxlint-tsgolint devDependency

@@ -104,7 +104,7 @@ The wasm build, under [wasmtime](https://wasmtime.dev):
 ```sh
 cargo build --release --target wasm32-wasip1 -p tsgolint-rust
 TSGOLINT_WASM=$PWD/target/wasm32-wasip1/release/tsgolint.wasm \
-  OXLINT_TSGOLINT_PATH=$PWD/tsgolint-rust/e2e/tsgolint-wasm.sh \
+  OXLINT_TSGOLINT_PATH=$PWD/crates/tsgolint-rust/e2e/tsgolint-wasm.sh \
   pnpm exec oxlint --type-aware --type-check
 ```
 
@@ -112,10 +112,10 @@ TSGOLINT_WASM=$PWD/target/wasm32-wasip1/release/tsgolint.wasm \
 
 | Crate | What it has |
 |---|---|
-| [`tsgolint-core`](tsgolint-core) | Program loading on ts-rust, the rule framework, the AST walk and the lint engine |
-| [`tsgolint-rules`](tsgolint-rules) | The 60 rules, their shared helpers, and the test harness with tsgolint's cases and snapshots |
-| [`tsgolint-rust`](tsgolint-rust) | The `tsgolint` binary: command line, `headless` protocol, tsconfig discovery, driver |
-| [`tsgolint-compare`](tsgolint-compare) | A dev tool that runs the Go and Rust binaries on one payload and compares them |
+| [`tsgolint-core`](crates/tsgolint-core) | Program loading on ts-rust, the rule framework, the AST walk and the lint engine |
+| [`tsgolint-rules`](crates/tsgolint-rules) | The 60 rules, their shared helpers, and the test harness with tsgolint's cases and snapshots |
+| [`tsgolint-rust`](crates/tsgolint-rust) | The `tsgolint` binary: command line, `headless` protocol, tsconfig discovery, driver |
+| [`tsgolint-compare`](crates/tsgolint-compare) | A dev tool that runs the Go and Rust binaries on one payload and compares them |
 
 Each tsconfig becomes one ts-rust program. ts-rust gives every file a checker, and each checker lives on its own thread. The engine sends each checker one job with the TypeScript diagnostics of its files, then one job that runs the rules on them. The binary streams the results to oxlint through tsgolint's 400 KB output buffer while the run goes on. [ARCHITECTURE.md](ARCHITECTURE.md) has the details.
 
