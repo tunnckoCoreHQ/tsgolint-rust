@@ -144,9 +144,17 @@ fn headless_option_errors() {
         b"{\"version\":2}",
     );
     assert_eq!(out.code, 1);
+    // Go prints the OS's own text for the error.
+    let missing = if cfg!(windows) {
+        "The system cannot find the path specified."
+    } else {
+        "no such file or directory"
+    };
     assert_eq!(
         out.stderr,
-        "error starting profiling: failed to start trace: error creating trace file: open /nonexistent/dir/t: no such file or directory"
+        format!(
+            "error starting profiling: failed to start trace: error creating trace file: open /nonexistent/dir/t: {missing}"
+        )
     );
     let out = compare(
         &["headless", "-cpuprof", "/nonexistent/dir/t"],
