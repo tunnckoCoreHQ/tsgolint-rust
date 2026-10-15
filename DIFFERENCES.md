@@ -64,3 +64,5 @@ The `lib.dom.d.ts` of TypeScript 7.1 changed some signatures. `TransformStreamDe
 ## The wasm build
 
 The `wasm32-wasip1` build runs on one thread and gives the same output as the native build. It reads the current directory from `PWD` and needs `/` preopened at `/`; the `@tsgolint-rust/wasm32-wasip1` package sets both up.
+
+The wasm build treats file names as case-sensitive, because ts-rust cannot probe the host file system under WASI. On a case-insensitive file system (macOS, Windows), a path with other casing than the file on disk does not match that file. The native build probes the file system and matches it.

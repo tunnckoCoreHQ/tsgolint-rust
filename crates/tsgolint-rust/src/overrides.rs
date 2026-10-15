@@ -38,13 +38,16 @@ mod tests {
         std::fs::write(&on_disk, "\u{feff}disk text").unwrap();
         std::fs::write(format!("{dir}/other.ts"), "\u{feff}other").unwrap();
 
+        // The binary keys overrides with the OS file system's case
+        // sensitivity: lowercased where it is case-insensitive (macOS).
+        let case_sensitive = goport_util::frontend::vfs::osvfs_fs().use_case_sensitive_file_names();
         let virtual_file = format!("{dir}/virtual.ts");
         let fs = headless_fs(
             &[
                 (format!("{dir}/sub/../disk.ts"), "\u{feff}override".into()),
                 (virtual_file.clone(), "v".into()),
             ],
-            true,
+            case_sensitive,
         )
         .make();
 
@@ -69,11 +72,14 @@ mod tests {
             ("other".to_string(), true)
         );
         assert!(!fs.file_exists(&format!("{dir}/missing.ts")));
-        // Case matters on a case-sensitive file system.
-        assert!(!fs.file_exists(&format!("{dir}/VIRTUAL.ts")));
+        // Case matters only on a case-sensitive file system.
+        assert_eq!(
+            fs.file_exists(&format!("{dir}/VIRTUAL.ts")),
+            !case_sensitive
+        );
 
         // Other threads see the same overrides.
-        let factory = headless_fs(&[(virtual_file.clone(), "v".into())], true);
+        let factory = headless_fs(&[(virtual_file.clone(), "v".into())], case_sensitive);
         let read = std::thread::spawn(move || factory.make().read_file(&virtual_file))
             .join()
             .unwrap();

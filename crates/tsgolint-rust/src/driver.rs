@@ -256,7 +256,10 @@ mod tests {
             }],
             ..Payload::default()
         };
-        FileRules::from_payload_with_registry(&payload, dir, true).1
+        // Keyed like the binary keys them: lowercased where the file system
+        // is case-insensitive (macOS).
+        let case_sensitive = goport_util::frontend::vfs::osvfs_fs().use_case_sensitive_file_names();
+        FileRules::from_payload_with_registry(&payload, dir, case_sensitive).1
     }
 
     /// `rule <name> <file>` or `internal <id> <file>`, with file names
