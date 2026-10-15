@@ -2,8 +2,7 @@
   "$schema": "https://turborepo.dev/schema.json",
   "agentGuidance": false,
   "globalEnv": [
-    "RUNNER_OS",
-    "RUNNER_ARCH"
+    "CI_OS"
   ],
   "tasks": {
     "//#check": {

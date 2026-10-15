@@ -51,6 +51,13 @@ ts-rust has the [Effect](https://effect.website) language service diagnostics bu
 
 oxlint runs the `tsgolint` bin of the `oxlint-tsgolint` package. tsgolint-rust ships the same bin in the [`tsgolint-rust`](https://www.npmjs.com/package/tsgolint-rust) package, so you install it under the name `oxlint-tsgolint`. It picks its binary from one of `@tsgolint-rust/darwin-arm64`, `darwin-x64`, `linux-arm64`, `linux-x64` (static, for glibc and musl), `win32-arm64` and `win32-x64`.
 
+```
+npm install tsgolint-rust
+
+# or nightly channel
+npm install tsgolint-rust@nightly
+```
+
 oxlint declares an optional peer dependency on `oxlint-tsgolint@>=7.0.2003`. tsgolint-rust has its own versions, so tell your package manager to accept it, as below. Otherwise pnpm warns about an unmet peer and npm refuses to install.
 
 With pnpm, alias it in `package.json`:
@@ -121,4 +128,19 @@ Each tsconfig becomes one ts-rust program. ts-rust gives every file a checker, a
 
 ## Development
 
-`pnpm exec turbo run check test e2e e2e:wasm build` runs fmt and clippy, the Rust tests, both e2e runs, and the release builds. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, and [UPSTREAM.json](UPSTREAM.json) records it with the TypeScript commit it ports and the ported tsgolint release. Two daily workflows open pull requests that merge by themselves once their checks pass: `ts-rust-bump` moves ts-rust when its compiler sources change and regenerates the snapshots, and `tsgolint-bump` moves to a newer tsgolint release with its new cases, snapshots and e2e changes, leaving the rule changes to port on the pull request.
+`pnpm exec turbo run check test e2e e2e:wasm build` runs fmt and clippy, the Rust tests, both e2e runs, and the release builds. CircleCI runs the same tasks on Linux, macOS and Windows, then the release builds of every target; [CONTRIBUTING.md](CONTRIBUTING.md#ci) lists the jobs. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, and [UPSTREAM.json](UPSTREAM.json) records it with the TypeScript commit it ports and the ported tsgolint release. Two daily CircleCI pipelines open pull requests that merge by themselves once their checks pass: the ts-rust bump moves ts-rust when its compiler sources change and regenerates the snapshots, and the tsgolint bump moves to a newer tsgolint release with its new cases, snapshots and e2e changes, leaving the rule changes to port on the pull request.
+
+## Provenance
+
+Each [GitHub release](https://github.com/tunnckoCoreHQ/tsgolint-rust/releases) has `provenance.sigstore.json`, a [Sigstore](https://www.sigstore.dev) attestation that the CircleCI job that published the release signed. Its SLSA provenance names the commit, and every npm tarball and binary of the release by its SHA-256 and SHA-512 digest. npm shows no provenance for these packages: it makes provenance only on GitHub Actions and GitLab.
+
+Verify a binary of the release, or a tarball from `npm pack`, with [cosign](https://github.com/sigstore/cosign):
+
+```sh
+npm pack @tsgolint-rust/linux-x64@0.1.0
+cosign verify-blob-attestation --bundle provenance.sigstore.json \
+  --type https://slsa.dev/provenance/v1 \
+  --certificate-oidc-issuer https://oidc.circleci.com/org/<org-id> \
+  --certificate-identity https://circleci.com/api/v2/projects/<project-id>/pipeline-definitions/<pipeline-definition-id> \
+  tsgolint-rust-linux-x64-0.1.0.tgz
+```

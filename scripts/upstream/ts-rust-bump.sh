@@ -3,7 +3,7 @@
 # the head changes its compiler sources, and records the new commits in
 # UPSTREAM.json.
 #
-# Prints `<key>=<value>` lines (for $GITHUB_OUTPUT):
+# Prints `<key>=<value>` lines, which bump.sh reads:
 #   bump=true|false   whether Cargo.lock and UPSTREAM.json changed
 #   from=<commit>     the pinned ts-rust commit
 #   to=<commit>       the new commit, when bump=true

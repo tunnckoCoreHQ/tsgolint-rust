@@ -1,22 +1,30 @@
 #!/usr/bin/env bash
-# Opens or updates the release PR from the pending changesets, after ci passes
-# on master. Merging the PR publishes the release with latest. GITHUB_TOKEN is
-# a personal token, so the PR is a user PR that ci runs on.
+# Opens or updates the release PR from the pending changesets, after every CI
+# job passes on master. Merging the PR publishes the release with latest.
+# GITHUB_TOKEN is a personal token, so the PR is a user PR that CI runs on,
+# and its commit is the token owner's.
 
 set -euo pipefail
 
 branch=changeset-release/master
-repo=${GITHUB_REPOSITORY:-tunnckoCoreHQ/tsgolint-rust}
+repo=tunnckoCoreHQ/tsgolint-rust
 
 if ! compgen -G '.changeset/*.md' > /dev/null; then
   echo "No pending changesets"
   exit 0
 fi
 
-git config user.name "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+user=$(gh api user --jq '"\(.login) \(.id)"')
+git config user.name "${user% *}"
+git config user.email "${user#* }+${user% *}@users.noreply.github.com"
 git checkout -B "$branch"
 pnpm exec changeset version
+# Empty changesets (`pnpm changeset --empty`) release nothing; they wait for
+# the next release.
+if git diff --quiet -- npm/tsgolint-rust/package.json; then
+  echo "No release in the pending changesets"
+  exit 0
+fi
 # The Cargo workspace version and the README's compatibility row follow the
 # npm version.
 node npm/scripts/packages.mjs sync
