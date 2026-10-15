@@ -1,0 +1,9 @@
+{
+  "strictness": 2,
+  "autoReview": ["open", "push", "rebase"],
+  "statusCheck": true,
+  "shouldUpdateDescription": false,
+  "autoApprove": {
+    "enabled": true
+  }
+}
