@@ -54,7 +54,7 @@ jobs:
         id: test
         if: steps.bump.outputs.bump == 'true'
         continue-on-error: true
-        run: pnpm exec turbo run check test
+        run: pnpm exec turbo run check test e2e e2e:wasm
 
       - name: Write the pull request
         if: steps.bump.outputs.bump == 'true'
@@ -88,9 +88,9 @@ jobs:
             UPSTREAM.json
             pnpm-workspace.yaml
             pnpm-lock.yaml
-            tsgolint-rules/tests/data/cases
-            tsgolint-rules/tests/data/snapshots
-            tsgolint-rust/e2e
+            crates/tsgolint-rules/tests/data/cases
+            crates/tsgolint-rules/tests/data/snapshots
+            crates/tsgolint-rust/e2e
           commit-message: "feat: port tsgolint ${{ steps.bump.outputs.to }}"
           title: "feat: port tsgolint ${{ steps.bump.outputs.to }}"
           body-path: ${{ runner.temp }}/pr-body.md

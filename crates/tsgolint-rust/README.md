@@ -1,6 +1,6 @@
 # tsgolint-rust
 
-The `tsgolint` binary: the command line, the `headless` protocol that oxlint speaks, tsconfig discovery and the multi-program driver. Program loading, the lint engine and the rules are `tsgolint-core` and `tsgolint-rules`. See [ARCHITECTURE.md](../ARCHITECTURE.md) for the whole port.
+The `tsgolint` binary: the command line, the `headless` protocol that oxlint speaks, tsconfig discovery and the multi-program driver. Program loading, the lint engine and the rules are `tsgolint-core` and `tsgolint-rules`. See [ARCHITECTURE.md](../../ARCHITECTURE.md) for the whole port.
 
 ## Layout
 
@@ -44,7 +44,7 @@ The unit tests cover flags, payload decoding, JSON escaping and key order, frami
 
 ## e2e
 
-`e2e` is tsgolint's vitest suite. It runs the binary that `TSGOLINT_BIN` names, so it checks the native build, the wasm build (through `e2e/tsgolint-wasm.sh`) and the Go binary alike. `scripts/test.sh` runs it for the native and the wasm build; [e2e/README.md](e2e/README.md) shows how to run it by hand.
+`e2e` is tsgolint's vitest suite. It runs the binary that `TSGOLINT_BIN` names, so it checks the native build, the wasm build (through `e2e/tsgolint-wasm.sh`) and the Go binary alike. `scripts/e2e.sh native|wasm` (the `e2e` and `e2e:wasm` tasks) runs it for the native and the wasm build; [e2e/README.md](e2e/README.md) shows how to run it by hand.
 
 To compare with the Go binary on a whole project, use `tsgolint-compare` (`tsgolint-compare payload <dir> [--rules a,b] [--type-check]`, then `tsgolint-compare run --go <bin> --rust <bin> --payload <file> [--flags "-fix -fix-suggestions"]`). Go is not deterministic with `--type-check`: run it twice to tell its noise from a real difference.
 
@@ -70,4 +70,4 @@ wasmtime run --dir /::/ --env PWD="$PWD" /path/to/target/wasm32-wasip1/release/t
 
 ## Differences from tsgolint
 
-[DIFFERENCES.md](../DIFFERENCES.md) lists them: the TypeScript 7.1 changes, the deterministic checker per file, the payload order of programs, the empty profiling files, and the error texts after their fixed prefixes.
+[DIFFERENCES.md](../../DIFFERENCES.md) lists them: the TypeScript 7.1 changes, the deterministic checker per file, the payload order of programs, the empty profiling files, and the error texts after their fixed prefixes.

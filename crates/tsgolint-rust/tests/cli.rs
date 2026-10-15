@@ -67,7 +67,7 @@ fn oracle() -> Option<String> {
             arch => arch,
         };
         format!(
-            "{}/../node_modules/.pnpm/node_modules/@oxlint-tsgolint/{os}-{arch}/tsgolint",
+            "{}/../../node_modules/.pnpm/node_modules/@oxlint-tsgolint/{os}-{arch}/tsgolint",
             env!("CARGO_MANIFEST_DIR")
         )
     });

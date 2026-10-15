@@ -1,6 +1,6 @@
 {
   "name": "tsgolint-rust",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "A Rust port of tsgolint on ts-rust: the type-aware linter that oxlint runs for --type-aware and --type-check. Install it as oxlint-tsgolint.",
   "keywords": [
     "oxlint",

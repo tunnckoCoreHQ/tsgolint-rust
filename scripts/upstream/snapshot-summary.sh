@@ -5,7 +5,7 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../.."
-snapshots=(tsgolint-rules/tests/data/snapshots tsgolint-rust/e2e/__snapshots__)
+snapshots=(crates/tsgolint-rules/tests/data/snapshots crates/tsgolint-rust/e2e/__snapshots__)
 files=$(git diff --name-only -- "${snapshots[@]}")
 [ -n "$files" ] || exit 0
 

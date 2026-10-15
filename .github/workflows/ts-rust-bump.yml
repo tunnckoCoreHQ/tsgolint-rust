@@ -47,13 +47,13 @@ jobs:
         run: |
           TSGOLINT_UPDATE_SNAPSHOTS=1 cargo test -p tsgolint-rules --test rules -- --test-threads 4 || true
           cargo build -p tsgolint-rust
-          TSGOLINT_BIN="$PWD/target/debug/tsgolint" pnpm --dir tsgolint-rust/e2e run e2e -- --update || true
+          TSGOLINT_BIN="$PWD/target/debug/tsgolint" pnpm --dir crates/tsgolint-rust/e2e run e2e -- --update || true
 
       - name: Check and test
         id: test
         if: steps.bump.outputs.bump == 'true'
         continue-on-error: true
-        run: pnpm exec turbo run check test
+        run: pnpm exec turbo run check test e2e e2e:wasm
 
       - name: Write the pull request
         if: steps.bump.outputs.bump == 'true'
@@ -108,8 +108,8 @@ jobs:
             .changeset
             Cargo.lock
             UPSTREAM.json
-            tsgolint-rules/tests/data/snapshots
-            tsgolint-rust/e2e/__snapshots__
+            crates/tsgolint-rules/tests/data/snapshots
+            crates/tsgolint-rust/e2e/__snapshots__
           commit-message: "build(deps): move ts-rust to ${{ steps.bump.outputs.short }}"
           title: "build(deps): move ts-rust to ${{ steps.bump.outputs.short }}"
           body-path: ${{ runner.temp }}/pr-body.md

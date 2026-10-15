@@ -528,6 +528,11 @@ console.log(x);
         context.skip(); // This regression requires a case-insensitive filesystem.
         return;
       }
+      if (process.env.TSGOLINT_WASM) {
+        // tsgolint-rust: the wasm build treats file names as case-sensitive (DIFFERENCES.md).
+        context.skip();
+        return;
+      }
       if (inferred) {
         // An unsaved editor file exists only in the source overrides.
         await fs.rm(file);

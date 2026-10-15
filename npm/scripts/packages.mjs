@@ -6,8 +6,7 @@
 //     Prints the version of tsgolint-rust.
 //
 //   node npm/scripts/packages.mjs check
-//     Checks that npm/wasm32-wasip1 and the Cargo workspace have that version,
-//     and that the README's compatibility table has a row for it.
+//     Checks that npm/wasm32-wasip1 and the Cargo workspace have that version.
 //
 //   node npm/scripts/packages.mjs sync
 //     Sets the Cargo workspace version, in Cargo.toml and Cargo.lock, to that
@@ -86,9 +85,6 @@ function check(version) {
   const cargo = cargoVersion();
   if (cargo !== version) {
     errors.push(`the Cargo workspace has version ${cargo}, tsgolint-rust ${version}: run \`node npm/scripts/packages.mjs sync\``);
-  }
-  if (!compatibilityRow(version).test(fs.readFileSync(readmeMd, 'utf8'))) {
-    errors.push(`the compatibility table of README.md has no row for ${version}: run \`node npm/scripts/packages.mjs sync\``);
   }
   // The platform packages of a version exist only once it is published, so
   // the workspace cannot install them: generate adds them.

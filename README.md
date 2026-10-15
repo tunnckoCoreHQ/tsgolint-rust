@@ -104,7 +104,7 @@ The wasm build, under [wasmtime](https://wasmtime.dev):
 ```sh
 cargo build --release --target wasm32-wasip1 -p tsgolint-rust
 TSGOLINT_WASM=$PWD/target/wasm32-wasip1/release/tsgolint.wasm \
-  OXLINT_TSGOLINT_PATH=$PWD/tsgolint-rust/e2e/tsgolint-wasm.sh \
+  OXLINT_TSGOLINT_PATH=$PWD/crates/tsgolint-rust/e2e/tsgolint-wasm.sh \
   pnpm exec oxlint --type-aware --type-check
 ```
 
@@ -112,13 +112,13 @@ TSGOLINT_WASM=$PWD/target/wasm32-wasip1/release/tsgolint.wasm \
 
 | Crate | What it has |
 |---|---|
-| [`tsgolint-core`](tsgolint-core) | Program loading on ts-rust, the rule framework, the AST walk and the lint engine |
-| [`tsgolint-rules`](tsgolint-rules) | The 60 rules, their shared helpers, and the test harness with tsgolint's cases and snapshots |
-| [`tsgolint-rust`](tsgolint-rust) | The `tsgolint` binary: command line, `headless` protocol, tsconfig discovery, driver |
-| [`tsgolint-compare`](tsgolint-compare) | A dev tool that runs the Go and Rust binaries on one payload and compares them |
+| [`tsgolint-core`](crates/tsgolint-core) | Program loading on ts-rust, the rule framework, the AST walk and the lint engine |
+| [`tsgolint-rules`](crates/tsgolint-rules) | The 60 rules, their shared helpers, and the test harness with tsgolint's cases and snapshots |
+| [`tsgolint-rust`](crates/tsgolint-rust) | The `tsgolint` binary: command line, `headless` protocol, tsconfig discovery, driver |
+| [`tsgolint-compare`](crates/tsgolint-compare) | A dev tool that runs the Go and Rust binaries on one payload and compares them |
 
 Each tsconfig becomes one ts-rust program. ts-rust gives every file a checker, and each checker lives on its own thread. The engine sends each checker one job with the TypeScript diagnostics of its files, then one job that runs the rules on them. The binary streams the results to oxlint through tsgolint's 400 KB output buffer while the run goes on. [ARCHITECTURE.md](ARCHITECTURE.md) has the details.
 
 ## Development
 
-`pnpm exec turbo run check test build` runs fmt and clippy, the Rust tests and both e2e runs, and the release builds. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, and [UPSTREAM.json](UPSTREAM.json) records it with the TypeScript commit it ports and the ported tsgolint release. Two daily workflows open pull requests that merge by themselves once their checks pass: `ts-rust-bump` moves ts-rust when its compiler sources change and regenerates the snapshots, and `tsgolint-bump` moves to a newer tsgolint release with its new cases, snapshots and e2e changes, leaving the rule changes to port on the pull request.
+`pnpm exec turbo run check test e2e e2e:wasm build` runs fmt and clippy, the Rust tests, both e2e runs, and the release builds. The toolchain is in `rust-toolchain.toml`. ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`. `Cargo.lock` pins the commit, and [UPSTREAM.json](UPSTREAM.json) records it with the TypeScript commit it ports and the ported tsgolint release. Two daily workflows open pull requests that merge by themselves once their checks pass: `ts-rust-bump` moves ts-rust when its compiler sources change and regenerates the snapshots, and `tsgolint-bump` moves to a newer tsgolint release with its new cases, snapshots and e2e changes, leaving the rule changes to port on the pull request.

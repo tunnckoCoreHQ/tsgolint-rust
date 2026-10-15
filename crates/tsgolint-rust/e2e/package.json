@@ -2,12 +2,12 @@
   "name": "tsgolint-e2e",
   "version": "0.0.0",
   "private": true,
-  "description": "tsgolint's e2e suite. It runs the binary that TSGOLINT_BIN names; scripts/test.sh runs it for the native and the wasm build.",
+  "description": "tsgolint's e2e suite. It runs the binary that TSGOLINT_BIN names; scripts/e2e.sh runs it for the native and the wasm build.",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tunnckoCoreHQ/tsgolint-rust.git",
-    "directory": "tsgolint-rust/e2e"
+    "directory": "crates/tsgolint-rust/e2e"
   },
   "type": "module",
   "scripts": {

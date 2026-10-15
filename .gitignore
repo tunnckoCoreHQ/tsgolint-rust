@@ -4,7 +4,7 @@ target/
 *.log
 .DS_Store
 
-# The precompiled module that tsgolint-rust/e2e/tsgolint-wasm.sh writes next to
+# The precompiled module that crates/tsgolint-rust/e2e/tsgolint-wasm.sh writes next to
 # the wasm build (and its temp files).
 *.cwasm
 *.cwasm.*

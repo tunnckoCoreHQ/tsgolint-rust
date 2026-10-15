@@ -106,6 +106,10 @@ fn source_overrides_package_json() {
             std::env::temp_dir().join(format!("tsgolint-package-specifier-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("node_modules/semver/lib")).unwrap();
+        // The program reads `package.json` through its real path, so the
+        // override is keyed by it: macOS's temp dir is under `/var`, a link
+        // to `/private/var`.
+        let dir = std::fs::canonicalize(&dir).unwrap();
         let write = |path: &str, text: &str| std::fs::write(dir.join(path), text).unwrap();
         write(
             "tsconfig.json",
@@ -123,8 +127,13 @@ fn source_overrides_package_json() {
         assert_eq!(lint(&on_disk, "renamed-semver"), []);
         assert_eq!(lint(&on_disk, "semver"), thrown_object());
 
-        let key =
-            OverlayFs::canonical_key(&format!("{cwd}/node_modules/semver/package.json"), true);
+        // Keyed like the binary keys them: lowercased where the file system
+        // is case-insensitive (macOS).
+        let case_sensitive = on_disk.make().use_case_sensitive_file_names();
+        let key = OverlayFs::canonical_key(
+            &format!("{cwd}/node_modules/semver/package.json"),
+            case_sensitive,
+        );
         let text = r#"{"name":"overridden","types":"lib/index.d.ts"}"#.to_owned();
         let overridden = FsFactory::source_overrides(Arc::new([(key, text)].into_iter().collect()));
         assert_eq!(lint(&overridden, "overridden"), []);
