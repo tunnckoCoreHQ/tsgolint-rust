@@ -8,7 +8,8 @@ version: 2.1
 # are few. On master, the release jobs run once every other job passes; see
 # scripts/ci/plan.sh for what a pipeline publishes.
 #
-# Every branch saves the cargo and pnpm caches, keyed on the lockfiles, and
+# Every branch saves the cargo and pnpm caches of check and test, keyed on the
+# lockfiles; only master saves those of the release builds. Every run saves
 # turbo's cache, whose entries are keyed by the task inputs. The contexts hold the
 # secrets and allow only master pipelines:
 # - tsgolint-rust-publish: NPM_TOKEN and GITHUB_TOKEN (contents: write).
@@ -93,13 +94,23 @@ commands:
     parameters:
       cache:
         type: string
+      master-only:
+        description: Save only on master. The release builds restore their cache, so no branch may write it.
+        type: boolean
+        default: false
     steps:
-      - save_cache:
-          key: v1-cargo-<< parameters.cache >>-{{ arch }}-{{ checksum "Cargo.lock" }}-{{ checksum "rust-toolchain.toml" }}
-          paths: [~/.cargo/registry, ~/.cargo/git, target]
-      - save_cache:
-          key: v1-pnpm-{{ arch }}-{{ checksum "pnpm-lock.yaml" }}
-          paths: [~/.pnpm-store]
+      - when:
+          condition:
+            or:
+              - not: << parameters.master-only >>
+              - equal: [master, << pipeline.git.branch >>]
+          steps:
+            - save_cache:
+                key: v1-cargo-<< parameters.cache >>-{{ arch }}-{{ checksum "Cargo.lock" }}-{{ checksum "rust-toolchain.toml" }}
+                paths: [~/.cargo/registry, ~/.cargo/git, target]
+            - save_cache:
+                key: v1-pnpm-{{ arch }}-{{ checksum "pnpm-lock.yaml" }}
+                paths: [~/.pnpm-store]
 
 jobs:
   changeset:
@@ -191,6 +202,7 @@ jobs:
       - run: bash scripts/ci/build.sh << parameters.targets >>
       - save:
           cache: build-<< parameters.platform >>
+          master-only: true
       - run:
           name: End the job when the pipeline publishes nothing
           environment:
