@@ -14,7 +14,8 @@ case "${1:-}" in
   native)
     cargo build -p tsgolint-rust
     # A copy: `cargo test` in parallel relinks target/debug/tsgolint.
-    exe=$(case "$(uname -s)" in MINGW* | MSYS*) echo .exe ;; esac)
+    exe=
+    case "$(uname -s)" in MINGW* | MSYS*) exe=.exe ;; esac
     mkdir -p "$target/e2e"
     cp "$target/debug/tsgolint$exe" "$target/e2e/"
     TSGOLINT_BIN="$target/e2e/tsgolint$exe" pnpm --dir "$e2e" run e2e
