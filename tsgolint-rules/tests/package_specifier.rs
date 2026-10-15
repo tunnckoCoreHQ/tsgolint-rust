@@ -106,6 +106,11 @@ fn source_overrides_package_json() {
             std::env::temp_dir().join(format!("tsgolint-package-specifier-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(dir.join("node_modules/semver/lib")).unwrap();
+        // The real path: macOS's temp dir is under `/var`, a link to
+        // `/private/var`. A program created here with a working directory
+        // behind a symlink does not find the package of a declaration file;
+        // the binary, like the Go one, finds it in a project behind a symlink.
+        let dir = std::fs::canonicalize(&dir).unwrap();
         let write = |path: &str, text: &str| std::fs::write(dir.join(path), text).unwrap();
         write(
             "tsconfig.json",
