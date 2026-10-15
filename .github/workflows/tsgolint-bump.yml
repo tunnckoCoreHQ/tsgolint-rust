@@ -1,0 +1,104 @@
+name: tsgolint-bump
+
+# Moves tsgolint to its latest release when that is newer than the ported one,
+# with the mechanical part of the port (scripts/upstream/tsgolint-bump.sh),
+# and opens a pull request with a minor changeset. The rule changes are left
+# to port on the pull request, which merges by itself once its checks pass.
+on:
+  schedule:
+    - cron: "0 6 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: tsgolint-bump
+
+jobs:
+  bump:
+    runs-on: namespace-profile-tsgolint-rust
+    timeout-minutes: 90
+    # The bot environment holds OLSTENLARCK_HQ_PAT and allows only master.
+    environment: bot
+    permissions:
+      contents: read
+    env:
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup
+        with:
+          wasmtime: "true"
+
+      # dump-cases.sh runs tsgolint's Go rule tests; tsgolint's go.mod picks
+      # its toolchain.
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Move tsgolint
+        id: bump
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/upstream/tsgolint-bump.sh "$RUNNER_TEMP/port.md" | tee -a "$GITHUB_OUTPUT"
+
+      - name: Check and test
+        id: test
+        if: steps.bump.outputs.bump == 'true'
+        continue-on-error: true
+        run: pnpm exec turbo run check test
+
+      - name: Write the pull request
+        if: steps.bump.outputs.bump == 'true'
+        env:
+          TESTS: ${{ steps.test.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            if [ "$TESTS" = success ]; then
+              echo "Check and test pass: the release needs no rule change."
+            else
+              echo "**Check or test fails** until the rule changes are ported. See the [workflow run]($RUN_URL)."
+            fi
+            echo
+            cat "$RUNNER_TEMP/port.md"
+          } > "$RUNNER_TEMP/pr-body.md"
+
+      # A pull request opened with the job token starts no workflow, so ci
+      # would never run on it: OLSTENLARCK_HQ_PAT is a personal token that can.
+      - name: Open the pull request
+        id: pr
+        if: steps.bump.outputs.bump == 'true'
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.OLSTENLARCK_HQ_PAT }}
+          branch: deps/tsgolint
+          delete-branch: true
+          signoff: true
+          add-paths: |
+            .changeset
+            UPSTREAM.json
+            pnpm-workspace.yaml
+            pnpm-lock.yaml
+            tsgolint-rules/tests/data/cases
+            tsgolint-rules/tests/data/snapshots
+            tsgolint-rust/e2e
+          commit-message: "feat: port tsgolint ${{ steps.bump.outputs.to }}"
+          title: "feat: port tsgolint ${{ steps.bump.outputs.to }}"
+          body-path: ${{ runner.temp }}/pr-body.md
+          labels: dependencies
+
+      - name: Merge when the checks pass
+        if: steps.pr.outputs.pull-request-number
+        env:
+          GH_TOKEN: ${{ secrets.OLSTENLARCK_HQ_PAT }}
+          PR: ${{ steps.pr.outputs.pull-request-number }}
+        run: gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --squash

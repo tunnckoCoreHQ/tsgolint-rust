@@ -91,7 +91,7 @@
       enabled: false,
     },
     {
-      description: "The Go tsgolint that tsgolint-rust ports. It moves with a port to a newer release (see the tsgolint watch workflow).",
+      description: "The Go tsgolint that tsgolint-rust ports. It moves with a port to a newer release (the tsgolint-bump workflow).",
       matchPackageNames: ["oxlint-tsgolint"],
       enabled: false,
     },
