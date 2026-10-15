@@ -1,10 +1,10 @@
-name: Release PR
+name: release-pr
 
-# After CI passes on a master push, opens or updates the release PR from the
+# After ci passes on a master push, opens or updates the release PR from the
 # pending changesets. Merging it runs publish-prod.
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: [ci]
     types: [completed]
     branches: [master]
 
@@ -20,15 +20,16 @@ concurrency:
 
 jobs:
   release-pr:
-    name: Open or update the release PR
     if: >-
       github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: namespace-profile-tsgolint-rust
+    # The bot environment holds OLSTENLARCK_HQ_PAT and allows only master.
+    environment: bot
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           # The script compares the release with the one on the release branch.
@@ -39,12 +40,12 @@ jobs:
         with:
           node-version: 24
       - run: pnpm install --frozen-lockfile
-      # A pull request opened with the job token starts no workflow, so CI
-      # would never run on it: BOT_TOKEN is a personal token that can. It also
-      # pushes the release branch and lets the changelog writer read the
+      # A pull request opened with the job token starts no workflow, so ci
+      # would never run on it: OLSTENLARCK_HQ_PAT is a personal token that can. It
+      # also pushes the release branch and lets the changelog writer read the
       # commits and pull requests.
       - name: Open or update the release PR
         env:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
-          GH_TOKEN: ${{ secrets.BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.OLSTENLARCK_HQ_PAT }}
+          GH_TOKEN: ${{ secrets.OLSTENLARCK_HQ_PAT }}
         run: bash scripts/release/release-pr.sh

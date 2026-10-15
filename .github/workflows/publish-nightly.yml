@@ -1,17 +1,17 @@
-name: Publish nightly
+name: publish-nightly
 
-# After CI passes on a master push with pending changesets, publishes a
+# After ci passes on a master push with pending changesets, publishes a
 # snapshot version of them to npm with nightly: tsgolint-rust, its platform
 # packages and its wasm package.
 #
 # SECURITY: npm trusts this workflow file in the nightly environment, which
 # allows only master. npm accepts OIDC tokens only from GitHub-hosted runners,
-# so the publish job runs on one; the builds run on Namespace. No repository
-# secrets: the job token only lets the changelog writer read commits and pull
-# requests.
+# so the publish job runs on one; everything else runs on Namespace. No
+# repository secrets: the job token only lets the changelog writer read
+# commits and pull requests.
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: [ci]
     types: [completed]
     branches: [master]
 
@@ -27,17 +27,17 @@ concurrency:
 
 jobs:
   plan:
-    name: Plan
+    name: plan
     if: >-
       github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository
-    runs-on: ubuntu-latest
+    runs-on: namespace-profile-tsgolint-rust
     permissions:
       contents: read
     outputs:
       publish: ${{ steps.changesets.outputs.pending }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           persist-credentials: false
@@ -50,7 +50,7 @@ jobs:
           fi
 
   build:
-    name: Build
+    name: build
     needs: plan
     if: needs.plan.outputs.publish == 'true'
     permissions:
@@ -60,7 +60,7 @@ jobs:
       ref: ${{ github.event.workflow_run.head_sha }}
 
   publish:
-    name: Publish to npm with nightly
+    name: publish (nightly)
     needs: build
     environment: nightly
     runs-on: ubuntu-latest

@@ -1,8 +1,8 @@
-name: ts-rust bump
+name: ts-rust-bump
 
 # Moves ts-rust to the head of its branch when the head changes its compiler
-# sources, regenerates the snapshots and opens a pull request. The pull
-# request merges by itself when no snapshot changed and CI passes.
+# sources, regenerates the snapshots and opens a pull request with a patch
+# changeset. The pull request merges by itself once its checks pass.
 on:
   schedule:
     - cron: "0 4 * * *"
@@ -19,16 +19,16 @@ concurrency:
 
 jobs:
   bump:
-    name: Bump ts-rust
     runs-on: namespace-profile-tsgolint-rust
     timeout-minutes: 90
+    # The bot environment holds OLSTENLARCK_HQ_PAT and allows only master.
+    environment: bot
     permissions:
-      contents: write
-      pull-requests: write
+      contents: read
     env:
       CARGO_TERM_COLOR: always
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
         with:
           persist-credentials: false
 
@@ -56,7 +56,6 @@ jobs:
         run: pnpm exec turbo run check test
 
       - name: Write the pull request
-        id: body
         if: steps.bump.outputs.bump == 'true'
         env:
           FROM: ${{ steps.bump.outputs.from }}
@@ -80,14 +79,11 @@ jobs:
             else
               echo "### Snapshot changes"
               echo
-              echo "Each change needs a cause in ts-rust: the TypeScript revision, or a fix. Review them before merging."
+              echo "Each change needs a cause in ts-rust: the TypeScript revision, or a fix."
               echo
               echo "$summary"
             fi
           } > "$RUNNER_TEMP/pr-body.md"
-          if [ -z "$summary" ] && [ "$TESTS" = success ]; then
-            echo "automerge=true" >> "$GITHUB_OUTPUT"
-          fi
           # The changeset puts the move in the next nightly and release.
           cat > ".changeset/ts-rust-${TO:0:8}.md" <<CHANGESET
           ---
@@ -97,14 +93,14 @@ jobs:
           Move ts-rust to [\`${TO:0:8}\`](https://github.com/pingdotgg/ts-rust/commit/$TO), which ports TypeScript [\`${TYPESCRIPT:0:12}\`](https://github.com/microsoft/TypeScript/commit/$TYPESCRIPT).
           CHANGESET
 
-      # A pull request opened with GITHUB_TOKEN starts no workflow, so CI
-      # would never run on it: BOT_TOKEN is a personal token that can.
+      # A pull request opened with the job token starts no workflow, so ci
+      # would never run on it: OLSTENLARCK_HQ_PAT is a personal token that can.
       - name: Open the pull request
         id: pr
         if: steps.bump.outputs.bump == 'true'
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.BOT_TOKEN || github.token }}
+          token: ${{ secrets.OLSTENLARCK_HQ_PAT }}
           branch: deps/ts-rust
           delete-branch: true
           signoff: true
@@ -119,9 +115,9 @@ jobs:
           body-path: ${{ runner.temp }}/pr-body.md
           labels: dependencies
 
-      - name: Merge when CI passes
-        if: steps.body.outputs.automerge == 'true' && steps.pr.outputs.pull-request-number
+      - name: Merge when the checks pass
+        if: steps.pr.outputs.pull-request-number
         env:
-          GH_TOKEN: ${{ secrets.BOT_TOKEN || github.token }}
+          GH_TOKEN: ${{ secrets.OLSTENLARCK_HQ_PAT }}
           PR: ${{ steps.pr.outputs.pull-request-number }}
         run: gh pr merge "$PR" --repo "$GITHUB_REPOSITORY" --auto --squash

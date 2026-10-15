@@ -1,12 +1,11 @@
-name: CI
+name: ci
 
 on:
   pull_request:
   push:
     branches: [master]
 
-permissions:
-  contents: read
+permissions: {}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -14,7 +13,7 @@ concurrency:
 
 jobs:
   ci:
-    name: Check, test and build (${{ matrix.name }})
+    name: ci (${{ matrix.name }})
     strategy:
       fail-fast: false
       matrix:
@@ -23,23 +22,26 @@ jobs:
           # commits to.
           - name: linux
             runs-on: [namespace-profile-tsgolint-rust]
-          # macOS arm64 with its own cache volume, also committed by master
-          # only. The account has no Windows machines, so Windows is not
-          # tested; its release builds cross-compile on Linux.
+          # macOS arm64 with its own cache volume and git mirror, also committed
+          # by master only. The account has no Windows machines, so Windows is
+          # not tested; its release builds cross-compile on Linux.
           - name: macos
             runs-on:
               - nscloud-macos-tahoe-arm64-6x14-with-cache
               - nscloud-cache-tag-tsgolint-rust-macos
               - nscloud-cache-size-50gb
               - nscloud-cache-allow-commit-from-master
+              - nscloud-git-mirror-5gb
     runs-on: ${{ matrix.runs-on }}
+    permissions:
+      contents: read
     timeout-minutes: 90
     env:
       # Pull requests read the turbo remote cache but never write to it.
       TURBO_CACHE: ${{ github.event_name == 'pull_request' && 'local:rw,remote:r' || 'local:rw,remote:rw' }}
       CARGO_TERM_COLOR: always
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
         with:
           persist-credentials: false
 

@@ -1,4 +1,4 @@
-name: Build
+name: build
 
 # The release builds of every npm target, uploaded as the artifacts
 # tsgolint-<target>. publish-nightly and publish-prod call it.
@@ -18,45 +18,47 @@ defaults:
 
 jobs:
   build:
-    name: Build ${{ matrix.npm }}
+    name: build (${{ matrix.npm }})
     permissions:
       contents: read
     strategy:
       fail-fast: true
       matrix:
         include:
-          # Static musl builds, each on a machine of its architecture.
+          # Static musl builds, each on a machine of its architecture. The
+          # machines by label get a cache volume for the git mirror of the
+          # Namespace checkout; the profile has both.
           - npm: linux-x64
             target: x86_64-unknown-linux-musl
-            runner: namespace-profile-tsgolint-rust
+            runner: [namespace-profile-tsgolint-rust]
           - npm: linux-arm64
             target: aarch64-unknown-linux-musl
-            runner: nscloud-ubuntu-24.04-arm64-8x16
+            runner: [nscloud-ubuntu-24.04-arm64-8x16-with-cache, nscloud-cache-tag-tsgolint-rust-linux-arm64, nscloud-git-mirror-5gb]
           # One macOS arm64 machine; x64 is a cross build.
           - npm: darwin-arm64
             target: aarch64-apple-darwin
-            runner: nscloud-macos-tahoe-arm64-6x14
+            runner: [nscloud-macos-tahoe-arm64-6x14-with-cache, nscloud-cache-tag-tsgolint-rust-macos, nscloud-cache-size-50gb, nscloud-git-mirror-5gb]
           - npm: darwin-x64
             target: x86_64-apple-darwin
-            runner: nscloud-macos-tahoe-arm64-6x14
+            runner: [nscloud-macos-tahoe-arm64-6x14-with-cache, nscloud-cache-tag-tsgolint-rust-macos, nscloud-cache-size-50gb, nscloud-git-mirror-5gb]
           # Windows has no C dependency (jemalloc is off there), so both
           # targets cross-compile on Linux with cargo-xwin and the MSVC SDK.
           # The Namespace account cannot create Windows machines.
           - npm: win32-x64
             target: x86_64-pc-windows-msvc
-            runner: namespace-profile-tsgolint-rust
+            runner: [namespace-profile-tsgolint-rust]
           - npm: win32-arm64
             target: aarch64-pc-windows-msvc
-            runner: namespace-profile-tsgolint-rust
+            runner: [namespace-profile-tsgolint-rust]
           - npm: wasm32-wasip1
             target: wasm32-wasip1
-            runner: namespace-profile-tsgolint-rust
+            runner: [namespace-profile-tsgolint-rust]
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 60
     env:
       CARGO_TERM_COLOR: always
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
         with:
           ref: ${{ inputs.ref }}
           persist-credentials: false

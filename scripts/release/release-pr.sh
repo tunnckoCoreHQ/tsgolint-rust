@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Opens or updates the release PR from the pending changesets, after CI passes
+# Opens or updates the release PR from the pending changesets, after ci passes
 # on master. Merging the PR publishes the release with latest. GITHUB_TOKEN is
-# a personal token, so the PR is a user PR that CI runs on.
+# a personal token, so the PR is a user PR that ci runs on.
 
 set -euo pipefail
 

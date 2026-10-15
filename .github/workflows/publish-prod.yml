@@ -1,17 +1,17 @@
-name: Publish prod
+name: publish-prod
 
-# After CI passes on the merged release PR, publishes its version to npm with
+# After ci passes on the merged release PR, publishes its version to npm with
 # latest: tsgolint-rust, its platform packages and its wasm package, then
 # creates the GitHub release v<version> with the binaries. Run it by hand on
 # master to publish whatever a failed release left missing.
 #
 # SECURITY: npm trusts this workflow file in the latest environment, which
 # allows only master. npm accepts OIDC tokens only from GitHub-hosted runners,
-# so the publish job runs on one; the builds run on Namespace. The job token
-# creates the tag and the GitHub release.
+# so the publish job runs on one; everything else runs on Namespace. The job
+# token creates the tag and the GitHub release.
 on:
   workflow_run:
-    workflows: [CI]
+    workflows: [ci]
     types: [completed]
     branches: [master]
   workflow_dispatch:
@@ -28,19 +28,19 @@ concurrency:
 
 jobs:
   plan:
-    name: Plan
+    name: plan
     if: >-
       (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master') ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' &&
       github.event.workflow_run.head_repository.full_name == github.repository &&
       startsWith(github.event.workflow_run.head_commit.message, 'chore: release tsgolint-rust'))
-    runs-on: ubuntu-latest
+    runs-on: namespace-profile-tsgolint-rust
     permissions:
       contents: read
     outputs:
       publish: ${{ steps.changesets.outputs.none }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
@@ -55,7 +55,7 @@ jobs:
           fi
 
   build:
-    name: Build
+    name: build
     needs: plan
     if: needs.plan.outputs.publish == 'true'
     permissions:
@@ -65,7 +65,7 @@ jobs:
       ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
   publish:
-    name: Publish to npm with latest
+    name: publish (latest)
     needs: build
     environment: latest
     runs-on: ubuntu-latest
