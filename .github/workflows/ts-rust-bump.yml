@@ -53,7 +53,7 @@ jobs:
         id: test
         if: steps.bump.outputs.bump == 'true'
         continue-on-error: true
-        run: pnpm exec turbo run check test
+        run: pnpm exec turbo run check test e2e e2e:wasm
 
       - name: Write the pull request
         if: steps.bump.outputs.bump == 'true'

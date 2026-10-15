@@ -4,7 +4,7 @@ tsgolint's end-to-end suite (Vitest), with its fixtures. It runs whichever binar
 
 ## Running
 
-The root `pnpm install` installs the suite's dependencies. `scripts/test.sh` (the `test` task) builds both binaries and runs the suite twice. To run it by hand:
+The root `pnpm install` installs the suite's dependencies. `scripts/e2e.sh native` and `scripts/e2e.sh wasm` (the `e2e` and `e2e:wasm` tasks) build a binary and run the suite on it. To run it by hand:
 
 ```bash
 cargo build -p tsgolint-rust

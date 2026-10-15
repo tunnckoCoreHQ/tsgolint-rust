@@ -31,7 +31,42 @@
         "Cargo.lock",
         "rust-toolchain.toml",
         "pnpm-lock.yaml",
-        "scripts/test.sh",
+        "tsgolint-*/**",
+        "!tsgolint-*/**/node_modules/**",
+        "!tsgolint-rust/e2e/**",
+        "!**/*.md"
+      ],
+      "passThroughEnv": [
+        "CARGO_*",
+        "RUSTUP_*",
+        "TSGOLINT_ORACLE"
+      ],
+      "outputs": []
+    },
+    "//#e2e": {
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        "pnpm-lock.yaml",
+        "scripts/e2e.sh",
+        "tsgolint-*/**",
+        "!tsgolint-*/**/node_modules/**",
+        "!**/*.md"
+      ],
+      "passThroughEnv": [
+        "CARGO_*",
+        "RUSTUP_*"
+      ],
+      "outputs": []
+    },
+    "//#e2e:wasm": {
+      "inputs": [
+        "Cargo.toml",
+        "Cargo.lock",
+        "rust-toolchain.toml",
+        "pnpm-lock.yaml",
+        "scripts/e2e.sh",
         "tsgolint-*/**",
         "!tsgolint-*/**/node_modules/**",
         "!**/*.md"
@@ -39,8 +74,7 @@
       "passThroughEnv": [
         "CARGO_*",
         "RUSTUP_*",
-        "WASMTIME",
-        "TSGOLINT_ORACLE"
+        "WASMTIME"
       ],
       "outputs": []
     },

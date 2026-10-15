@@ -19,7 +19,7 @@ The Go sources to compare with are tsgolint at that tag and the typescript-go re
 
 ## Tests
 
-- `pnpm exec turbo run check test` runs fmt, clippy, the Rust tests and the e2e suite on the native and the wasm build.
+- `pnpm exec turbo run check test e2e e2e:wasm` runs fmt and clippy, the Rust tests, and the e2e suite on the native and the wasm build.
 - `cargo test -p tsgolint-rules --test rules -- <rule-name or case key>` runs tsgolint's rule cases for one rule against their expectations and our snapshots.
 - `tsgolint-compare` compares the Go binary (`node_modules/.bin/tsgolint`, from the root `oxlint-tsgolint` devDependency) with this one on a real project.
 

@@ -7,25 +7,52 @@ on:
 
 permissions: {}
 
+defaults:
+  run:
+    shell: bash
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+env:
+  # Pull requests read the turbo remote cache but never write to it.
+  TURBO_CACHE: ${{ github.event_name == 'pull_request' && 'local:rw,remote:r' || 'local:rw,remote:rw' }}
+  CARGO_TERM_COLOR: always
+
+# Every job of an OS runs on the same machine shape and shares its Namespace
+# cache volume (cargo registry, git deps, target/, the pnpm store) and git
+# mirror, and all of them share the turbo remote cache. Only master commits
+# to the cache volumes.
+#
+# - linux: the tsgolint-rust profile, linux/amd64, 4 vCPU, 8 GB.
+# - macos: macOS arm64 by label. The account has no Windows machines, so
+#   Windows is not tested; its release builds cross-compile on Linux.
 jobs:
-  ci:
-    name: ci (${{ matrix.name }})
+  # fmt, clippy and the npm package check. They do not depend on the OS.
+  check:
+    runs-on: [namespace-profile-tsgolint-rust]
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    steps:
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: namespace-actions/setup-turbocache@3b82149ffb545cab670093f13bc0bad156917e18 # v0.0.4
+      - run: pnpm exec turbo run check
+
+  # The Rust tests: rule cases, unit, golden and CLI tests.
+  test:
+    name: test (${{ matrix.os }})
     strategy:
       fail-fast: false
-      matrix:
+      matrix: &os
         include:
-          # linux/amd64, 4 vCPU, 8 GB, with a cache volume that only master
-          # commits to.
-          - name: linux
+          - os: linux
             runs-on: [namespace-profile-tsgolint-rust]
-          # macOS arm64 with its own cache volume and git mirror, also committed
-          # by master only. The account has no Windows machines, so Windows is
-          # not tested; its release builds cross-compile on Linux.
-          - name: macos
+          - os: macos
             runs-on:
               - nscloud-macos-tahoe-arm64-6x14-with-cache
               - nscloud-cache-tag-tsgolint-rust-macos
@@ -33,34 +60,69 @@ jobs:
               - nscloud-cache-allow-commit-from-master
               - nscloud-git-mirror-5gb
     runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 60
     permissions:
       contents: read
-    timeout-minutes: 90
-    env:
-      # Pull requests read the turbo remote cache but never write to it.
-      TURBO_CACHE: ${{ github.event_name == 'pull_request' && 'local:rw,remote:r' || 'local:rw,remote:rw' }}
-      CARGO_TERM_COLOR: always
     steps:
       - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
         with:
           persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: namespace-actions/setup-turbocache@3b82149ffb545cab670093f13bc0bad156917e18 # v0.0.4
+      - run: pnpm exec turbo run test
 
+  # tsgolint's e2e suite on the native debug build.
+  e2e:
+    name: e2e (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix: *os
+    runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: namespace-actions/setup-turbocache@3b82149ffb545cab670093f13bc0bad156917e18 # v0.0.4
+      - run: pnpm exec turbo run e2e
+
+  # tsgolint's e2e suite on the wasm32-wasip1 debug build under wasmtime.
+  e2e-wasm:
+    name: e2e-wasm (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix: *os
+    runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup
         with:
           wasmtime: "true"
+      - uses: namespace-actions/setup-turbocache@3b82149ffb545cab670093f13bc0bad156917e18 # v0.0.4
+      - run: pnpm exec turbo run e2e:wasm
 
-      - name: Set up the turbo remote cache
-        uses: namespace-actions/setup-turbocache@3b82149ffb545cab670093f13bc0bad156917e18 # v0.0.4
-
-      # fmt and clippy.
-      - name: Check
-        run: pnpm exec turbo run check
-
-      # The Rust tests, then tsgolint's e2e suite on the native binary and on
-      # the wasm32-wasip1 build under wasmtime.
-      - name: Test
-        run: pnpm exec turbo run test
-
-      # The release builds, native and wasm32-wasip1.
-      - name: Build
-        run: pnpm exec turbo run build
+  # The release builds, native and wasm32-wasip1.
+  build:
+    name: build (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix: *os
+    runs-on: ${{ matrix.runs-on }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: namespacelabs/nscloud-checkout-action@66f2dc6f6c42a8ac6c4e53473c4840006822831e # v9.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: namespace-actions/setup-turbocache@3b82149ffb545cab670093f13bc0bad156917e18 # v0.0.4
+      - run: pnpm exec turbo run build
