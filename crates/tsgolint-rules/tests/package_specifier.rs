@@ -80,7 +80,10 @@ fn thrown_object() -> Vec<(String, i32, i32)> {
 #[test]
 fn rule_tester_overlay_package_json() {
     on_loading_thread(|| {
-        let fixtures = format!("{}/tests/data/fixtures", env!("CARGO_MANIFEST_DIR"));
+        let fixtures = format!(
+            "{}/tests/data/fixtures",
+            env!("CARGO_MANIFEST_DIR").replace('\\', "/")
+        );
         let files: FxHashMap<String, String> = [
             ("file.ts", CODE),
             ("node_modules/semver/package.json", PACKAGE_JSON),
@@ -118,7 +121,9 @@ fn source_overrides_package_json() {
         write("a.ts", CODE);
         write("node_modules/semver/package.json", PACKAGE_JSON);
         write("node_modules/semver/lib/index.d.ts", INDEX_D_TS);
-        let cwd = dir.to_str().unwrap().to_owned();
+        // On Windows, canonicalize gives a verbatim `\\?\C:\...` path.
+        let cwd = dir.to_str().unwrap().replace('\\', "/");
+        let cwd = cwd.strip_prefix("//?/").unwrap_or(&cwd).to_owned();
 
         let lint = |fs: &FsFactory, package| {
             only_throw_error(fs, &cwd, "tsconfig.json", &format!("{cwd}/a.ts"), package)
