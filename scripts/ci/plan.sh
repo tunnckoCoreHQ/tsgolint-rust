@@ -58,7 +58,7 @@ case "${1:-}" in
     ;;
   channel) channel ;;
   source)
-    if [ -n "$(channel)" ] || [ -n "$(changed crates scripts npm .circleci 'Cargo.*' rust-toolchain.toml pnpm-lock.yaml)" ]; then
+    if [ -n "$(channel)" ] || [ -n "$(changed crates scripts npm .circleci 'Cargo.*' rust-toolchain.toml package.json pnpm-lock.yaml turbo.json .gitattributes)" ]; then
       echo yes
     else
       echo no

@@ -284,7 +284,10 @@ workflows:
           platform: macos
           targets: darwin-arm64 darwin-x64
           requires: [test (macos)]
+      # One release at a time, in pipeline order, so an older pipeline never
+      # publishes or pushes over a newer one.
       - publish:
+          serial-group: << pipeline.project.slug >>/publish
           context: tsgolint-rust-publish
           requires: &all
             - test
@@ -297,6 +300,7 @@ workflows:
             branches:
               only: master
       - release-pr:
+          serial-group: << pipeline.project.slug >>/release-pr
           context: tsgolint-rust-bot
           requires: *all
           filters: *master
