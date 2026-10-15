@@ -16,6 +16,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
+  TURBO_CACHE: local:rw,remote:rw
   CARGO_TERM_COLOR: always
 
 # Every job of an OS runs on the same machine shape and shares its Namespace
