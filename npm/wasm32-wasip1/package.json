@@ -1,6 +1,6 @@
 {
   "name": "@tsgolint-rust/wasm32-wasip1",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "tsgolint-rust built for wasm32-wasip1, run on Node's WASI: the type-aware linter of oxlint where no native build runs. Install it as oxlint-tsgolint.",
   "keywords": ["oxlint", "tsgolint", "typescript", "linter", "wasm", "wasi"],
   "license": "MIT",
