@@ -70,6 +70,15 @@
       extractVersionTemplate: "^v(?<version>.+)$",
     },
     {
+      // The GitHub CLI opens the release and bump PRs and creates the releases: `GH_VERSION=2.102.0`.
+      customType: "regex",
+      managerFilePatterns: ["/^scripts/ci/setup\\.sh$/"],
+      matchStrings: ["GH_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      depNameTemplate: "cli/cli",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+    },
+    {
       // The Rust toolchain: `channel = "1.95.0"`.
       customType: "regex",
       managerFilePatterns: ["/^rust-toolchain\\.toml$/"],

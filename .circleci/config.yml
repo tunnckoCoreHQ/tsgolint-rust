@@ -229,7 +229,7 @@ jobs:
             echo "export CHANNEL=$channel" >> "$BASH_ENV"
       - attach_workspace:
           at: .
-      - run: bash scripts/ci/setup.sh
+      - run: bash scripts/ci/setup.sh --gh
       - run: bash scripts/release/publish.sh "$CHANNEL" dist
       - store_artifacts:
           path: dist/provenance.sigstore.json
@@ -239,14 +239,14 @@ jobs:
     resource_class: medium
     steps:
       - checkout
-      - run: bash scripts/ci/setup.sh
+      - run: bash scripts/ci/setup.sh --gh
       - run: bash scripts/release/release-pr.sh
 
   bump:
     executor: linux
     steps:
       - checkout
-      - run: bash scripts/ci/setup.sh --wasmtime
+      - run: bash scripts/ci/setup.sh --wasmtime --gh
       - run: bash scripts/upstream/bump.sh << pipeline.parameters.bump >>
 
 workflows:

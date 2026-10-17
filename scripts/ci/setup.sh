@@ -1,13 +1,27 @@
 #!/usr/bin/env bash
 # Sets up a CI machine (Linux, macOS or Windows under Git Bash): the Rust
 # toolchain of rust-toolchain.toml, the pnpm release of package.json's
-# packageManager, the workspace's npm dependencies, and wasmtime with
-# --wasmtime. PATH changes go to $BASH_ENV, which every later step sources.
+# packageManager, the workspace's npm dependencies, wasmtime with --wasmtime,
+# and the GitHub CLI with --gh (Linux x64 only). PATH changes go to
+# $BASH_ENV, which every later step sources.
 #
-#   scripts/ci/setup.sh [--wasmtime]
+#   scripts/ci/setup.sh [--wasmtime] [--gh]
 set -euo pipefail
 
 WASMTIME_VERSION=44.0.1
+GH_VERSION=2.102.0
+
+wasmtime=false gh=false
+for flag in "$@"; do
+  case "$flag" in
+    --wasmtime) wasmtime=true ;;
+    --gh) gh=true ;;
+    *)
+      echo "unknown option: $flag" >&2
+      exit 2
+      ;;
+  esac
+done
 
 cd "$(dirname "$0")/../.."
 # CircleCI's checkout sends every github.com URL over SSH with a deploy key
@@ -57,7 +71,7 @@ fi
 pnpm --version
 pnpm install --frozen-lockfile
 
-if [ "${1:-}" = --wasmtime ]; then
+if [ "$wasmtime" = true ]; then
   name=wasmtime-v$WASMTIME_VERSION-$arch-$os
   url=https://github.com/bytecodealliance/wasmtime/releases/download/v$WASMTIME_VERSION/$name
   if [ "$os" = windows ]; then
@@ -67,4 +81,12 @@ if [ "${1:-}" = --wasmtime ]; then
     curl -fsSL "$url.tar.xz" | tar -xJ -C "$bin" --strip-components 1 "$name/wasmtime"
   fi
   wasmtime --version
+fi
+
+# The jobs that call gh run on Linux x64.
+if [ "$gh" = true ]; then
+  name=gh_${GH_VERSION}_linux_amd64
+  curl -fsSL "https://github.com/cli/cli/releases/download/v$GH_VERSION/$name.tar.gz" |
+    tar -xz -C "$bin" --strip-components 2 "$name/bin/gh"
+  gh --version
 fi
