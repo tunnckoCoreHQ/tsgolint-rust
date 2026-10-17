@@ -44,9 +44,13 @@ for npm in "$@"; do
       export CFLAGS_aarch64_unknown_linux_musl=-mno-outline-atomics
       ;;
     *-windows-msvc)
+      # CI caches the MSVC CRT and Windows SDK, a download of minutes, and
+      # the apt packages.
+      export XWIN_CACHE_DIR=$HOME/.cache/cargo-xwin
       if ! command -v cargo-xwin > /dev/null; then
+        mkdir -p "$HOME/.cache/apt/partial"
         $sudo apt-get update
-        $sudo apt-get install -y --no-install-recommends clang lld llvm
+        $sudo apt-get install -y --no-install-recommends -o Dir::Cache::Archives="$HOME/.cache/apt" clang lld llvm
         curl -fsSL "https://github.com/rust-cross/cargo-xwin/releases/download/v$CARGO_XWIN_VERSION/cargo-xwin-v$CARGO_XWIN_VERSION.x86_64-unknown-linux-musl.tar.gz" |
           tar -xz -C "$bin" cargo-xwin
       fi

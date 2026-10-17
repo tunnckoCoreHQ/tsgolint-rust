@@ -199,10 +199,28 @@ jobs:
       - setup:
           os: << parameters.os >>
           cache: build-<< parameters.platform >>
+      - when:
+          condition:
+            equal: [windows, << parameters.platform >>]
+          steps:
+            - restore_cache:
+                keys:
+                  - v1-xwin-{{ arch }}-{{ checksum "scripts/ci/build.sh" }}
       - run: bash scripts/ci/build.sh << parameters.targets >>
       - save:
           cache: build-<< parameters.platform >>
           master-only: true
+      # The MSVC CRT and Windows SDK of cargo-xwin, and the apt packages of
+      # clang, lld and llvm, which scripts/ci/build.sh downloads.
+      - when:
+          condition:
+            and:
+              - equal: [windows, << parameters.platform >>]
+              - equal: [master, << pipeline.git.branch >>]
+          steps:
+            - save_cache:
+                key: v1-xwin-{{ arch }}-{{ checksum "scripts/ci/build.sh" }}
+                paths: [~/.cache/cargo-xwin, ~/.cache/apt]
       - run:
           name: End the job when the pipeline publishes nothing
           environment:
