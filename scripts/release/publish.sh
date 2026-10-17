@@ -39,7 +39,17 @@ repo=tunnckoCoreHQ/tsgolint-rust
 commit=$(git rev-parse HEAD)
 
 if [ "$channel" = nightly ]; then
+  current=$(node npm/scripts/packages.mjs version)
   pnpm exec changeset version --snapshot nightly
+  # Empty changesets bump nothing; the nightly is then a prerelease of the
+  # current version.
+  if [ "$(node npm/scripts/packages.mjs version)" = "$current" ]; then
+    snapshot="$current-nightly.$(date -u +%Y%m%d%H%M%S).$(git rev-parse --short=7 HEAD)"
+    for pkg in npm/tsgolint-rust npm/wasm32-wasip1; do
+      jq --arg v "$snapshot" '.version = $v' "$pkg/package.json" > "$pkg/package.json.tmp"
+      mv "$pkg/package.json.tmp" "$pkg/package.json"
+    done
+  fi
 fi
 version=$(node npm/scripts/packages.mjs version)
 

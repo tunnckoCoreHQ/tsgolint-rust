@@ -9,8 +9,8 @@
 #   scripts/ci/plan.sh channel
 #     Prints the npm dist-tag that the pipeline publishes with, or nothing:
 #     latest for a release PR merge or with PUBLISH=true (the `publish`
-#     pipeline parameter), nightly for a master commit that adds a changeset
-#     with a release.
+#     pipeline parameter), nightly for a master commit that adds a changeset,
+#     an empty one too.
 #   scripts/ci/plan.sh source
 #     Prints yes when the pipeline publishes or changes what the macOS and
 #     Windows jobs check, test or build, and no otherwise.
@@ -39,9 +39,7 @@ channel() {
     echo latest
     return
   fi
-  # An empty changeset (`pnpm changeset --empty`) names no package.
-  added=$(added_changesets)
-  if [ -n "$added" ] && xargs grep -qE '^"?[@a-z0-9/._-]+"?: (patch|minor|major)$' <<< "$added"; then
+  if [ -n "$(added_changesets)" ]; then
     echo nightly
   fi
 }
