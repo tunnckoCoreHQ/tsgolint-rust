@@ -7,7 +7,7 @@
   "ts-rust": {
     "repository": "pingdotgg/ts-rust",
     "branch": "main",
-    "commit": "598e6416bfc04962605209911451a3f45f15495c"
+    "commit": "780dc512d64f40afebffa6a7028207649fb7ed1c"
   },
   "typescript": {
     "repository": "microsoft/TypeScript",
