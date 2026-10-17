@@ -35,7 +35,8 @@ added_changesets() {
 
 channel() {
   [ "$branch" = master ] || return 0
-  if [ "${PUBLISH:-false}" = true ] || git log -1 --format=%s | grep -q '^chore: release tsgolint-rust '; then
+  # CircleCI may pass the boolean `publish` parameter as 1.
+  if [[ ${PUBLISH:-} =~ ^(true|1)$ ]] || git log -1 --format=%s | grep -q '^chore: release tsgolint-rust '; then
     echo latest
     return
   fi
