@@ -1,0 +1,330 @@
+version: 2.1
+
+# CI, releases and the upstream bumps of tsgolint-rust.
+#
+# Each OS runs its own chain: check, then test, then its release builds. No
+# OS waits on another. The macOS and Windows jobs pass at once when the
+# pipeline changes nothing they check, test or build, because their credits
+# are few. On master, the release jobs run once every other job passes; see
+# scripts/ci/plan.sh for what a pipeline publishes.
+#
+# Every branch saves the cargo and pnpm caches of check and test, keyed on the
+# lockfiles; only master saves those of the release builds. Every run saves
+# turbo's cache, whose entries are keyed by the task inputs. The contexts hold the
+# secrets and allow only master pipelines:
+# - tsgolint-rust-publish: NPM_TOKEN and GITHUB_TOKEN (contents: write).
+# - tsgolint-rust-bot: GITHUB_TOKEN, the personal token that opens the
+#   release and bump pull requests, so that CI runs on them.
+
+parameters:
+  publish:
+    type: boolean
+    default: false
+    description: Publish the version on master with latest. Trigger it on master.
+  bump:
+    type: enum
+    enum: [none, ts-rust, tsgolint]
+    default: none
+    description: Run this upstream bump instead of CI. The scheduled pipelines set it.
+
+executors:
+  linux:
+    docker:
+      - image: cimg/rust:1.95.0-node
+    resource_class: large
+    environment: &environment
+      # CircleCI's terminal crashes turbo's UI.
+      TURBO_UI: "false"
+  linux-arm64:
+    docker:
+      - image: cimg/rust:1.95.0-node
+    resource_class: arm.large
+    environment: *environment
+  macos:
+    macos:
+      xcode: 27.0.0
+    resource_class: m4pro.medium
+    environment: *environment
+  windows:
+    machine:
+      image: windows-server-2025-gui:current
+    resource_class: windows.medium
+    shell: bash.exe -eo pipefail
+    environment: *environment
+
+commands:
+  setup:
+    description: Check out, end the job when it has nothing to do, then restore the caches and set up the tools.
+    parameters:
+      os:
+        type: string
+      cache:
+        type: string
+      args:
+        type: string
+        default: ""
+    steps:
+      - checkout
+      - when:
+          condition:
+            or:
+              - equal: [macos, << parameters.os >>]
+              - equal: [windows, << parameters.os >>]
+          steps:
+            - run:
+                name: End the job when the pipeline changes no source
+                environment:
+                  PUBLISH: << pipeline.parameters.publish >>
+                command: |
+                  changes=$(bash scripts/ci/plan.sh source)
+                  [ "$changes" = yes ] || circleci-agent step halt
+      - restore_cache:
+          keys:
+            - v1-cargo-<< parameters.cache >>-{{ arch }}-{{ checksum "Cargo.lock" }}-{{ checksum "rust-toolchain.toml" }}
+            - v1-cargo-<< parameters.cache >>-{{ arch }}-
+      - restore_cache:
+          keys:
+            - v1-pnpm-{{ arch }}-{{ checksum "pnpm-lock.yaml" }}
+            - v1-pnpm-{{ arch }}-
+      - run:
+          name: Set up Rust, pnpm and the npm dependencies
+          command: bash scripts/ci/setup.sh << parameters.args >>
+  save:
+    description: Save the cargo and pnpm caches.
+    parameters:
+      cache:
+        type: string
+      master-only:
+        description: Save only on master. The release builds restore their cache, so no branch may write it.
+        type: boolean
+        default: false
+    steps:
+      - when:
+          condition:
+            or:
+              - not: << parameters.master-only >>
+              - equal: [master, << pipeline.git.branch >>]
+          steps:
+            - save_cache:
+                key: v1-cargo-<< parameters.cache >>-{{ arch }}-{{ checksum "Cargo.lock" }}-{{ checksum "rust-toolchain.toml" }}
+                paths: [~/.cargo/registry, ~/.cargo/git, target]
+            - save_cache:
+                key: v1-pnpm-{{ arch }}-{{ checksum "pnpm-lock.yaml" }}
+                paths: [~/.pnpm-store]
+
+jobs:
+  changeset:
+    executor: linux
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: Check for a changeset
+          command: bash scripts/ci/plan.sh changeset
+
+  check:
+    parameters:
+      os:
+        type: enum
+        enum: [linux, macos, windows]
+    executor: << parameters.os >>
+    retention:
+      caches: 7d
+    steps:
+      - setup:
+          os: << parameters.os >>
+          cache: check-<< parameters.os >>
+      - restore_cache:
+          keys:
+            - v1-turbo-check-<< parameters.os >>-
+      - run: pnpm exec turbo run check
+      - save_cache:
+          key: v1-turbo-check-<< parameters.os >>-{{ .Revision }}
+          paths: [.turbo/cache]
+          when: always
+      - save:
+          cache: check-<< parameters.os >>
+
+  test:
+    parameters:
+      os:
+        type: enum
+        enum: [linux, macos, windows]
+    executor: << parameters.os >>
+    retention:
+      caches: 7d
+    steps:
+      - setup:
+          os: << parameters.os >>
+          cache: test-<< parameters.os >>
+          args: --wasmtime
+      - restore_cache:
+          keys:
+            - v1-turbo-test-<< parameters.os >>-
+      # On Windows, node cannot spawn the wasm build's shell wrapper
+      # (crates/tsgolint-rust/e2e/tsgolint-wasm.sh), so e2e:wasm runs on
+      # Linux and macOS only.
+      - when:
+          condition:
+            equal: [windows, << parameters.os >>]
+          steps:
+            - run: pnpm exec turbo run test e2e
+      - unless:
+          condition:
+            equal: [windows, << parameters.os >>]
+          steps:
+            - run: pnpm exec turbo run test e2e e2e:wasm
+      - save_cache:
+          key: v1-turbo-test-<< parameters.os >>-{{ .Revision }}
+          paths: [.turbo/cache]
+          when: always
+      - save:
+          cache: test-<< parameters.os >>
+
+  # The release builds. On a pipeline that publishes, the binaries go to the
+  # workspace, for the publish job.
+  build:
+    parameters:
+      os:
+        type: enum
+        enum: [linux, linux-arm64, macos]
+      platform:
+        type: string
+      targets:
+        type: string
+    executor: << parameters.os >>
+    retention:
+      caches: 7d
+    steps:
+      - setup:
+          os: << parameters.os >>
+          cache: build-<< parameters.platform >>
+      - run: bash scripts/ci/build.sh << parameters.targets >>
+      - save:
+          cache: build-<< parameters.platform >>
+          master-only: true
+      - run:
+          name: End the job when the pipeline publishes nothing
+          environment:
+            PUBLISH: << pipeline.parameters.publish >>
+          command: |
+            channel=$(bash scripts/ci/plan.sh channel)
+            [ -n "$channel" ] || circleci-agent step halt
+      - persist_to_workspace:
+          root: .
+          paths: [dist]
+
+  publish:
+    executor: linux
+    resource_class: medium
+    steps:
+      - checkout
+      - run:
+          name: End the job when the pipeline publishes nothing
+          environment:
+            PUBLISH: << pipeline.parameters.publish >>
+          command: |
+            channel=$(bash scripts/ci/plan.sh channel)
+            [ -n "$channel" ] || circleci-agent step halt
+            echo "export CHANNEL=$channel" >> "$BASH_ENV"
+      - attach_workspace:
+          at: .
+      - run: bash scripts/ci/setup.sh
+      - run: bash scripts/release/publish.sh "$CHANNEL" dist
+      - store_artifacts:
+          path: dist/provenance.sigstore.json
+
+  release-pr:
+    executor: linux
+    resource_class: medium
+    steps:
+      - checkout
+      - run: bash scripts/ci/setup.sh
+      - run: bash scripts/release/release-pr.sh
+
+  bump:
+    executor: linux
+    steps:
+      - checkout
+      - run: bash scripts/ci/setup.sh --wasmtime
+      - run: bash scripts/upstream/bump.sh << pipeline.parameters.bump >>
+
+workflows:
+  ci:
+    when:
+      equal: [none, << pipeline.parameters.bump >>]
+    jobs:
+      - changeset
+      - check:
+          name: check (<< matrix.os >>)
+          matrix:
+            parameters:
+              os: [linux, macos, windows]
+          requires: [changeset]
+      - test:
+          name: test (<< matrix.os >>)
+          matrix:
+            parameters:
+              os: [linux, macos, windows]
+          requires: [check (<< matrix.os >>)]
+      - build:
+          name: build (linux-x64)
+          os: linux
+          platform: linux-x64
+          targets: linux-x64
+          requires: [test (linux)]
+      - build:
+          name: build (linux-arm64)
+          os: linux-arm64
+          platform: linux-arm64
+          targets: linux-arm64
+          requires: [test (linux)]
+      - build:
+          name: build (wasm)
+          os: linux
+          platform: wasm
+          targets: wasm32-wasip1
+          requires: [test (linux)]
+      # Windows has no C dependency (jemalloc is off there), so both targets
+      # cross-compile on Linux with cargo-xwin and the MSVC SDK.
+      - build:
+          name: build (windows)
+          os: linux
+          platform: windows
+          targets: win32-x64 win32-arm64
+          requires: [test (windows)]
+      # One macOS arm64 machine; x64 is a cross build.
+      - build:
+          name: build (macos)
+          os: macos
+          platform: macos
+          targets: darwin-arm64 darwin-x64
+          requires: [test (macos)]
+      # One release at a time, in pipeline order, so an older pipeline never
+      # publishes or pushes over a newer one.
+      - publish:
+          serial-group: << pipeline.project.slug >>/publish
+          context: tsgolint-rust-publish
+          requires: &all
+            - test
+            - build (linux-x64)
+            - build (linux-arm64)
+            - build (wasm)
+            - build (windows)
+            - build (macos)
+          filters: &master
+            branches:
+              only: master
+      - release-pr:
+          serial-group: << pipeline.project.slug >>/release-pr
+          context: tsgolint-rust-bot
+          requires: *all
+          filters: *master
+
+  bump:
+    when:
+      not:
+        equal: [none, << pipeline.parameters.bump >>]
+    jobs:
+      - bump:
+          context: tsgolint-rust-bot

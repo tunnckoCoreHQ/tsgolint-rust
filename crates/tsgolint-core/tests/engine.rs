@@ -13,7 +13,10 @@ use tsgolint_core::{
 };
 
 fn fixture(name: &str) -> String {
-    format!("{}/tests/fixtures/{name}", env!("CARGO_MANIFEST_DIR"))
+    format!(
+        "{}/tests/fixtures/{name}",
+        env!("CARGO_MANIFEST_DIR").replace('\\', "/")
+    )
 }
 
 /// Runs `f` on a thread with ts-rust's stack size.

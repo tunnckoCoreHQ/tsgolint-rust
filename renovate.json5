@@ -43,20 +43,29 @@
 
   customManagers: [
     {
-      // cargo-xwin cross-compiles the Windows release builds: `CARGO_XWIN_VERSION: 0.23.1`.
+      // cargo-xwin cross-compiles the Windows release builds: `CARGO_XWIN_VERSION=0.23.1`.
       customType: "regex",
-      managerFilePatterns: ["/^\\.github/.+\\.ya?ml$/"],
-      matchStrings: ["CARGO_XWIN_VERSION: (?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      managerFilePatterns: ["/^scripts/ci/build\\.sh$/"],
+      matchStrings: ["CARGO_XWIN_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
       depNameTemplate: "rust-cross/cargo-xwin",
       datasourceTemplate: "github-releases",
       extractVersionTemplate: "^v(?<version>.+)$",
     },
     {
-      // wasmtime runs the e2e suite on the wasm build: `WASMTIME_VERSION: 44.0.1`.
+      // wasmtime runs the e2e suite on the wasm build: `WASMTIME_VERSION=44.0.1`.
       customType: "regex",
-      managerFilePatterns: ["/^\\.github/.+\\.ya?ml$/"],
-      matchStrings: ["WASMTIME_VERSION: (?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      managerFilePatterns: ["/^scripts/ci/setup\\.sh$/"],
+      matchStrings: ["WASMTIME_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
       depNameTemplate: "bytecodealliance/wasmtime",
+      datasourceTemplate: "github-releases",
+      extractVersionTemplate: "^v(?<version>.+)$",
+    },
+    {
+      // cosign signs the attestation of each release: `COSIGN_VERSION=3.1.3`.
+      customType: "regex",
+      managerFilePatterns: ["/^scripts/release/publish\\.sh$/"],
+      matchStrings: ["COSIGN_VERSION=(?<currentValue>\\d+\\.\\d+\\.\\d+)"],
+      depNameTemplate: "sigstore/cosign",
       datasourceTemplate: "github-releases",
       extractVersionTemplate: "^v(?<version>.+)$",
     },
@@ -73,7 +82,7 @@
 
   packageRules: [
     {
-      description: "ts-rust moves with the ts-rust bump workflow (.github/workflows/ts-rust-bump.yml), which regenerates the snapshots.",
+      description: "ts-rust moves with the daily ts-rust bump (scripts/upstream/bump.sh), which regenerates the snapshots.",
       matchManagers: ["cargo"],
       matchPackageNames: ["goport_core", "goport_util"],
       enabled: false,
@@ -91,7 +100,7 @@
       enabled: false,
     },
     {
-      description: "The Go tsgolint that tsgolint-rust ports. It moves with a port to a newer release (the tsgolint-bump workflow).",
+      description: "The Go tsgolint that tsgolint-rust ports. It moves with a port to a newer release (the daily tsgolint bump, scripts/upstream/bump.sh).",
       matchPackageNames: ["oxlint-tsgolint"],
       enabled: false,
     },

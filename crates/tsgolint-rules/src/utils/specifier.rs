@@ -234,13 +234,14 @@ fn type_matches_string_specifier(c: &Checker, t: TypeId, names: &[String]) -> bo
 /// `relative_path` empty: some file is under the program's current
 /// directory; else some file is that path resolved against it.
 fn type_declared_in_file(relative_path: &str, declaration_files: &[Node]) -> bool {
-    let cwd = program::get_current_directory();
+    // File names use `/`; the current directory on Windows has `\`.
+    let cwd = normalize_slashes(program::get_current_directory());
     if relative_path.is_empty() {
         return declaration_files
             .iter()
-            .any(|&f| source_file_file_name(f).starts_with(cwd));
+            .any(|&f| source_file_file_name(f).starts_with(cwd.as_str()));
     }
-    let absolute_path = get_normalized_absolute_path(relative_path, cwd);
+    let absolute_path = get_normalized_absolute_path(relative_path, &cwd);
     declaration_files
         .iter()
         .any(|&f| source_file_file_name(f) == absolute_path)

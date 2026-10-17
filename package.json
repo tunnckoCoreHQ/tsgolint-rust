@@ -15,7 +15,7 @@
     "check": "node npm/scripts/packages.mjs check && cargo fmt --all --check && cargo clippy --workspace --all-targets -- -D warnings",
     "e2e": "sh scripts/e2e.sh native",
     "e2e:wasm": "sh scripts/e2e.sh wasm",
-    "test": "cargo test --workspace -- --test-threads 4"
+    "test": "cargo test --workspace --no-fail-fast -- --test-threads 4"
   },
   "devDependencies": {
     "@changesets/changelog-github": "catalog:",

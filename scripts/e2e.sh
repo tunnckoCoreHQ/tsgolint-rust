@@ -13,7 +13,12 @@ cd "$root"
 case "${1:-}" in
   native)
     cargo build -p tsgolint-rust
-    TSGOLINT_BIN="$target/debug/tsgolint" pnpm --dir "$e2e" run e2e
+    # A copy: `cargo test` in parallel relinks target/debug/tsgolint.
+    exe=
+    case "$(uname -s)" in MINGW* | MSYS*) exe=.exe ;; esac
+    mkdir -p "$target/e2e"
+    cp "$target/debug/tsgolint$exe" "$target/e2e/"
+    TSGOLINT_BIN="$target/e2e/tsgolint$exe" pnpm --dir "$e2e" run e2e
     ;;
   wasm)
     cargo build -p tsgolint-rust --target wasm32-wasip1

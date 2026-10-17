@@ -19,7 +19,7 @@
 # TSGOLINT_TAG=<tag> moves to that release instead of the latest.
 #
 # Writes the pull request body to <body-file>, and prints `<key>=<value>`
-# lines (for $GITHUB_OUTPUT):
+# lines, which bump.sh reads:
 #   bump=true|false   whether anything changed
 #   from=<tag>        the ported tsgolint release
 #   to=<tag>          the new release, when bump=true

@@ -76,20 +76,29 @@ mod tests {
     use super::*;
 
     // The texts of the Go binary for `-trace` and `-cpuprof` in a missing
-    // directory.
+    // directory. Go prints the OS's own text for the error.
     #[test]
     fn go_error_texts() {
+        let missing = if cfg!(windows) {
+            "The system cannot find the path specified."
+        } else {
+            "no such file or directory"
+        };
         assert_eq!(
             Profiling::start("/nonexistent/dir/t", "", "", "")
                 .err()
                 .unwrap(),
-            "failed to start trace: error creating trace file: open /nonexistent/dir/t: no such file or directory"
+            format!(
+                "failed to start trace: error creating trace file: open /nonexistent/dir/t: {missing}"
+            )
         );
         assert_eq!(
             Profiling::start("", "/nonexistent/dir/t", "", "")
                 .err()
                 .unwrap(),
-            "failed to start cpu profile: error creating cpuprof file: open /nonexistent/dir/t: no such file or directory"
+            format!(
+                "failed to start cpu profile: error creating cpuprof file: open /nonexistent/dir/t: {missing}"
+            )
         );
         // Heap and allocs paths only matter at exit, and their errors are
         // ignored.

@@ -1,0 +1,3 @@
+# Check out text files with LF on every OS: the tests compare byte offsets
+# and snapshots of the source files.
+* text=auto eol=lf

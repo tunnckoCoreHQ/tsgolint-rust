@@ -642,13 +642,22 @@ mod tests {
 
     #[test]
     fn depth_limit() {
-        let deep = "[".repeat(MAX_DEPTH) + &"]".repeat(MAX_DEPTH);
-        assert!(parse(deep.as_bytes()).is_ok());
-        let too_deep = "[".repeat(MAX_DEPTH + 1) + &"]".repeat(MAX_DEPTH + 1);
-        assert!(
-            parse(too_deep.as_bytes())
-                .unwrap_err()
-                .contains("exceeded max depth")
-        );
+        // A value 10,000 deep needs more than a test thread's 2 MiB of stack
+        // in a Windows debug build.
+        std::thread::Builder::new()
+            .stack_size(goport_util::gostd::stack::max_stack_size())
+            .spawn(|| {
+                let deep = "[".repeat(MAX_DEPTH) + &"]".repeat(MAX_DEPTH);
+                assert!(parse(deep.as_bytes()).is_ok());
+                let too_deep = "[".repeat(MAX_DEPTH + 1) + &"]".repeat(MAX_DEPTH + 1);
+                assert!(
+                    parse(too_deep.as_bytes())
+                        .unwrap_err()
+                        .contains("exceeded max depth")
+                );
+            })
+            .unwrap()
+            .join()
+            .unwrap();
     }
 }
