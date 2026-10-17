@@ -286,12 +286,16 @@ workflows:
           targets: wasm32-wasip1
           requires: [test (linux)]
       # Windows has no C dependency (jemalloc is off there), so both targets
-      # cross-compile on Linux with cargo-xwin and the MSVC SDK.
+      # cross-compile on Linux with cargo-xwin and the MSVC SDK. They run in
+      # parallel and share one cache, which holds both targets.
       - build:
-          name: build (windows)
+          name: build (<< matrix.targets >>)
           os: linux
           platform: windows
-          targets: win32-x64 win32-arm64
+          matrix:
+            alias: build (windows)
+            parameters:
+              targets: [win32-x64, win32-arm64]
           requires: [test (windows)]
       # One macOS arm64 machine; x64 is a cross build.
       - build:
