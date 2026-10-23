@@ -18,9 +18,18 @@ catalogs:
     # The Go tsgolint that tsgolint-rust ports, at the tag in UPSTREAM.json. It is
     # the oracle of crates/tsgolint-rust/tests/cli.rs and tsgolint-compare, and moves
     # only with a port to a newer tsgolint.
-    oxlint-tsgolint: 7.0.2004
+    oxlint-tsgolint: 7.0.2005
     turbo: 2.11.7
     vitest: 5.0.3
   types:
     "@types/node": ^24
     typescript: 7.0.2
+
+minimumReleaseAgeExclude:
+  - '@oxlint-tsgolint/darwin-arm64@7.0.2005'
+  - '@oxlint-tsgolint/darwin-x64@7.0.2005'
+  - '@oxlint-tsgolint/linux-arm64@7.0.2005'
+  - '@oxlint-tsgolint/linux-x64@7.0.2005'
+  - '@oxlint-tsgolint/win32-arm64@7.0.2005'
+  - '@oxlint-tsgolint/win32-x64@7.0.2005'
+  - oxlint-tsgolint@7.0.2005
