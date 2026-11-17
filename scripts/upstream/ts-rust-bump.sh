@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Moves ts-rust (goport_core, goport_util) to the head of its branch, when
-# the head changes its compiler sources, and records the new commits in
-# UPSTREAM.json.
+# Moves ts-rust (goport_core, goport_util, goport_cell) to the head of its
+# branch, when the head changes its compiler sources, and records the new
+# commit in UPSTREAM.json, with the TypeScript commit and version it ports.
 #
 # Prints `<key>=<value>` lines, which bump.sh reads:
 #   bump=true|false   whether Cargo.lock and UPSTREAM.json changed
@@ -10,10 +10,10 @@
 #   short=<commit>    its first 8 characters
 #   typescript=<commit> the TypeScript commit the new ts-rust ports
 #
-# The compiler sources are what goport_core and goport_util build: ts-rust's
-# crates/ts_goport/src without what only ts_goport and goport_lsproto build
-# (api, bin, cmd, format, ls, lsp, lsproto, project; see goport_core_root.rs
-# and goport_util_root.rs), the two crates'
+# The compiler sources are what goport_core, goport_util and goport_cell
+# build: ts-rust's crates/ts_goport/src without what only ts_goport and
+# goport_lsproto build (api, bin, cmd, format, ls, lsp, lsproto, project; see
+# goport_core_root.rs and goport_util_root.rs), the three crates'
 # manifests and build scripts, and the bundled lib files. Changes outside
 # them (docs, tests, tools, the language server) leave Cargo.lock as it was.
 set -euo pipefail
@@ -44,7 +44,7 @@ fi
 db=$(ls -d "${CARGO_HOME:-$HOME/.cargo}"/git/db/ts-rust-* | head -1)
 changed=$(git -C "$db" diff --name-only "$from" "$to")
 relevant=$(printf '%s\n' "$changed" |
-  grep -E '^crates/ts_goport/(src/|libs/|parts/goport_(core|util)/)' |
+  grep -E '^crates/ts_goport/(src/|libs/|parts/goport_(cell|core|util)/)' |
   grep -vE '^crates/ts_goport/src/((api|bin|cmd|format|ls|lsp|lsproto|project)/|lib\.rs$|goport_lsproto_root\.rs$)' || true)
 if [ -z "$relevant" ]; then
   echo "ts-rust $from..$to changes no compiler source ($(printf '%s\n' "$changed" | grep -c .) files)" >&2
@@ -54,17 +54,23 @@ if [ -z "$relevant" ]; then
 fi
 echo "ts-rust $from..$to changes $(printf '%s\n' "$relevant" | grep -c .) compiler source files" >&2
 
-# ts-rust's UPSTREAM.md names the TypeScript commit it ports:
+# ts-rust's UPSTREAM.md names the TypeScript version and commit it ports:
+# (under `tsc/`, TypeScript 7.1.0-beta).
 # - Commit: [`fed0bf24149f`](https://github.com/microsoft/TypeScript/commit/<full>)
-typescript=$(git -C "$db" show "$to:UPSTREAM.md" |
-  grep -m1 -oE '^- Commit: .*microsoft/TypeScript/commit/[0-9a-f]{40}' | grep -oE '[0-9a-f]{40}$' || true)
+upstream_md=$(git -C "$db" show "$to:UPSTREAM.md")
+typescript=$(grep -m1 -oE '^- Commit: .*microsoft/TypeScript/commit/[0-9a-f]{40}' <<< "$upstream_md" | grep -oE '[0-9a-f]{40}$' || true)
 if [ -z "$typescript" ]; then
   echo "no TypeScript commit in ts-rust's UPSTREAM.md at $to; keeping the old one" >&2
   typescript=$(jq -r '.typescript.commit' UPSTREAM.json)
 fi
+version=$(grep -m1 -oE 'TypeScript [0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z]+)?' <<< "$upstream_md" | cut -d' ' -f2 || true)
+if [ -z "$version" ]; then
+  echo "no TypeScript version in ts-rust's UPSTREAM.md at $to; keeping the old one" >&2
+  version=$(jq -r '.typescript.version' UPSTREAM.json)
+fi
 
-jq --arg to "$to" --arg ts "$typescript" \
-  '."ts-rust".commit = $to | .typescript.commit = $ts' UPSTREAM.json > UPSTREAM.json.tmp
+jq --arg to "$to" --arg ts "$typescript" --arg version "$version" \
+  '."ts-rust".commit = $to | .typescript.commit = $ts | .typescript.version = $version' UPSTREAM.json > UPSTREAM.json.tmp
 mv UPSTREAM.json.tmp UPSTREAM.json
 echo "bump=true"
 echo "to=$to"
