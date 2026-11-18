@@ -1,4 +1,4 @@
-//! The 60 rules, one module each, and the registry. A rule module exports
+//! The 61 rules, one module each, and the registry. A rule module exports
 //! `pub static RULE: RuleDefinition`.
 
 use tsgolint_core::RuleDefinition;
