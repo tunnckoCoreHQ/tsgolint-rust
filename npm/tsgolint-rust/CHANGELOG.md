@@ -1,5 +1,15 @@
 # tsgolint-rust
 
+## 0.2.0
+
+### Minor Changes
+
+- [#10](https://github.com/tunnckoCoreHQ/tsgolint-rust/pull/10) [`2640676`](https://github.com/tunnckoCoreHQ/tsgolint-rust/commit/26406768fce8270564525a0c217a7695ff2c127e) Thanks [@tunnckoCore](https://github.com/tunnckoCore)! - Port tsgolint [v7.0.2007](https://github.com/oxc-project/tsgolint/releases/tag/v7.0.2007).
+
+### Patch Changes
+
+- [#9](https://github.com/tunnckoCoreHQ/tsgolint-rust/pull/9) [`fdc095b`](https://github.com/tunnckoCoreHQ/tsgolint-rust/commit/fdc095b415689c12e5075b5d88e7a0f46eccd324) Thanks [@tunnckoCore](https://github.com/tunnckoCore)! - Move ts-rust to [`91f3d021`](https://github.com/pingdotgg/ts-rust/commit/91f3d021c4f1f102cebee704ac285e85ae0c8ff5), which ports TypeScript [`3e9236361fa9`](https://github.com/microsoft/TypeScript/commit/3e9236361fa97a9e6c685f4833ac457ae2d8c50a). The wasm build now matches differently cased paths on a case-insensitive file system (macOS), as the native build does.
+
 ## 0.1.0
 
 ### Minor Changes

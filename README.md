@@ -21,6 +21,7 @@ tsgolint-rust has its own version numbers. Each release ports one tsgolint relea
 
 | tsgolint-rust | tsgolint rules and protocol | TypeScript | ts-rust | Tested with oxlint |
 |---|---|---|---|---|
+| 0.2.0 | [v7.0.2007](https://github.com/oxc-project/tsgolint/tree/v7.0.2007) | [`3e9236361fa9`](https://github.com/microsoft/TypeScript/commit/3e9236361fa9) (7.1.0-beta) | [`91f3d021`](https://github.com/pingdotgg/ts-rust/commit/91f3d021) | 1.86.0 |
 | 0.1.0 | [v7.0.2004](https://github.com/oxc-project/tsgolint/tree/v7.0.2004) | [`fed0bf24149f`](https://github.com/microsoft/TypeScript/commit/fed0bf24149f) (7.1.0-dev) | [`598e6416`](https://github.com/pingdotgg/ts-rust/commit/598e6416) | 1.86.0 |
 
 ## Speed and memory
