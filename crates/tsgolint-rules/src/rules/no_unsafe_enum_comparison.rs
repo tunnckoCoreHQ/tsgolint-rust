@@ -17,8 +17,8 @@ use tsgolint_core::{
 };
 
 use crate::utils::{
-    get_enum_literals, get_enum_types, intersection_type_parts, is_symbol_flag_set,
-    is_type_flag_set, quote_single_string_literal, union_type_parts,
+    get_enum_literals, get_enum_types, is_symbol_flag_set, is_type_flag_set,
+    quote_single_string_literal, type_is_primitive_like, union_type_parts,
 };
 
 pub static RULE: RuleDefinition = RuleDefinition {
@@ -159,15 +159,6 @@ fn enum_value_kind(checker: &Checker, t: TypeId) -> Option<EnumValueKind> {
     } else {
         Some(EnumValueKind::String)
     }
-}
-
-/// Every union part has an intersection part with one of `flags`.
-fn type_is_primitive_like(checker: &Checker, t: TypeId, flags: TypeFlags) -> bool {
-    union_type_parts(checker, t).iter().all(|&union_part| {
-        intersection_type_parts(checker, union_part)
-            .iter()
-            .any(|&part| is_type_flag_set(checker, part, flags))
-    })
 }
 
 /// Whether comparing `right_type` with any of `left_parts` is unsafe.

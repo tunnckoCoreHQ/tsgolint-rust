@@ -20,8 +20,8 @@ use tsgolint_core::{Listener, Listeners, RuleContext, RuleDefinition, RuleListen
 
 use crate::utils::{
     get_enum_types, get_heritage_clauses, get_number_index_type, get_parent_function_node,
-    intersection_type_parts, is_object_type, is_rest_parameter_declaration, is_type_flag_set,
-    literal_type_value, union_type_parts,
+    is_object_type, is_rest_parameter_declaration, is_type_flag_set, literal_type_value,
+    type_is_primitive_like, union_type_parts,
 };
 
 pub static RULE: RuleDefinition = RuleDefinition {
@@ -843,15 +843,6 @@ impl EnumTypes {
     }
 }
 
-/// Every union part has an intersection part with one of `flags`.
-fn primitive_like(c: &Checker, t: TypeId, flags: TypeFlags) -> bool {
-    union_type_parts(c, t).iter().all(|&union_part| {
-        intersection_type_parts(c, union_part)
-            .iter()
-            .any(|&part| is_type_flag_set(c, part, flags))
-    })
-}
-
 /// Whether a part of `sender` is a number or a string that `receiver` takes
 /// only as a member of an enum that the part is not of.
 fn direct_mismatch(c: &mut Checker, sender: TypeId, receiver: TypeId) -> bool {
@@ -871,8 +862,8 @@ fn direct_mismatch(c: &mut Checker, sender: TypeId, receiver: TypeId) -> bool {
         }
     }
     for part in union_type_parts(c, sender) {
-        if !(number_enum && primitive_like(c, part, TypeFlags::NUMBER_LIKE)
-            || string_enum && primitive_like(c, part, TypeFlags::STRING_LIKE))
+        if !(number_enum && type_is_primitive_like(c, part, TypeFlags::NUMBER_LIKE)
+            || string_enum && type_is_primitive_like(c, part, TypeFlags::STRING_LIKE))
         {
             continue;
         }
