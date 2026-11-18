@@ -4135,6 +4135,24 @@
       "index": 561,
       "code": "\n          declare const flag: boolean;\n          declare const node: { querySelector(s: string): Element | null } | null;\n          function label(): string | false {\n            const el = flag && node?.querySelector('[data-x]');\n            if (!el || !el.textContent) return false;\n            return el.textContent.trim();\n          }\n        ",
       "options": null
+    },
+    {
+      "index": 562,
+      "code": "declare const foo: { bar: string } | undefined;\nconst element = <div value={foo && foo.bar} />;",
+      "options": null,
+      "tsx": true
+    },
+    {
+      "index": 563,
+      "code": "declare const foo: { bar: string } | undefined;\nconst element = <div>{foo && foo.bar}</div>;",
+      "options": null,
+      "tsx": true
+    },
+    {
+      "index": 564,
+      "code": "declare const foo: { bar: string } | undefined;\nconst element = <Component render={() => <div>{foo && foo.bar}</div>} />;",
+      "options": null,
+      "tsx": true
     }
   ],
   "invalid": [
@@ -16612,6 +16630,93 @@
       "options": null,
       "output": [
         "declare const x: false | { y: { z: string } | undefined } | null; x && x.y?.z;"
+      ],
+      "errors": [
+        {
+          "messageId": "preferOptionalChain",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 608,
+      "code": "\ndeclare const ref: { current: HTMLDivElement | null };\nexport const inJsx = (\n  <div\n    onClick={() => {\n      const g = ref.current;\n      if (g && g.parentNode) g.remove();\n    }}\n  />\n);\nexport const outsideJsx = () => {\n  const g = ref.current;\n  if (g && g.parentNode) g.remove();\n};\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "preferOptionalChain",
+          "suggestions": [
+            {
+              "messageId": "optionalChainSuggest",
+              "output": "\ndeclare const ref: { current: HTMLDivElement | null };\nexport const inJsx = (\n  <div\n    onClick={() => {\n      const g = ref.current;\n      if (g?.parentNode) g.remove();\n    }}\n  />\n);\nexport const outsideJsx = () => {\n  const g = ref.current;\n  if (g && g.parentNode) g.remove();\n};\n"
+            }
+          ]
+        },
+        {
+          "messageId": "preferOptionalChain",
+          "suggestions": [
+            {
+              "messageId": "optionalChainSuggest",
+              "output": "\ndeclare const ref: { current: HTMLDivElement | null };\nexport const inJsx = (\n  <div\n    onClick={() => {\n      const g = ref.current;\n      if (g && g.parentNode) g.remove();\n    }}\n  />\n);\nexport const outsideJsx = () => {\n  const g = ref.current;\n  if (g?.parentNode) g.remove();\n};\n"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 609,
+      "code": "declare const foo: { bar: string } | undefined;\nconst element = <div onClick={() => foo && foo.bar} />;",
+      "options": null,
+      "tsx": true,
+      "output": [
+        "declare const foo: { bar: string } | undefined;\nconst element = <div onClick={() => foo?.bar} />;"
+      ],
+      "errors": [
+        {
+          "messageId": "preferOptionalChain",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 610,
+      "code": "declare const foo: { bar: string } | undefined;\nconst element = <div onClick={function () { return foo && foo.bar; }} />;",
+      "options": null,
+      "tsx": true,
+      "output": [
+        "declare const foo: { bar: string } | undefined;\nconst element = <div onClick={function () { return foo?.bar; }} />;"
+      ],
+      "errors": [
+        {
+          "messageId": "preferOptionalChain",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 611,
+      "code": "declare const foo: { bar: string } | undefined;\nconst element = <Component handlers={{ onClick() { return foo && foo.bar; } }} />;",
+      "options": null,
+      "tsx": true,
+      "output": [
+        "declare const foo: { bar: string } | undefined;\nconst element = <Component handlers={{ onClick() { return foo?.bar; } }} />;"
+      ],
+      "errors": [
+        {
+          "messageId": "preferOptionalChain",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 612,
+      "code": "declare const foo: { bar: string } | undefined;\nconst element = <Component>{() => foo && foo.bar}</Component>;",
+      "options": null,
+      "tsx": true,
+      "output": [
+        "declare const foo: { bar: string } | undefined;\nconst element = <Component>{() => foo?.bar}</Component>;"
       ],
       "errors": [
         {

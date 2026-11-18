@@ -307,11 +307,14 @@ impl Processor<'_, '_, '_> {
     }
 }
 
-/// In JSX, `foo && foo.bar` renders `false`/`null` where `foo?.bar` gives
-/// undefined.
+/// JSX rendering can tell the falsy value of `foo && foo.bar` from the
+/// undefined of `foo?.bar`. A function inside the JSX is not rendered.
 fn is_inside_jsx(node: Node) -> bool {
     let mut current = node;
     while current.is_some() {
+        if ast::is_function_like_declaration(current) {
+            return false;
+        }
         if matches!(
             current.kind(),
             SyntaxKind::JsxExpression

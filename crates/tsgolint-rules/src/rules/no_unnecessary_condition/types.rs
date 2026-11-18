@@ -55,13 +55,14 @@ pub(super) fn remove_nullish_from_type(c: &Checker, t: TypeId) -> TypeId {
         .unwrap_or(TypeId::NIL)
 }
 
-/// A union part of `t` is `any`, `unknown` or a type variable.
+/// A union part of `t` is `any`, `unknown`, a type variable or a conditional
+/// type.
 pub(super) fn is_conditional_always_necessary(c: &Checker, t: TypeId) -> bool {
     let check = |part: TypeId| {
         is_type_flag_set(
             c,
             part,
-            TypeFlags::ANY_OR_UNKNOWN | TypeFlags::TYPE_VARIABLE,
+            TypeFlags::ANY_OR_UNKNOWN | TypeFlags::TYPE_VARIABLE | TypeFlags::CONDITIONAL,
         )
     };
     if is_union_type(c, t) {

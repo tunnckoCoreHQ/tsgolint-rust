@@ -189,7 +189,50 @@
     },
     {
       "index": 36,
+      "code": "\ndeclare function getValue(): any;\nexport const plain = { value: getValue() } satisfies Record<string, unknown>;\nexport const quoted = { \"value\": getValue() } satisfies Record<string, unknown>;\nexport const dotted = { \"example.key\": getValue() } satisfies Record<string, unknown>;\nexport const annotated: Record<string, unknown> = { \"example.key\": getValue() };\nconst opaque: unknown = getValue();\nexport const held = { \"example.key\": opaque };\n    ",
+      "options": null
+    },
+    {
+      "index": 37,
+      "code": "\ndeclare function getValue(): any;\nconst quoted: { \"value\": unknown } = { \"value\": getValue() };\nconst numeric: { 0: unknown } = { 0: getValue() };\nconst computed = { [\"example.key\"]: getValue() } satisfies Record<string, unknown>;\nconst parenthesized = { \"example.key\": (getValue()) } satisfies Record<string, unknown>;\n    ",
+      "options": null
+    },
+    {
+      "index": 38,
+      "code": "\ndeclare const value: any;\ndeclare const source: { value: any };\nconst identifier = { \"example.key\": value } satisfies Record<string, unknown>;\nconst member = { \"example.key\": source.value } satisfies Record<string, unknown>;\nconst assertion = { \"example.key\": 1 as any } satisfies Record<string, unknown>;\n    ",
+      "options": null
+    },
+    {
+      "index": 39,
       "code": "\ndeclare const foo: any;\nlet a = 1;\n\na+= foo;\n\t\t",
+      "options": null
+    },
+    {
+      "index": 40,
+      "code": "\ndeclare function Foo(props: { a: any }): never;\n<Foo a={\"safe\"} />;\n",
+      "options": null,
+      "tsx": true
+    },
+    {
+      "index": 41,
+      "code": "\ndeclare function Foo(props: { a: unknown }): never;\ndeclare const value: unknown;\n<Foo a={value} />;\n",
+      "options": null,
+      "tsx": true
+    },
+    {
+      "index": 42,
+      "code": "\ndeclare namespace JSX {\n  interface IntrinsicElements { foo: { a: any }; }\n}\n<foo a={\"safe\"} />;\n",
+      "options": null,
+      "tsx": true
+    },
+    {
+      "index": 43,
+      "code": "\ndeclare const value: any;\nconst x: { p: unknown } = { 'p': value };\n",
+      "options": null
+    },
+    {
+      "index": 44,
+      "code": "\ndeclare const value: any;\nconst x: { p: unknown } = { ['p']: value };\n",
       "options": null
     }
   ],
@@ -1020,6 +1063,192 @@
           "line": 4,
           "column": 1,
           "endColumn": 24,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 58,
+      "code": "\ndeclare function getValue(): any;\nconst inferred = { \"value\": getValue() };\nconst satisfies = { \"example.key\": getValue() } satisfies Record<string, string>;\nconst annotated: Record<string, string> = { \"example.key\": getValue() };\ndeclare function getSet(): Set<any>;\nconst generic = { \"example.key\": getSet() } satisfies Record<string, Set<string>>;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 3,
+          "suggestions": []
+        },
+        {
+          "messageId": "anyAssignment",
+          "line": 4,
+          "suggestions": []
+        },
+        {
+          "messageId": "anyAssignment",
+          "line": 5,
+          "suggestions": []
+        },
+        {
+          "messageId": "unsafeAssignment",
+          "line": 7,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 59,
+      "code": "\ndeclare namespace JSX {\n  interface Element {}\n  interface IntrinsicAttributes { key?: string; }\n}\ndeclare function Foo(props: { a: any; b: string }): never;\ndeclare const v: any;\n<Foo a={v} b=\"x\" />;\n<Foo a={1} b={v} />;\nconst x: any = v;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 8,
+          "column": 9,
+          "endColumn": 10,
+          "suggestions": []
+        },
+        {
+          "messageId": "anyAssignment",
+          "line": 9,
+          "column": 15,
+          "endColumn": 16,
+          "suggestions": []
+        },
+        {
+          "messageId": "anyAssignment",
+          "line": 10,
+          "column": 7,
+          "endColumn": 17,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 60,
+      "code": "\ndeclare function Foo(props: { a: any }): never;\n<Foo a={1 as any} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 3,
+          "column": 9,
+          "endColumn": 17,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 61,
+      "code": "\ndeclare function Foo(props: { a: unknown }): never;\ndeclare const value: any;\n<Foo a={value} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 4,
+          "column": 9,
+          "endColumn": 14,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 62,
+      "code": "\ndeclare namespace JSX {\n  interface IntrinsicElements { foo: { a: any }; }\n}\ndeclare const value: any;\n<foo a={value} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 6,
+          "column": 9,
+          "endColumn": 14,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 63,
+      "code": "\ndeclare function Foo(props: { [key: string]: string }): never;\ndeclare const value: any;\n<Foo a={value} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 4,
+          "column": 9,
+          "endColumn": 14,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 64,
+      "code": "\ndeclare namespace JSX {\n  interface IntrinsicAttributes { key?: string; }\n}\ndeclare function Foo(props: { kind: \"a\"; a: string } | { kind: \"b\"; b: number }): never;\ndeclare const value: any;\n<Foo kind=\"a\" a={value} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 7,
+          "column": 18,
+          "endColumn": 23,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 65,
+      "code": "\ndeclare namespace JSX {\n  interface IntrinsicAttributes { key?: string; }\n}\ndeclare function Foo(props: { kind: \"a\"; a: any } | { kind: \"b\"; b: number }): never;\ndeclare const value: any;\n<Foo kind=\"a\" a={value} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 7,
+          "column": 18,
+          "endColumn": 23,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 66,
+      "code": "\ndeclare namespace JSX {\n  interface IntrinsicAttributes { key?: string; }\n}\ndeclare function Foo(props: { [key: string]: any }): never;\ndeclare const value: any;\n<Foo a={value} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "anyAssignment",
+          "line": 7,
+          "column": 9,
+          "endColumn": 14,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 67,
+      "code": "\ndeclare function Foo(props: { a: Set<string> }): never;\ndeclare const value: Set<any>;\n<Foo a={value} />;\n",
+      "options": null,
+      "tsx": true,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "unsafeAssignment",
+          "line": 4,
+          "column": 9,
+          "endColumn": 14,
           "suggestions": []
         }
       ]

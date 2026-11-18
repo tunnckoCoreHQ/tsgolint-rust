@@ -90,6 +90,13 @@ impl Unnecessary {
     }
 }
 
+fn contextually_inferred_type_arguments_message() -> RuleMessage {
+    RuleMessage::new(
+        "contextuallyInferredTypeArguments",
+        "The type arguments for this generic call may be inferred from the assertion. Specify them explicitly instead.",
+    )
+}
+
 fn create(ctx: &mut RuleContext<'_>, options: &Value) -> RuleListeners {
     let options: Options = decode_options(options, RULE.name);
     let compiler_options = ctx.compiler_options();
@@ -477,6 +484,41 @@ fn has_generic_call_signature(c: &mut Checker, t: TypeId) -> bool {
     get_call_signatures(c, t)
         .iter()
         .any(|&signature| has_type_parameters(c, signature))
+}
+
+/// Whether the asserted expression is a call of a generic function without
+/// type arguments: the assertion can be what its type arguments are inferred
+/// from. Looks through parentheses, `await`, `!` and the right of a comma.
+fn is_generic_call_with_inferred_type_arguments(c: &mut Checker, mut expression: Node) -> bool {
+    loop {
+        expression = skip_parentheses(expression);
+        match expression.kind() {
+            SyntaxKind::CallExpression => {
+                if !expression.type_argument_list().is_nil() {
+                    return false;
+                }
+                let callee_type = c.get_type_at_location(expression.expression());
+                if !has_generic_call_signature(c, callee_type) {
+                    return false;
+                }
+                let signature = c.get_resolved_signature(expression, None, CheckMode::NORMAL);
+                if signature.is_nil() {
+                    return false;
+                }
+                let signature = original_signature(c, signature);
+                return has_type_parameters(c, signature);
+            }
+            SyntaxKind::AwaitExpression | SyntaxKind::NonNullExpression => {
+                expression = expression.expression();
+            }
+            SyntaxKind::BinaryExpression
+                if expression.operator_token().kind() == SyntaxKind::CommaToken =>
+            {
+                expression = expression.right();
+            }
+            _ => return false,
+        }
+    }
 }
 
 /// Some property of `contextual` has a generic call signature that the
@@ -1092,7 +1134,13 @@ fn check_type_assertion(state: &mut State, ctx: &mut RuleContext<'_>, node: Node
     }
 
     let expression = node.expression();
-    let mut uncast = uncast_type(c, node);
+    let generic_call_with_inferred_type_arguments =
+        is_generic_call_with_inferred_type_arguments(c, expression);
+    let mut uncast = if generic_call_with_inferred_type_arguments {
+        c.get_type_at_location(expression)
+    } else {
+        uncast_type(c, node)
+    };
 
     let bare_expression = skip_parentheses(expression);
     if uncast == cast && is_identifier(bare_expression) {
@@ -1114,7 +1162,19 @@ fn check_type_assertion(state: &mut State, ctx: &mut RuleContext<'_>, node: Node
         !is_const
     };
     if type_is_unchanged && would_same_type_be_inferred {
+        if generic_call_with_inferred_type_arguments {
+            let report = Report::new(
+                assertion_range(ctx.source_file, node),
+                contextually_inferred_type_arguments_message(),
+            );
+            ctx.report_diagnostic(report);
+            return;
+        }
         report_with_assertion_fixes(ctx, node, Unnecessary::Assertion);
+        return;
+    }
+
+    if generic_call_with_inferred_type_arguments {
         return;
     }
 

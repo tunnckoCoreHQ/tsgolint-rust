@@ -87,6 +87,26 @@
       "index": 16,
       "code": "\n      function f(text: string): void {\n        /\\s/.test(text);\n      }\n    ",
       "options": null
+    },
+    {
+      "index": 17,
+      "code": "\n      function f(body: string): void {\n        /scopeName\\\\?\":\\\\?\"source\\./.test(body);\n      }\n    ",
+      "options": null
+    },
+    {
+      "index": 18,
+      "code": "\n      function f(body: string): void {\n        /a\\\\?b/.test(body);\n      }\n    ",
+      "options": null
+    },
+    {
+      "index": 19,
+      "code": "\n      function f(body: string): void {\n        /a\\\\+/.test(body);\n      }\n    ",
+      "options": null
+    },
+    {
+      "index": 20,
+      "code": "\n      function f(body: string): void {\n        /a\\\\\\d/.test(body);\n      }\n    ",
+      "options": null
     }
   ],
   "invalid": [
@@ -657,7 +677,7 @@
       "code": "\n        function f(a: string): void {\n          /\\0'\\\\n\\r\\v\\t\\f/.test(a);\n        }\n      ",
       "options": null,
       "output": [
-        "\n        function f(a: string): void {\n          a.includes('\\0\\'\\\\n\\r\\v\\t\\f');\n        }\n      "
+        "\n        function f(a: string): void {\n          a.includes('\\u0000\\'\\\\n\\r\\v\\t\\f');\n        }\n      "
       ],
       "errors": [
         {
@@ -808,6 +828,144 @@
           "messageId": "preferStringIncludes",
           "line": 3,
           "column": 11,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 48,
+      "code": "\n        function f(a: string): void {\n          /a\\\\b\\.c/.test(a);\n        }\n      ",
+      "options": null,
+      "output": [
+        "\n        function f(a: string): void {\n          a.includes('a\\\\b.c');\n        }\n      "
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 49,
+      "code": "function f(a: string) { /a\\\\b\\'c/.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { a.includes('a\\\\b\\'c'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 50,
+      "code": "function f(a: string) { /a\\\\b\\\\'c/.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { a.includes('a\\\\b\\\\\\'c'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 51,
+      "code": "function f(a: string) { /a\\\\b\\1/.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { a.includes('a\\\\b\\u0001'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 52,
+      "code": "function f(a: string) { /a\\\\b\\8/.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { a.includes('a\\\\b8'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 53,
+      "code": "function f(a: string) { /a\\\\b\\377/.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { a.includes('a\\\\bÿ'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 54,
+      "code": "function f(a: string) { /a\\\\b\\400/.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { a.includes('a\\\\b 0'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 55,
+      "code": "function f(a: string) { /a\\\\b\\08/.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { a.includes('a\\\\b\\u00008'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 56,
+      "code": "function f(a: string) { const p = new RegExp('a\\\\\\\\b\\n'); p.test(a); }",
+      "options": null,
+      "output": [
+        "function f(a: string) { const p = new RegExp('a\\\\\\\\b\\n'); a.includes('a\\\\b\\n'); }"
+      ],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 57,
+      "code": "function f(a: string) { const p = new RegExp('a\\\\\\\\b\\uD800'); p.test(a); }",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "preferStringIncludes",
           "suggestions": []
         }
       ]

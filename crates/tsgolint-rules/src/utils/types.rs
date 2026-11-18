@@ -128,28 +128,13 @@ pub fn intersection_type_parts(c: &Checker, t: TypeId) -> SharedList<TypeId> {
     }
 }
 
-/// Calls `visit` on each union member, or on `t` when it is not a union.
-/// Stops and returns false as soon as `visit` returns false.
-pub fn visit_union_type_parts(
-    c: &mut Checker,
-    t: TypeId,
-    mut visit: impl FnMut(&mut Checker, TypeId) -> bool,
-) -> bool {
-    union_type_parts(c, t)
-        .into_iter()
-        .all(|part| visit(c, part))
-}
-
-/// Whether `predicate` holds for some union member, or for `t` when it is
-/// not a union.
-pub fn some_union_type_part(
-    c: &mut Checker,
-    t: TypeId,
-    mut predicate: impl FnMut(&mut Checker, TypeId) -> bool,
-) -> bool {
-    union_type_parts(c, t)
-        .into_iter()
-        .any(|part| predicate(c, part))
+/// Every union part of `t` has an intersection part with one of `flags`.
+pub fn type_is_primitive_like(c: &Checker, t: TypeId, flags: TypeFlags) -> bool {
+    union_type_parts(c, t).iter().all(|&union_part| {
+        intersection_type_parts(c, union_part)
+            .iter()
+            .any(|&part| is_type_flag_set(c, part, flags))
+    })
 }
 
 /// typescript-eslint `typeRecurser`-style walk: calls `predicate` on each

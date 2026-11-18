@@ -23,8 +23,7 @@ use tsgolint_core::{
 use crate::utils::{
     get_call_signatures, get_construct_signatures, get_function_head_loc, get_heritage_clauses,
     is_array_method_call_with_predicate, is_function_param, is_rest_parameter_declaration,
-    is_thenable_type, is_type_flag_set, some_union_type_part, trim_node_text_range,
-    union_type_parts, visit_union_type_parts,
+    is_thenable_type, is_type_flag_set, is_union_type, trim_node_text_range, union_type_parts,
 };
 
 pub static RULE: RuleDefinition = RuleDefinition {
@@ -35,7 +34,8 @@ pub static RULE: RuleDefinition = RuleDefinition {
 #[derive(Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 struct Options {
-    checks_conditionals: bool,
+    /// A boolean or a `ChecksConditionalsOptions` object.
+    checks_conditionals: Value,
     checks_spreads: bool,
     /// A boolean or a `ChecksVoidReturnOptions` object.
     checks_void_return: Value,
@@ -44,10 +44,44 @@ struct Options {
 impl Default for Options {
     fn default() -> Self {
         Self {
-            checks_conditionals: true,
+            checks_conditionals: Value::Bool(true),
             checks_spreads: true,
             checks_void_return: Value::Bool(true),
         }
+    }
+}
+
+/// Which unions with a thenable member a conditional reports.
+#[derive(Clone, Copy, Default, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "lowercase")]
+enum FlagUnions {
+    /// Every union with a thenable member.
+    All,
+    /// Unions of thenables and the types they resolve to, like
+    /// `T | Promise<T>`.
+    Strict,
+    #[default]
+    None,
+}
+
+#[derive(Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+struct ChecksConditionalsOptions {
+    flag_unions: FlagUnions,
+}
+
+/// Whether `checksConditionals` turns the conditional checks on, and its
+/// `flagUnions`.
+fn checks_conditionals_options(value: &Value) -> (bool, FlagUnions) {
+    match value {
+        Value::Bool(checks) => (*checks, FlagUnions::None),
+        // tsgolint falls back to `none` when the object does not decode.
+        Value::Object(_) => {
+            let options = ChecksConditionalsOptions::deserialize(value.clone()).unwrap_or_default();
+            (true, options.flag_unions)
+        }
+        // Values of another shape, which tsgolint ignores.
+        _ => (true, FlagUnions::None),
     }
 }
 
@@ -153,6 +187,7 @@ fn void_return_variable_message() -> RuleMessage {
 
 struct State {
     checks_conditionals: bool,
+    flag_unions: FlagUnions,
     void_return: Option<ChecksVoidReturnOptions>,
     /// Conditions already checked, so that nested listeners skip them.
     checked_nodes: FxHashSet<Node>,
@@ -161,10 +196,12 @@ struct State {
 fn create(_ctx: &mut RuleContext<'_>, options: &Value) -> RuleListeners {
     let options: Options = decode_options(options, RULE.name);
     let void_return = checks_void_return_options(&options.checks_void_return);
-    let checks_conditionals = options.checks_conditionals;
+    let (checks_conditionals, flag_unions) =
+        checks_conditionals_options(&options.checks_conditionals);
 
     let mut listeners = Listeners::new(State {
         checks_conditionals,
+        flag_unions,
         void_return,
         checked_nodes: FxHashSet::default(),
     })
@@ -273,16 +310,39 @@ fn returns_thenable(checker: &mut Checker, node: Node) -> bool {
         .any(|&part| any_signature_is_thenable_type(checker, node, part))
 }
 
+/// Calls `visit` on the reduced apparent type of `t`, or on each member when
+/// that type is a union, and on the members of those members in the same way.
+/// Stops and returns false as soon as `visit` returns false.
+///
+/// The call signatures of a type parameter with a union constraint are not
+/// read from the type parameter: the checker makes them from the signatures
+/// of every member, which can take exponential time.
+fn visit_function_type_parts(
+    checker: &mut Checker,
+    t: TypeId,
+    visit: &mut dyn FnMut(&mut Checker, TypeId) -> bool,
+) -> bool {
+    let t = checker.get_reduced_apparent_type(t);
+    if !is_union_type(checker, t) {
+        return visit(checker, t);
+    }
+    checker
+        .ty(t)
+        .types_list()
+        .into_iter()
+        .all(|part| visit_function_type_parts(checker, part, visit))
+}
+
 fn is_thenable_returning_function_type(checker: &mut Checker, node: Node, t: TypeId) -> bool {
-    some_union_type_part(checker, t, |checker, part| {
-        any_signature_is_thenable_type(checker, node, part)
+    !visit_function_type_parts(checker, t, &mut |checker, part| {
+        !any_signature_is_thenable_type(checker, node, part)
     })
 }
 
 /// Some call signature of `t` returns `void` and none returns a thenable.
 fn is_void_returning_function_type(checker: &mut Checker, node: Node, t: TypeId) -> bool {
     let mut had_void_return = false;
-    let no_thenable = visit_union_type_parts(checker, t, |checker, part| {
+    let no_thenable = visit_function_type_parts(checker, t, &mut |checker, part| {
         for signature in get_call_signatures(checker, part) {
             let return_type = checker.get_return_type_of_signature(signature);
             // A position that accepts both thenable and void returns takes a
@@ -326,6 +386,58 @@ fn is_always_thenable(checker: &mut Checker, node: Node) -> bool {
         }
     }
     true
+}
+
+/// Some union member of the type of `node` is thenable.
+fn is_sometimes_thenable(checker: &mut Checker, node: Node) -> bool {
+    let node_type = checker.get_type_at_location(node);
+    let apparent = checker.get_apparent_type(node_type);
+    union_type_parts(checker, apparent)
+        .into_iter()
+        .any(|part| is_thenable_type(checker, node, part))
+}
+
+/// The type of `node` is a union of thenables and of the types that they
+/// resolve to, like `T | Promise<T>`: each other member matches an awaited
+/// type, and each awaited type matches another member.
+fn has_matching_promise_type_argument(checker: &mut Checker, node: Node) -> bool {
+    let node_type = checker.get_type_at_location(node);
+    let apparent = checker.get_apparent_type(node_type);
+    let mut promise_types = Vec::new();
+    let mut other_types = Vec::new();
+    for part in union_type_parts(checker, apparent) {
+        if is_thenable_type(checker, node, part) {
+            promise_types.push(part);
+        } else {
+            other_types.push(part);
+        }
+    }
+    if promise_types.is_empty() {
+        return false;
+    }
+
+    let mut awaited_types = Vec::new();
+    for promise_type in promise_types {
+        let awaited = checker.get_awaited_type(promise_type);
+        if awaited.is_nil() {
+            return false;
+        }
+        awaited_types.extend(union_type_parts(checker, awaited));
+    }
+
+    let mut has_equivalent_type = |t: TypeId, candidates: &[TypeId]| {
+        candidates.contains(&t)
+            || candidates.iter().any(|&candidate| {
+                checker.is_type_assignable_to(t, candidate)
+                    && checker.is_type_assignable_to(candidate, t)
+            })
+    };
+    other_types
+        .iter()
+        .all(|&t| has_equivalent_type(t, &awaited_types))
+        && awaited_types
+            .iter()
+            .all(|&t| has_equivalent_type(t, &other_types))
 }
 
 /// The member of `t`'s symbol named `name`, else the property of `t`.
@@ -479,7 +591,13 @@ fn check_conditional(
         }
         return;
     }
-    if is_always_thenable(ctx.checker, node) {
+    let is_thenable = is_always_thenable(ctx.checker, node)
+        || match state.flag_unions {
+            FlagUnions::All => is_sometimes_thenable(ctx.checker, node),
+            FlagUnions::Strict => has_matching_promise_type_argument(ctx.checker, node),
+            FlagUnions::None => false,
+        };
+    if is_thenable {
         report_node(ctx, node, conditional_message(), None);
     }
 }
@@ -560,11 +678,10 @@ fn void_function_arguments(
     ctx: &mut RuleContext<'_>,
     call: Node,
 ) -> (Vec<usize>, FxHashMap<usize, VoidExpectation>) {
-    // `new Foo` has no argument list.
-    if call.argument_list().is_nil() {
+    let argument_count = call.arguments().len();
+    if argument_count == 0 {
         return (Vec::new(), FxHashMap::default());
     }
-    let argument_count = call.arguments().len();
     let callee = call.expression();
     let mut checks = ArgumentChecks::default();
     let callee_type = ctx.checker.get_type_at_location(callee);
@@ -576,7 +693,8 @@ fn void_function_arguments(
         };
         for signature in signatures {
             let parameters = ctx.checker.sig(signature).parameters().to_vec();
-            for (index, parameter) in parameters.into_iter().enumerate() {
+            // Parameters after the last argument have no argument to check.
+            for (index, parameter) in parameters.into_iter().enumerate().take(argument_count) {
                 let declaration = ctx.checker.sym(parameter).value_declaration;
                 let t = ctx
                     .checker

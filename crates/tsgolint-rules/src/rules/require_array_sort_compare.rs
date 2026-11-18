@@ -72,7 +72,10 @@ fn check_call(options: &mut Options, ctx: &mut RuleContext<'_>, node: Node) {
     }
 
     let parts = union_type_parts(checker, object_type);
-    if parts.iter().all(|&t| checker.is_array_type(t)) {
+    if parts
+        .iter()
+        .all(|&t| checker.is_array_type(t) || checker.is_tuple_type(t))
+    {
         ctx.report_node(node, require_compare_message());
     }
 }
