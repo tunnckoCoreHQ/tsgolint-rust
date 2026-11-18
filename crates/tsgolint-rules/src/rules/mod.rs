@@ -32,6 +32,7 @@ pub mod no_unnecessary_type_parameters;
 pub mod no_unsafe_argument;
 pub mod no_unsafe_assignment;
 pub mod no_unsafe_call;
+pub mod no_unsafe_enum_assignment;
 pub mod no_unsafe_enum_comparison;
 pub mod no_unsafe_member_access;
 pub mod no_unsafe_return;
@@ -96,6 +97,7 @@ pub static ALL_RULES: &[&RuleDefinition] = &[
     &no_unsafe_argument::RULE,
     &no_unsafe_assignment::RULE,
     &no_unsafe_call::RULE,
+    &no_unsafe_enum_assignment::RULE,
     &no_unsafe_enum_comparison::RULE,
     &no_unsafe_member_access::RULE,
     &no_unsafe_return::RULE,
