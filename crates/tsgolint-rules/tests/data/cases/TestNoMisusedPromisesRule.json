@@ -906,26 +906,174 @@
     },
     {
       "index": 124,
-      "code": "if (process.env.SKIP) { return x; }",
+      "code": "\ndeclare const f: () => number | Promise<void>;\nif (f()) {\n}\n    ",
       "options": null
     },
     {
       "index": 125,
+      "code": "\ndeclare const f: () => boolean | Promise<boolean>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "none"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 126,
+      "code": "\ndeclare const f: () => boolean | Promise<void>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "none"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 127,
+      "code": "\ndeclare const f: () => boolean | Promise<void>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 128,
+      "code": "\ntype MyUnion = number | string | undefined;\ntype PromiseUnion = string | number;\ndeclare const f: () => MyUnion | Promise<PromiseUnion>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 129,
+      "code": "\ndeclare const f: () => number | string | Promise<number> | Promise<boolean>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 130,
+      "code": "\ndeclare const f: () => string[] | Promise<number[]>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 131,
+      "code": "\ndeclare const f: () => [number, string] | Promise<[string, number]>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 132,
+      "code": "\ndeclare const f: () => (() => void) | Promise<() => number>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 133,
+      "code": "\ninterface MyInterface {\n  name: string;\n}\n\ninterface PromiseInterface {\n  age: string;\n}\n\ndeclare const f: () => MyInterface | Promise<PromiseInterface>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 134,
+      "code": "\ntype Recursive = Promise<Recursive>;\ndeclare const f: () => boolean | Recursive;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 135,
+      "code": "\ndeclare const f: boolean | string;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "all"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 136,
+      "code": "\nconst fn: () => Promise<boolean> | boolean = () => Promise.resolve(true);\nif (await fn()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "all"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 137,
+      "code": "\ntype MyUnion = number | string;\ntype PromiseUnion = string | number | undefined;\ndeclare const f: () => MyUnion | Promise<PromiseUnion>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      }
+    },
+    {
+      "index": 138,
+      "code": "if (process.env.SKIP) { return x; }",
+      "options": null
+    },
+    {
+      "index": 139,
       "code": "\nconst sent: string[] = [];\nconst send = (message: string): Promise<void> => (sent.push(message), Promise.resolve());\n    ",
       "options": null
     },
     {
-      "index": 126,
+      "index": 140,
       "code": "\nconst sent: string[] = [];\ndeclare const pending: Promise<void>;\nconst all = ['a', 'b'].map(message => (sent.push(message), pending));\n    ",
       "options": null
     },
     {
-      "index": 127,
+      "index": 141,
       "code": "\nconst sent: string[] = [];\ndeclare const pending: Promise<void>;\nconst last = (sent.push('c'), pending);\n    ",
       "options": null
     },
     {
-      "index": 128,
+      "index": 142,
       "code": "\nconst sent: string[] = [];\ndeclare const pending: Promise<void>;\nlet assigned: Promise<void>;\nassigned = (sent.push('a'), pending);\nfunction returned(): Promise<void> {\n  return (sent.push('b'), pending);\n}\n(sent.push('c'), pending);\n    ",
       "options": null
     }
@@ -2278,6 +2426,248 @@
     },
     {
       "index": 90,
+      "code": "\ndeclare const f: () => number | Promise<number>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 3,
+          "column": 5,
+          "endLine": 3,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 91,
+      "code": "\ndeclare const f: () => number | string | Promise<number> | Promise<string>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 3,
+          "column": 5,
+          "endLine": 3,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 92,
+      "code": "\ntype MyUnion = number | string | undefined;\ndeclare const f: () => MyUnion | Promise<MyUnion>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 4,
+          "column": 5,
+          "endLine": 4,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 93,
+      "code": "\ndeclare const f: () => string[] | Promise<string[]>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 3,
+          "column": 5,
+          "endLine": 3,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 94,
+      "code": "\ndeclare const f: () => [number, string] | Promise<[number, string]>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 3,
+          "column": 5,
+          "endLine": 3,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 95,
+      "code": "\ndeclare const f: () => (() => void) | Promise<() => void>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 3,
+          "column": 5,
+          "endLine": 3,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 96,
+      "code": "\ninterface MyInterface {\n  name: string;\n}\ndeclare const f: () => MyInterface | Promise<MyInterface>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 6,
+          "column": 5,
+          "endLine": 6,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 97,
+      "code": "\ntype MyType<T> = { value: T };\ndeclare const f: () => MyType<number> | Promise<MyType<number>>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 4,
+          "column": 5,
+          "endLine": 4,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 98,
+      "code": "\ntype T = number | string | undefined;\ndeclare const f: () => T | Promise<T>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 4,
+          "column": 5,
+          "endLine": 4,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 99,
+      "code": "\ntype MyType<T> = { value: T };\ntype PromiseType<T> = { value: T };\ndeclare const f: () => MyType<number> | Promise<PromiseType<number>>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "strict"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 5,
+          "column": 5,
+          "endLine": 5,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 100,
+      "code": "\ndeclare const f: () => boolean | Promise<void>;\nif (f()) {\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "all"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 3,
+          "column": 5,
+          "endLine": 3,
+          "endColumn": 8,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 101,
       "code": "\ndeclare function on(this: void, ...callbacks: Array<() => void>): void;\non(async () => {}, async () => {});\n      ",
       "options": null,
       "output": [],
@@ -2295,7 +2685,7 @@
       ]
     },
     {
-      "index": 91,
+      "index": 102,
       "code": "\nclass C {\n  private _handler: ((x: number) => Promise<void>) | undefined;\n\n  set handler(handler: undefined | ((x: number) => void)) {\n    this._handler = handler as ((x: number) => Promise<void>) | undefined;\n  }\n\n  get handler() {\n    return this._handler;\n  }\n}\n      ",
       "options": null,
       "output": [],
@@ -2308,7 +2698,7 @@
       ]
     },
     {
-      "index": 92,
+      "index": 103,
       "code": "\ndeclare function takesCb(cb: () => void): void;\nfunction f<T extends () => Promise<void>>(t: T) {\n  takesCb({ ...t });\n}\n      ",
       "options": null,
       "output": [],
@@ -2321,7 +2711,7 @@
       ]
     },
     {
-      "index": 93,
+      "index": 104,
       "code": "\nfunction f<T extends () => Promise<void>>(t: T) {\n  const cb: () => void = { ...t };\n}\n      ",
       "options": null,
       "output": [],
@@ -2334,7 +2724,7 @@
       ]
     },
     {
-      "index": 94,
+      "index": 105,
       "code": "\ninterface String {\n  (): Promise<void>;\n}\ndeclare function takesCb(cb: () => void): void;\ntakesCb('literal');\ntakesCb(`template`);\nconst cb: () => void = 'literal';\n      ",
       "options": null,
       "output": [],
@@ -2357,7 +2747,7 @@
       ]
     },
     {
-      "index": 95,
+      "index": 106,
       "code": "\ninterface Number {\n  (): Promise<void>;\n}\ndeclare function takesCb(cb: () => void): void;\ntakesCb(123);\n      ",
       "options": null,
       "output": [],
@@ -2370,7 +2760,7 @@
       ]
     },
     {
-      "index": 96,
+      "index": 107,
       "code": "\ninterface Array<T> {\n  (): Promise<void>;\n}\ndeclare function takesCb(cb: () => void): void;\ntakesCb([1, 2]);\nconst cb: () => void = [1, 2];\n      ",
       "options": null,
       "output": [],
@@ -2388,7 +2778,7 @@
       ]
     },
     {
-      "index": 97,
+      "index": 108,
       "code": "\nconst sent: string[] = [];\ndeclare const pending: Promise<void>;\n(sent.push('x'), pending) ? 1 : 2;\n      ",
       "options": null,
       "output": [],
@@ -2404,7 +2794,7 @@
       ]
     },
     {
-      "index": 98,
+      "index": 109,
       "code": "\nconst sent: string[] = [];\ndeclare const pending: Promise<void>;\n(sent.push('x'), pending) || false;\n      ",
       "options": null,
       "output": [],
@@ -2420,7 +2810,7 @@
       ]
     },
     {
-      "index": 99,
+      "index": 110,
       "code": "\nconst sent: string[] = [];\ndeclare const pending: Promise<void>;\nif (sent.push('a'), pending) {}\n!(sent.push('b'), pending);\n(sent.push('c'), pending) && true;",
       "options": null,
       "output": [],
@@ -2438,6 +2828,28 @@
         {
           "messageId": "conditional",
           "line": 6,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 111,
+      "code": "\nfunction f<T extends Promise<number> | string>(x: T | undefined) {\n  if (x) {\n  }\n}\n      ",
+      "options": {
+        "checksConditionals": {
+          "flagUnions": "all"
+        },
+        "checksSpreads": true,
+        "checksVoidReturn": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "conditional",
+          "line": 3,
+          "column": 7,
+          "endLine": 3,
+          "endColumn": 8,
           "suggestions": []
         }
       ]

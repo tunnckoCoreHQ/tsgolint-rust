@@ -165,203 +165,253 @@
     },
     {
       "index": 32,
-      "code": "\nfunction test<T>(arg: T, key: keyof T) {\n  if (arg[key]?.toString()) {\n  }\n}\n    ",
+      "code": "\nconst truthy = <T,>(value: Awaited<T>) => (value ? 1 : 2);\n    ",
       "options": null
     },
     {
       "index": 33,
-      "code": "\nfunction test<T>(arg: T, key: keyof T) {\n  if (arg?.toString()) {\n  }\n}\n    ",
+      "code": "\nconst nullish = <T,>(value: Awaited<T>) => value ?? 1;\n    ",
       "options": null
     },
     {
       "index": 34,
-      "code": "\nfunction test<T>(arg: T | { value: string }) {\n  if (arg?.value) {\n  }\n}\n    ",
+      "code": "\nconst fromPromise = async <T,>(promise: Promise<T>) => {\n  const value = await promise;\n  return value ? 1 : 2;\n};\n    ",
       "options": null
     },
     {
       "index": 35,
-      "code": "\nfunction test(a: string) {\n  const t1 = a === 'a';\n  const t2 = 'a' === a;\n}\n    ",
+      "code": "\ntype Id<T> = T extends unknown ? T : never;\nfunction test<T>(t: Id<T>) {\n  return t ? 'yes' : 'no';\n}\n    ",
       "options": null
     },
     {
       "index": 36,
-      "code": "\nfunction test(a?: string) {\n  const t1 = a === undefined;\n  const t2 = undefined === a;\n  const t1 = a !== undefined;\n  const t2 = undefined !== a;\n}\n    ",
+      "code": "\nconst truthyUnion = <T,>(value: Awaited<T> | string) => (value ? 1 : 2);\n    ",
       "options": null
     },
     {
       "index": 37,
-      "code": "\nfunction test(a: null | string) {\n  const t1 = a === null;\n  const t2 = null === a;\n  const t1 = a !== null;\n  const t2 = null !== a;\n}\n    ",
+      "code": "\nconst truthy = <T extends string>(value: Awaited<T>) => (value ? 1 : 2);\n    ",
       "options": null
     },
     {
       "index": 38,
-      "code": "\nfunction test(a?: null | string) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n}\n    ",
+      "code": "\nconst nullish = <T extends Promise<string | null>>(value: Awaited<T>) =>\n  value ?? 1;\n    ",
       "options": null
     },
     {
       "index": 39,
-      "code": "\nfunction test(a?: string) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n}\n    ",
+      "code": "\nconst isUndefined = <T,>(value: Awaited<T>) => value === undefined;\n    ",
       "options": null
     },
     {
       "index": 40,
-      "code": "\nfunction test(a: null | string) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n}\n    ",
+      "code": "\nconst isNull = <T,>(value: Awaited<T>) => value === null;\n    ",
       "options": null
     },
     {
       "index": 41,
-      "code": "\nfunction test(a: any) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n  const t9 = a === null;\n  const t10 = null === a;\n  const t11 = a !== null;\n  const t12 = null !== a;\n  const t13 = a === undefined;\n  const t14 = undefined === a;\n  const t15 = a !== undefined;\n  const t16 = undefined !== a;\n}\n    ",
+      "code": "\nfunction test<T, K extends keyof T>(value: Awaited<T[K]>) {\n  return value ?? 1;\n}\n    ",
       "options": null
     },
     {
       "index": 42,
-      "code": "\nfunction test(a: unknown) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n  const t9 = a === null;\n  const t10 = null === a;\n  const t11 = a !== null;\n  const t12 = null !== a;\n  const t13 = a === undefined;\n  const t14 = undefined === a;\n  const t15 = a !== undefined;\n  const t16 = undefined !== a;\n}\n    ",
+      "code": "\nfunction test<T>(arg: T, key: keyof T) {\n  if (arg[key]?.toString()) {\n  }\n}\n    ",
       "options": null
     },
     {
       "index": 43,
-      "code": "\nfunction test<T>(a: T) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n  const t9 = a === null;\n  const t10 = null === a;\n  const t11 = a !== null;\n  const t12 = null !== a;\n  const t13 = a === undefined;\n  const t14 = undefined === a;\n  const t15 = a !== undefined;\n  const t16 = undefined !== a;\n}\n    ",
+      "code": "\nfunction test<T>(arg: T, key: keyof T) {\n  if (arg?.toString()) {\n  }\n}\n    ",
       "options": null
     },
     {
       "index": 44,
-      "code": "\nfunction foo<T extends object>(arg: T, key: keyof T): void {\n  arg[key] == null;\n}\n    ",
+      "code": "\nfunction test<T>(arg: T | { value: string }) {\n  if (arg?.value) {\n  }\n}\n    ",
       "options": null
     },
     {
       "index": 45,
-      "code": "\n// with literal arrow function\n[0, 1, 2].filter(x => x);\n\n// filter with named function\nfunction length(x: string) {\n  return x.length;\n}\n['a', 'b', ''].filter(length);\n\n// with non-literal array\nfunction nonEmptyStrings(x: string[]) {\n  return x.filter(length);\n}\n\n// filter-like predicate\nfunction count(\n  list: string[],\n  predicate: (value: string, index: number, array: string[]) => unknown,\n) {\n  return list.filter(predicate).length;\n}\n    ",
+      "code": "\nfunction test(a: string) {\n  const t1 = a === 'a';\n  const t2 = 'a' === a;\n}\n    ",
       "options": null
     },
     {
       "index": 46,
-      "code": "\ndeclare const test: <T>() => T;\n\n[1, null].filter(test);\n    ",
+      "code": "\nfunction test(a?: string) {\n  const t1 = a === undefined;\n  const t2 = undefined === a;\n  const t1 = a !== undefined;\n  const t2 = undefined !== a;\n}\n    ",
       "options": null
     },
     {
       "index": 47,
-      "code": "\ndeclare const test: <T extends boolean>() => T;\n\n[1, null].filter(test);\n    ",
+      "code": "\nfunction test(a: null | string) {\n  const t1 = a === null;\n  const t2 = null === a;\n  const t1 = a !== null;\n  const t2 = null !== a;\n}\n    ",
       "options": null
     },
     {
       "index": 48,
-      "code": "\n[1, null].filter(1 as any);\n    ",
+      "code": "\nfunction test(a?: null | string) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n}\n    ",
       "options": null
     },
     {
       "index": 49,
-      "code": "\n[1, null].filter(1 as never);\n    ",
+      "code": "\nfunction test(a?: string) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n}\n    ",
       "options": null
     },
     {
       "index": 50,
-      "code": "\nconst notArray = {\n  filter: (func: () => boolean) => func(),\n  find: (func: () => boolean) => func(),\n};\nnotArray.filter(() => true);\nnotArray.find(() => true);\n    ",
+      "code": "\nfunction test(a: null | string) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n}\n    ",
       "options": null
     },
     {
       "index": 51,
-      "code": "\nfunction test(a: string | null) {\n  return a ?? 'default';\n}\n    ",
+      "code": "\nfunction test(a: any) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n  const t9 = a === null;\n  const t10 = null === a;\n  const t11 = a !== null;\n  const t12 = null !== a;\n  const t13 = a === undefined;\n  const t14 = undefined === a;\n  const t15 = a !== undefined;\n  const t16 = undefined !== a;\n}\n    ",
       "options": null
     },
     {
       "index": 52,
-      "code": "\nfunction test(a: string | undefined) {\n  return a ?? 'default';\n}\n    ",
+      "code": "\nfunction test(a: unknown) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n  const t9 = a === null;\n  const t10 = null === a;\n  const t11 = a !== null;\n  const t12 = null !== a;\n  const t13 = a === undefined;\n  const t14 = undefined === a;\n  const t15 = a !== undefined;\n  const t16 = undefined !== a;\n}\n    ",
       "options": null
     },
     {
       "index": 53,
-      "code": "\nfunction test(a: string | null | undefined) {\n  return a ?? 'default';\n}\n    ",
+      "code": "\nfunction test<T>(a: T) {\n  const t1 = a == null;\n  const t2 = null == a;\n  const t3 = a != null;\n  const t4 = null != a;\n  const t5 = a == undefined;\n  const t6 = undefined == a;\n  const t7 = a != undefined;\n  const t8 = undefined != a;\n  const t9 = a === null;\n  const t10 = null === a;\n  const t11 = a !== null;\n  const t12 = null !== a;\n  const t13 = a === undefined;\n  const t14 = undefined === a;\n  const t15 = a !== undefined;\n  const t16 = undefined !== a;\n}\n    ",
       "options": null
     },
     {
       "index": 54,
-      "code": "\nfunction test(a: unknown) {\n  return a ?? 'default';\n}\n    ",
+      "code": "\nfunction foo<T extends object>(arg: T, key: keyof T): void {\n  arg[key] == null;\n}\n    ",
       "options": null
     },
     {
       "index": 55,
-      "code": "\nfunction test<T>(a: T) {\n  return a ?? 'default';\n}\n    ",
+      "code": "\n// with literal arrow function\n[0, 1, 2].filter(x => x);\n\n// filter with named function\nfunction length(x: string) {\n  return x.length;\n}\n['a', 'b', ''].filter(length);\n\n// with non-literal array\nfunction nonEmptyStrings(x: string[]) {\n  return x.filter(length);\n}\n\n// filter-like predicate\nfunction count(\n  list: string[],\n  predicate: (value: string, index: number, array: string[]) => unknown,\n) {\n  return list.filter(predicate).length;\n}\n    ",
       "options": null
     },
     {
       "index": 56,
-      "code": "\nfunction test<T extends string | null>(a: T) {\n  return a ?? 'default';\n}\n    ",
+      "code": "\ndeclare const test: <T>() => T;\n\n[1, null].filter(test);\n    ",
       "options": null
     },
     {
       "index": 57,
-      "code": "\nfunction foo<T extends object>(arg: T, key: keyof T): void {\n  arg[key] ?? 'default';\n}\n}\n    ",
+      "code": "\ndeclare const test: <T extends boolean>() => T;\n\n[1, null].filter(test);\n    ",
       "options": null
     },
     {
       "index": 58,
-      "code": "\ndeclare const arr: object[];\nif (arr[42]) {\n} // looks unnecessary from the types, but isn't\n\nconst tuple = [{}] as [object];\ndeclare const n: number;\nif (tuple[n]) {\n}\n    ",
+      "code": "\n[1, null].filter(1 as any);\n    ",
       "options": null
     },
     {
       "index": 59,
-      "code": "\ndeclare const arr: Array<{ value: string } & (() => void)>;\nif (arr[42]?.value) {\n}\narr[41]?.();\n\n// An array access can \"infect\" deeper into the chain\ndeclare const arr2: Array<{ x: { y: { z: object } } }>;\narr2[42]?.x?.y?.z;\n\nconst tuple = ['foo'] as const;\ndeclare const n: number;\ntuple[n]?.toUpperCase();\n    ",
+      "code": "\n[1, null].filter(1 as never);\n    ",
       "options": null
     },
     {
       "index": 60,
+      "code": "\nconst notArray = {\n  filter: (func: () => boolean) => func(),\n  find: (func: () => boolean) => func(),\n};\nnotArray.filter(() => true);\nnotArray.find(() => true);\n    ",
+      "options": null
+    },
+    {
+      "index": 61,
+      "code": "\nfunction test(a: string | null) {\n  return a ?? 'default';\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 62,
+      "code": "\nfunction test(a: string | undefined) {\n  return a ?? 'default';\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 63,
+      "code": "\nfunction test(a: string | null | undefined) {\n  return a ?? 'default';\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 64,
+      "code": "\nfunction test(a: unknown) {\n  return a ?? 'default';\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 65,
+      "code": "\nfunction test<T>(a: T) {\n  return a ?? 'default';\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 66,
+      "code": "\nfunction test<T extends string | null>(a: T) {\n  return a ?? 'default';\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 67,
+      "code": "\nfunction foo<T extends object>(arg: T, key: keyof T): void {\n  arg[key] ?? 'default';\n}\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 68,
+      "code": "\ndeclare const arr: object[];\nif (arr[42]) {\n} // looks unnecessary from the types, but isn't\n\nconst tuple = [{}] as [object];\ndeclare const n: number;\nif (tuple[n]) {\n}\n    ",
+      "options": null
+    },
+    {
+      "index": 69,
+      "code": "\ndeclare const arr: Array<{ value: string } & (() => void)>;\nif (arr[42]?.value) {\n}\narr[41]?.();\n\n// An array access can \"infect\" deeper into the chain\ndeclare const arr2: Array<{ x: { y: { z: object } } }>;\narr2[42]?.x?.y?.z;\n\nconst tuple = ['foo'] as const;\ndeclare const n: number;\ntuple[n]?.toUpperCase();\n    ",
+      "options": null
+    },
+    {
+      "index": 70,
       "code": "\ndeclare const arr: Array<{ value: string } & (() => void)>;\nif (arr[42]?.value) {\n}\narr[41]?.();\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 61,
+      "index": 71,
       "code": "\nif (arr?.[42]) {\n}\n    ",
       "options": null
     },
     {
-      "index": 62,
+      "index": 72,
       "code": "\ntype ItemA = { bar: string; baz: string };\ntype ItemB = { bar: string; qux: string };\ndeclare const foo: ItemA[] | ItemB[];\nfoo[0]?.bar;\n    ",
       "options": null
     },
     {
-      "index": 63,
+      "index": 73,
       "code": "\ntype TupleA = [string, number];\ntype TupleB = [string, number];\n\ndeclare const foo: TupleA | TupleB;\ndeclare const index: number;\nfoo[index]?.toString();\n    ",
       "options": null
     },
     {
-      "index": 64,
+      "index": 74,
       "code": "\ntype TupleA = [string, number];\ntype TupleB = [string, number];\n\ndeclare const foo: TupleA | TupleB;\ndeclare const index: number;\nfoo[index]?.toString();\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 65,
+      "index": 75,
       "code": "\ndeclare const returnsArr: undefined | (() => string[]);\nif (returnsArr?.()[42]) {\n}\nreturnsArr?.()[42]?.toUpperCase();\n    ",
       "options": null
     },
     {
-      "index": 66,
+      "index": 76,
       "code": "\ndeclare const arr: string[][];\narr[x] ?? [];\n    ",
       "options": null
     },
     {
-      "index": 67,
+      "index": 77,
       "code": "\ndeclare const arr: { foo: number }[];\nconst bar = arr[42]?.foo ?? 0;\n    ",
       "options": null
     },
     {
-      "index": 68,
+      "index": 78,
       "code": "\ndeclare const b1: boolean;\ndeclare const b2: true;\nconst x = b1 && b2;\n      ",
       "options": null
     },
     {
-      "index": 69,
+      "index": 79,
       "code": "\nfunction test(foo?: boolean, bar?: boolean) {\n  return (foo && 'foo') || (bar && 'bar');\n}\n      ",
       "options": null
     },
     {
-      "index": 70,
+      "index": 80,
       "code": "\ndeclare const b1: boolean;\ndeclare const b2: boolean;\nconst x = (b1 && 'b1') || b2;\n      ",
       "options": null
     },
     {
-      "index": 71,
+      "index": 81,
       "code": "\nwhile (true) {}\n      ",
       "options": {
         "allowConstantLoopConditions": true,
@@ -369,7 +419,7 @@
       }
     },
     {
-      "index": 72,
+      "index": 82,
       "code": "\nfor (; true; ) {}\n      ",
       "options": {
         "allowConstantLoopConditions": true,
@@ -377,7 +427,7 @@
       }
     },
     {
-      "index": 73,
+      "index": 83,
       "code": "\ndo {} while (true);\n      ",
       "options": {
         "allowConstantLoopConditions": true,
@@ -385,7 +435,7 @@
       }
     },
     {
-      "index": 74,
+      "index": 84,
       "code": "\nwhile (true) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "always",
@@ -393,7 +443,7 @@
       }
     },
     {
-      "index": 75,
+      "index": 85,
       "code": "\nfor (; true; ) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "always",
@@ -401,7 +451,7 @@
       }
     },
     {
-      "index": 76,
+      "index": 86,
       "code": "\ndo {} while (true);\n      ",
       "options": {
         "allowConstantLoopConditions": "always",
@@ -409,7 +459,7 @@
       }
     },
     {
-      "index": 77,
+      "index": 87,
       "code": "\nwhile (true) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "only-allowed-literals",
@@ -417,7 +467,7 @@
       }
     },
     {
-      "index": 78,
+      "index": 88,
       "code": "\nwhile (1) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "only-allowed-literals",
@@ -425,7 +475,7 @@
       }
     },
     {
-      "index": 79,
+      "index": 89,
       "code": "\nwhile (false) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "only-allowed-literals",
@@ -433,7 +483,7 @@
       }
     },
     {
-      "index": 80,
+      "index": 90,
       "code": "\nwhile (0) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "only-allowed-literals",
@@ -441,7 +491,7 @@
       }
     },
     {
-      "index": 81,
+      "index": 91,
       "code": "\nfor (; true; ) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "only-allowed-literals",
@@ -449,7 +499,7 @@
       }
     },
     {
-      "index": 82,
+      "index": 92,
       "code": "\nfor (; 0; ) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "only-allowed-literals",
@@ -457,7 +507,7 @@
       }
     },
     {
-      "index": 83,
+      "index": 93,
       "code": "\ndo {} while (0);\n      ",
       "options": {
         "allowConstantLoopConditions": "only-allowed-literals",
@@ -465,579 +515,579 @@
       }
     },
     {
-      "index": 84,
+      "index": 94,
       "code": "\nlet variable = 'abc' as string | void;\nvariable?.[0];\n    ",
       "options": null
     },
     {
-      "index": 85,
+      "index": 95,
       "code": "\nlet foo: undefined | { bar: true };\nfoo?.bar;\n    ",
       "options": null
     },
     {
-      "index": 86,
+      "index": 96,
       "code": "\nlet foo: null | { bar: true };\nfoo?.bar;\n    ",
       "options": null
     },
     {
-      "index": 87,
+      "index": 97,
       "code": "\nlet foo: undefined;\nfoo?.bar;\n    ",
       "options": null
     },
     {
-      "index": 88,
+      "index": 98,
       "code": "\nlet foo: undefined;\nfoo?.bar.baz;\n    ",
       "options": null
     },
     {
-      "index": 89,
+      "index": 99,
       "code": "\nlet foo: null;\nfoo?.bar;\n    ",
       "options": null
     },
     {
-      "index": 90,
+      "index": 100,
       "code": "\nlet anyValue: any;\nanyValue?.foo;\n    ",
       "options": null
     },
     {
-      "index": 91,
+      "index": 101,
       "code": "\nlet unknownValue: unknown;\nunknownValue?.foo;\n    ",
       "options": null
     },
     {
-      "index": 92,
+      "index": 102,
       "code": "\nlet foo: undefined | (() => {});\nfoo?.();\n    ",
       "options": null
     },
     {
-      "index": 93,
+      "index": 103,
       "code": "\nlet foo: null | (() => {});\nfoo?.();\n    ",
       "options": null
     },
     {
-      "index": 94,
+      "index": 104,
       "code": "\nlet foo: undefined;\nfoo?.();\n    ",
       "options": null
     },
     {
-      "index": 95,
+      "index": 105,
       "code": "\nlet foo: undefined;\nfoo?.().bar;\n    ",
       "options": null
     },
     {
-      "index": 96,
+      "index": 106,
       "code": "\nlet foo: null;\nfoo?.();\n    ",
       "options": null
     },
     {
-      "index": 97,
+      "index": 107,
       "code": "\nlet anyValue: any;\nanyValue?.();\n    ",
       "options": null
     },
     {
-      "index": 98,
+      "index": 108,
       "code": "\nlet unknownValue: unknown;\nunknownValue?.();\n    ",
       "options": null
     },
     {
-      "index": 99,
+      "index": 109,
       "code": "const foo = [1, 2, 3][0];",
       "options": null
     },
     {
-      "index": 100,
+      "index": 110,
       "code": "\ndeclare const foo: { bar?: { baz: { c: string } } } | null;\nfoo?.bar?.baz;\n    ",
       "options": null
     },
     {
-      "index": 101,
+      "index": 111,
       "code": "\nfoo?.bar?.baz?.qux;\n    ",
       "options": null
     },
     {
-      "index": 102,
+      "index": 112,
       "code": "\ndeclare const foo: { bar: { baz: string } };\nfoo.bar.qux?.();\n    ",
       "options": null
     },
     {
-      "index": 103,
+      "index": 113,
       "code": "\ntype Foo = { baz: number } | null;\ntype Bar = { baz: null | string | { qux: string } };\ndeclare const foo: { fooOrBar: Foo | Bar } | null;\nfoo?.fooOrBar?.baz?.qux;\n    ",
       "options": null
     },
     {
-      "index": 104,
+      "index": 114,
       "code": "\ntype Foo = { [key: string]: string } | null;\ndeclare const foo: Foo;\n\nconst key = '1';\nfoo?.[key]?.trim();\n    ",
       "options": null
     },
     {
-      "index": 105,
+      "index": 115,
       "code": "\ntype Foo = { [key: string]: string; foo: 'foo'; bar: 'bar' } | null;\ntype Key = 'bar' | 'foo';\ndeclare const foo: Foo;\ndeclare const key: Key;\n\nfoo?.[key].trim();\n    ",
       "options": null
     },
     {
-      "index": 106,
+      "index": 116,
       "code": "\ninterface Outer {\n  inner?: {\n    [key: string]: string | undefined;\n  };\n}\n\nfunction Foo(outer: Outer, key: string): number | undefined {\n  return outer.inner?.[key]?.charCodeAt(0);\n}\n    ",
       "options": null
     },
     {
-      "index": 107,
+      "index": 117,
       "code": "\ninterface Outer {\n  inner?: {\n    [key: string]: string | undefined;\n    bar: 'bar';\n  };\n}\ntype Foo = 'foo';\n\nfunction Foo(outer: Outer, key: Foo): number | undefined {\n  return outer.inner?.[key]?.charCodeAt(0);\n}\n    ",
       "options": null
     },
     {
-      "index": 108,
+      "index": 118,
       "code": "\ntype Foo = { [key: string]: string; foo: 'foo'; bar: 'bar' } | null;\ntype Key = 'bar' | 'foo' | 'baz';\ndeclare const foo: Foo;\ndeclare const key: Key;\n\nfoo?.[key]?.trim();\n    ",
       "options": null
     },
     {
-      "index": 109,
+      "index": 119,
       "code": "\ntype BrandedKey = string & { __brand: string };\ntype Foo = { [key: BrandedKey]: string } | null;\ndeclare const foo: Foo;\nconst key = '1' as BrandedKey;\nfoo?.[key]?.trim();\n    ",
       "options": null
     },
     {
-      "index": 110,
+      "index": 120,
       "code": "\ntype BrandedKey<S extends string> = S & { __brand: string };\ntype Foo = { [key: string]: string; foo: 'foo'; bar: 'bar' } | null;\ntype Key = BrandedKey<'bar'> | BrandedKey<'foo'>;\ndeclare const foo: Foo;\ndeclare const key: Key;\nfoo?.[key].trim();\n    ",
       "options": null
     },
     {
-      "index": 111,
+      "index": 121,
       "code": "\ntype BrandedKey = string & { __brand: string };\ninterface Outer {\n  inner?: {\n    [key: BrandedKey]: string | undefined;\n  };\n}\nfunction Foo(outer: Outer, key: BrandedKey): number | undefined {\n  return outer.inner?.[key]?.charCodeAt(0);\n}\n    ",
       "options": null
     },
     {
-      "index": 112,
+      "index": 122,
       "code": "\ninterface Outer {\n  inner?: {\n    [key: string & { __brand: string }]: string | undefined;\n    bar: 'bar';\n  };\n}\ntype Foo = 'foo' & { __brand: string };\nfunction Foo(outer: Outer, key: Foo): number | undefined {\n  return outer.inner?.[key]?.charCodeAt(0);\n}\n    ",
       "options": null
     },
     {
-      "index": 113,
+      "index": 123,
       "code": "\ntype BrandedKey<S extends string> = S & { __brand: string };\ntype Foo = { [key: string]: string; foo: 'foo'; bar: 'bar' } | null;\ntype Key = BrandedKey<'bar'> | BrandedKey<'foo'> | BrandedKey<'baz'>;\ndeclare const foo: Foo;\ndeclare const key: Key;\nfoo?.[key]?.trim();\n    ",
       "options": null
     },
     {
-      "index": 114,
+      "index": 124,
       "code": "\ntype BrandedKey = string & { __brand: string };\ntype Foo = { [key: BrandedKey]: string } | null;\ndeclare const foo: Foo;\nconst key = '1' as BrandedKey;\nfoo?.[key]?.trim();\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 115,
+      "index": 125,
       "code": "\ntype BrandedKey<S extends string> = S & { __brand: string };\ntype Foo = { [key: string]: string; foo: 'foo'; bar: 'bar' } | null;\ntype Key = BrandedKey<'bar'> | BrandedKey<'foo'>;\ndeclare const foo: Foo;\ndeclare const key: Key;\nfoo?.[key].trim();\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 116,
+      "index": 126,
       "code": "\ntype BrandedKey = string & { __brand: string };\ninterface Outer {\n  inner?: {\n    [key: BrandedKey]: string | undefined;\n  };\n}\nfunction Foo(outer: Outer, key: BrandedKey): number | undefined {\n  return outer.inner?.[key]?.charCodeAt(0);\n}\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 117,
+      "index": 127,
       "code": "\ninterface Outer {\n  inner?: {\n    [key: string & { __brand: string }]: string | undefined;\n    bar: 'bar';\n  };\n}\ntype Foo = 'foo' & { __brand: string };\nfunction Foo(outer: Outer, key: Foo): number | undefined {\n  return outer.inner?.[key]?.charCodeAt(0);\n}\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 118,
+      "index": 128,
       "code": "\ntype BrandedKey<S extends string> = S & { __brand: string };\ntype Foo = { [key: string]: string; foo: 'foo'; bar: 'bar' } | null;\ntype Key = BrandedKey<'bar'> | BrandedKey<'foo'> | BrandedKey<'baz'>;\ndeclare const foo: Foo;\ndeclare const key: Key;\nfoo?.[key]?.trim();\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 119,
+      "index": 129,
       "code": "\ntype Foo = {\n  key?: Record<string, { key: string }>;\n};\ndeclare const foo: Foo;\nfoo.key?.someKey?.key;\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 120,
+      "index": 130,
       "code": "\ntype Foo = {\n  key?: {\n    [key: string]: () => void;\n  };\n};\ndeclare const foo: Foo;\nfoo.key?.value?.();\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 121,
+      "index": 131,
       "code": "\ntype A = {\n  [name in Lowercase<string>]?: {\n    [name in Lowercase<string>]: {\n      a: 1;\n    };\n  };\n};\n\ndeclare const a: A;\n\na.a?.a?.a;\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 122,
+      "index": 132,
       "code": "\nlet latencies: number[][] = [];\n\nfunction recordData(): void {\n  if (!latencies[0]) latencies[0] = [];\n  latencies[0].push(4);\n}\n\nrecordData();\n    ",
       "options": null
     },
     {
-      "index": 123,
+      "index": 133,
       "code": "\nlet latencies: number[][] = [];\n\nfunction recordData(): void {\n  if (latencies[0]) latencies[0] = [];\n  latencies[0].push(4);\n}\n\nrecordData();\n    ",
       "options": null
     },
     {
-      "index": 124,
+      "index": 134,
       "code": "\nfunction test(testVal?: boolean) {\n  if (testVal ?? true) {\n    console.log('test');\n  }\n}\n    ",
       "options": null
     },
     {
-      "index": 125,
+      "index": 135,
       "code": "\ndeclare const x: string[];\nif (!x[0]) {\n}\n    ",
       "options": null
     },
     {
-      "index": 126,
+      "index": 136,
       "code": "\nconst isEven = (val: number) => val % 2 === 0;\nif (!isEven(1)) {\n}\n    ",
       "options": null
     },
     {
-      "index": 127,
+      "index": 137,
       "code": "\ndeclare const booleanTyped: boolean;\ndeclare const unknownTyped: unknown;\n\nif (!(booleanTyped || unknownTyped)) {\n}\n    ",
       "options": null
     },
     {
-      "index": 128,
+      "index": 138,
       "code": "\ninterface Foo {\n  [key: string]: [string] | undefined;\n}\n\ntype OptionalFoo = Foo | undefined;\ndeclare const foo: OptionalFoo;\nfoo?.test?.length;\n    ",
       "options": null
     },
     {
-      "index": 129,
+      "index": 139,
       "code": "\ninterface Foo {\n  [key: number]: [string] | undefined;\n}\n\ntype OptionalFoo = Foo | undefined;\ndeclare const foo: OptionalFoo;\nfoo?.[1]?.length;\n    ",
       "options": null
     },
     {
-      "index": 130,
+      "index": 140,
       "code": "\ndeclare let foo: number | null;\nfoo ??= 1;\n    ",
       "options": null
     },
     {
-      "index": 131,
+      "index": 141,
       "code": "\ndeclare let foo: number;\nfoo ||= 1;\n    ",
       "options": null
     },
     {
-      "index": 132,
+      "index": 142,
       "code": "\ndeclare const foo: { bar: { baz?: number; qux: number } };\ntype Key = 'baz' | 'qux';\ndeclare const key: Key;\nfoo.bar[key] ??= 1;\n    ",
       "options": null
     },
     {
-      "index": 133,
+      "index": 143,
       "code": "\ntype Fields = { hello?: number; world?: boolean };\nlet fields: Fields = {};\nfor (const key of ['hello', 'world'] as const) {\n  fields[key] ??= undefined;\n}",
       "options": null
     },
     {
-      "index": 134,
+      "index": 144,
       "code": "\ntype Fields = { hello?: boolean | number; world?: boolean };\nlet fields: Fields = {};\nfor (const key of ['hello', 'world'] as const) {\n  fields[key] ??= undefined;\n}",
       "options": null
     },
     {
-      "index": 135,
+      "index": 145,
       "code": "\ntype Fields = { hello?: number; world?: 1 | 2 | 3 };\nlet fields: Fields = {};\nfor (const key of ['hello', 'world'] as const) {\n  fields[key] ??= undefined;\n}",
       "options": null
     },
     {
-      "index": 136,
+      "index": 146,
       "code": "\ntype Fields = { hello?: 1 | 2 | 4; world?: 1 | 3 | 5 };\nlet fields: Fields = {};\nfor (const key of ['hello', 'world'] as const) {\n  fields[key] ??= undefined;\n}",
       "options": null
     },
     {
-      "index": 137,
+      "index": 147,
       "code": "\ninterface Foo { bizz?: number; buzz?: boolean }\nlet fields: Foo = {};\nfor (const key of ['bizz', 'buzz'] as const) {\n  fields[key] ??= undefined;\n}",
       "options": null
     },
     {
-      "index": 138,
+      "index": 148,
       "code": "\nlet fields: { 0?: number; 1?: boolean } = {};\nfor (const key of [0, 1] as const) {\n  fields[key] ??= undefined;\n}",
       "options": null
     },
     {
-      "index": 139,
+      "index": 149,
       "code": "\ndeclare const a: unique symbol;\ndeclare const b: unique symbol;\nlet fields: { [a]?: number; [b]?: boolean } = {};\nfor (const key of [a, b] as const) {\n  fields[key] ??= undefined;\n}",
       "options": null
     },
     {
-      "index": 140,
+      "index": 150,
       "code": "\ndeclare const sym: unique symbol;\ndeclare const key: 'x' | typeof sym;\ndeclare const fields: { [k: string]: number | undefined; [k: symbol]: boolean | undefined };\nfields[key] ??= undefined;\n",
       "options": null
     },
     {
-      "index": 141,
+      "index": 151,
       "code": "\ndeclare const sym: unique symbol;\ndeclare const key: string | symbol;\ndeclare const fields: { [k: string]: number | undefined; [k: symbol]: boolean | undefined };\nfields[key] ??= undefined;\n",
       "options": null
     },
     {
-      "index": 142,
+      "index": 152,
       "code": "\ndeclare const sym: unique symbol;\ndeclare const key: number | symbol;\ndeclare const fields: { [k: string]: number | undefined; [k: symbol]: boolean | undefined };\nfields[key] ??= undefined;\n",
       "options": null
     },
     {
-      "index": 143,
+      "index": 153,
       "code": "\nenum Keys {\n  A = 'A',\n  B = 'B',\n}\ntype Foo = {\n  [Keys.A]: number | null;\n  [Keys.B]: number;\n};\ndeclare const foo: Foo;\ndeclare const key: Keys;\nfoo[key] ??= 1;\n    ",
       "options": null
     },
     {
-      "index": 144,
+      "index": 154,
       "code": "\ndeclare const foo: { bar?: number };\nfoo.bar ??= 1;\n      ",
       "options": null,
       "tsconfig": "tsconfig.exactOptionalPropertyTypes.json"
     },
     {
-      "index": 145,
+      "index": 155,
       "code": "\ndeclare const foo: { bar: { baz?: number } };\nfoo['bar'].baz ??= 1;\n      ",
       "options": null,
       "tsconfig": "tsconfig.exactOptionalPropertyTypes.json"
     },
     {
-      "index": 146,
+      "index": 156,
       "code": "\ndeclare const foo: { bar: { baz?: number; qux: number } };\ntype Key = 'baz' | 'qux';\ndeclare const key: Key;\nfoo.bar[key] ??= 1;\n      ",
       "options": null,
       "tsconfig": "tsconfig.exactOptionalPropertyTypes.json"
     },
     {
-      "index": 147,
+      "index": 157,
       "code": "\ndeclare let foo: number;\nfoo &&= 1;\n    ",
       "options": null
     },
     {
-      "index": 148,
+      "index": 158,
       "code": "\nfunction foo<T extends object>(arg: T, key: keyof T): void {\n  arg[key] ??= 'default';\n}\n    ",
       "options": null
     },
     {
-      "index": 149,
+      "index": 159,
       "code": "\nfunction get<Obj, Key extends keyof Obj>(obj: Obj, key: Key) {\n  const value = obj[key];\n  if (value) {\n    return value;\n  }\n  throw new Error('BOOM!');\n}\n\nget({ foo: null }, 'foo');\n    ",
       "options": null
     },
     {
-      "index": 150,
+      "index": 160,
       "code": "\nfunction getElem(dict: Record<string, { foo: string }>, key: string) {\n  if (dict[key]) {\n    return dict[key].foo;\n  } else {\n    return '';\n  }\n}\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 151,
+      "index": 161,
       "code": "\ntype Foo = { bar: () => number | undefined } | null;\ndeclare const foo: Foo;\nfoo?.bar()?.toExponential();\n    ",
       "options": null
     },
     {
-      "index": 152,
+      "index": 162,
       "code": "\ntype Foo = (() => number | undefined) | null;\ndeclare const foo: Foo;\nfoo?.()?.toExponential();\n    ",
       "options": null
     },
     {
-      "index": 153,
+      "index": 163,
       "code": "\ntype FooUndef = () => undefined;\ntype FooNum = () => number;\ntype Foo = FooUndef | FooNum | null;\ndeclare const foo: Foo;\nfoo?.()?.toExponential();\n    ",
       "options": null
     },
     {
-      "index": 154,
+      "index": 164,
       "code": "\ntype Foo = { [key: string]: () => number | undefined } | null;\ndeclare const foo: Foo;\nfoo?.['bar']()?.toExponential();\n    ",
       "options": null
     },
     {
-      "index": 155,
+      "index": 165,
       "code": "\ndeclare function foo(): void | { key: string };\nconst bar = foo()?.key;\n    ",
       "options": null
     },
     {
-      "index": 156,
+      "index": 166,
       "code": "\ntype fn = () => void;\ndeclare function foo(): void | fn;\nconst bar = foo()?.();\n    ",
       "options": null
     },
     {
-      "index": 157,
+      "index": 167,
       "code": "\nclass ConsistentRand {\n  #rand?: number;\n\n  getCachedRand() {\n    this.#rand ??= Math.random();\n    return this.#rand;\n  }\n}\n      ",
       "options": null,
       "tsconfig": "tsconfig.exactOptionalPropertyTypes.json"
     },
     {
-      "index": 158,
+      "index": 168,
       "code": "\ndeclare function assert(x: unknown): asserts x;\n\nassert(Math.random() > 0.5);\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 159,
+      "index": 169,
       "code": "\ndeclare function assertSecond(x: unknown, y: unknown): asserts y;\ndeclare const b: boolean;\nassertSecond(b && 'b', b);",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 160,
+      "index": 170,
       "code": "\ndeclare function assert(x: unknown, y: unknown): asserts x;\n\nassert(Math.random() > 0.5, true);\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 161,
+      "index": 171,
       "code": "\ndeclare function assert(x: unknown): asserts x;\nassert(true);\n      ",
       "options": {
         "checkTypePredicates": false
       }
     },
     {
-      "index": 162,
+      "index": 172,
       "code": "\nclass ThisAsserter {\n  assertThis(this: unknown, arg2: unknown): asserts this {}\n}\n\nconst thisAsserter: ThisAsserter = new ThisAsserter();\nthisAsserter.assertThis(true);\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 163,
+      "index": 173,
       "code": "\nclass ThisAsserter {\n  assertThis(this: unknown, arg2: unknown): asserts this {}\n}\n\nconst thisAsserter: ThisAsserter = new ThisAsserter();\nthisAsserter.assertThis(Math.random());\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 164,
+      "index": 174,
       "code": "\ndeclare function assert(x: unknown): asserts x;\nassert(...[]);\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 165,
+      "index": 175,
       "code": "\ndeclare function assert(x: unknown): asserts x;\nassert(...[], {});\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 166,
+      "index": 176,
       "code": "\ndeclare function assertString(x: unknown): asserts x is string;\ndeclare const a: string;\nassertString(a);\n      ",
       "options": {
         "checkTypePredicates": false
       }
     },
     {
-      "index": 167,
+      "index": 177,
       "code": "\ndeclare function isString(x: unknown): x is string;\ndeclare const a: string;\nisString(a);\n      ",
       "options": {
         "checkTypePredicates": false
       }
     },
     {
-      "index": 168,
+      "index": 178,
       "code": "\ndeclare function assertString(x: unknown): asserts x is string;\nassertString('falafel');\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 169,
+      "index": 179,
       "code": "\ndeclare function isString(x: unknown): x is string;\nisString('falafel');\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 170,
+      "index": 180,
       "code": "\ntype A = { [name in Lowercase<string>]?: A };\ndeclare const a: A;\na.a?.a?.a;\n    ",
       "options": null
     },
     {
-      "index": 171,
+      "index": 181,
       "code": "\ninterface T {\n  [name: Lowercase<string>]: {\n    [name: Lowercase<string>]: {\n      [name: Lowercase<string>]: {\n        value: 'value';\n      };\n    };\n  };\n  [name: Uppercase<string>]: null | {\n    [name: Uppercase<string>]: null | {\n      [name: Uppercase<string>]: null | {\n        VALUE: 'VALUE';\n      };\n    };\n  };\n}\n\ndeclare const t: T;\n\nt.a.a.a.value;\nt.A?.A?.A?.VALUE;\n    ",
       "options": null
     },
     {
-      "index": 172,
+      "index": 182,
       "code": "function repro1(e: FocusEvent) { if (e.target !== window) return; }",
       "options": null
     },
     {
-      "index": 173,
+      "index": 183,
       "code": "\nfunction repro2(flag: string & {}, arg: string) {\n  if (arg === flag) return true;\n  return false;\n}\n    ",
       "options": null
     },
     {
-      "index": 174,
+      "index": 184,
       "code": "\nconst flagPresent = Symbol();\ntype FlagPresent = typeof flagPresent;\nfunction repro3(queryFlag: string[] | FlagPresent) {\n  if (Array.isArray(queryFlag) && queryFlag.length === 0) return true;\n  if (queryFlag === flagPresent) return true;\n  return false;\n}\n    ",
       "options": null
     },
     {
-      "index": 175,
+      "index": 185,
       "code": "type PersonalizationId = `${string}_6_main` | `${string}_7_main`;\nfunction repro4(a: PersonalizationId, b: string) {\n  return a === b;\n}\n",
       "options": null
     },
     {
-      "index": 176,
+      "index": 186,
       "code": "\nfunction test699<T extends 'a' | 'b'>(x: T | undefined, y: T) {\n  return x === y;\n}\n    ",
       "options": null
     },
     {
-      "index": 177,
+      "index": 187,
       "code": "\nfunction test<T extends [string], I extends number>(arr: T, i: I) {\n  return arr[i] ?? 'default';\n}\n    ",
       "options": null
     },
     {
-      "index": 178,
+      "index": 188,
       "code": "\nexport function groupBy<T, R extends string | number>(list: T[], func: (item: T) => R) {\n    return list.reduce(\n      (obj, item) => {\n        const existingItems = obj[func(item)] ?? [];\n        return { ...obj, [func(item)]: [...existingItems, item] };\n      },\n      {} as Partial<Record<R, T[]>>\n    );\n}\n      ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 179,
+      "index": 189,
       "code": "\nexport function groupBy<T, R extends string | number>(list: T[], func: (item: T) => R) {\n    return list.reduce(\n      (obj, item) => {\n        const existingItems = obj[func(item)] ?? [];\n        return { ...obj, [func(item)]: [...existingItems, item] };\n      },\n      {} as Partial<Record<R, T[]>>\n    );\n}\n    ",
       "options": null
     },
     {
-      "index": 180,
+      "index": 190,
       "code": "\nfunction test<T extends string[], I extends number>(arr: T, i: I) {\n  arr[i] ??= 'default';\n}\n    ",
       "options": null
     },
     {
-      "index": 181,
+      "index": 191,
       "code": "\nfunction repro5() {\n  const obj: Record<string, { name: string }> = {};\n  const key: string = 'foo';\n  obj[key] ??= { name: key };\n}\n    ",
       "options": null
     },
     {
-      "index": 182,
+      "index": 192,
       "code": "\nfunction repro5WithNoUncheckedIndexedAccess() {\n  const obj: Record<string, { name: string }> = {};\n  const key: string = 'foo';\n  obj[key] ??= { name: key };\n}\n    ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 183,
+      "index": 193,
       "code": "\ntype ProviderOptions = Record<string, Record<string, unknown>>;\n\nfunction withNullishAssignment(opts: ProviderOptions): Record<string, unknown> {\n  return opts.perplexity ??= {};\n}\n    ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 184,
+      "index": 194,
       "code": "\ntype Result<T> = T extends null\n  ? string | null\n  : T extends string\n    ? string\n    : T extends boolean\n      ? boolean\n      : T extends number\n        ? number\n        : T;\n\nfunction processValue<T extends string | null>(value: Result<T>): string {\n  if (value == null) {\n    return 'default';\n  }\n  return String(value);\n}\n    ",
       "options": null
     },
     {
-      "index": 185,
+      "index": 195,
       "code": "\ntype BrandedString = string & { __brand: 'brandedString' };\n\nfunction reproBrandedRecordWithNoUncheckedIndexedAccess(key: BrandedString) {\n  const lookup: Record<BrandedString, number> = {};\n  lookup[key] ?? 2;\n}\n    ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 186,
+      "index": 196,
       "code": "\ntype BrandedString = string & { __brand: 'brandedString' };\n\nfunction reproBrandedRecordAssignmentWithNoUncheckedIndexedAccess(key: BrandedString) {\n  const lookup: Record<BrandedString, number> = {};\n  lookup[key] ??= 2;\n}\n    ",
       "options": null,
       "tsconfig": "tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 187,
+      "index": 197,
       "code": "\ntype Item = { action: 'create'; value: number } | null | undefined;\n\ndeclare function getValues(): { data: Item[] };\ndeclare function getValues(name: `data.${number}`): Item;\n\nconst value = getValues(`data.0`)?.value;\n    ",
       "options": null
     },
     {
-      "index": 188,
+      "index": 198,
       "code": "\ntype Item = { action: 'create'; value: number } | null | undefined;\n\ntype Form =\n  | {\n      getValues(): { data: Item[] };\n      getValues(name: `data.${number}`): Item;\n    }\n  | undefined;\n\ndeclare const form: Form;\n\nconst value = form?.getValues(`data.0`)?.value;\n    ",
       "options": null
     },
     {
-      "index": 189,
+      "index": 199,
       "code": "\nfunction getValueOrDefault<T>(value: T | null | undefined, defaultValue: T): T {\n\tif (value != null && value !== '') {\n\t\treturn value;\n\t}\n\treturn defaultValue;\n}\n\nconst _result = getValueOrDefault<string>('', 'fallback');\n    ",
       "options": null
     },
     {
-      "index": 190,
+      "index": 200,
       "code": "\ndeclare const test: true;\n\nwhile (test) {}\n      ",
       "options": {
         "allowConstantLoopConditions": "always",
@@ -1045,31 +1095,31 @@
       }
     },
     {
-      "index": 191,
+      "index": 201,
       "code": "\ntype Foo = { bar: { baz: string } } | { bar: null };\ndeclare const foo: Foo | null;\nfoo?.bar?.baz;\n    ",
       "options": null
     },
     {
-      "index": 192,
+      "index": 202,
       "code": "\ntype Brand<T, B extends string> = T & { readonly $brand: { [K in B]: true } };\ntype IsoDateString = Brand<string, \"IsoDateString\">;\ndeclare const date: IsoDateString;\nif (date === \"2025-01-01\") {}\n    ",
       "options": null
     },
     {
-      "index": 193,
+      "index": 203,
       "code": "\ndeclare function isString(x: unknown): x is string;\ndeclare const a: 'falafel';\n\nif (isString(a)) {}\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 194,
+      "index": 204,
       "code": "\ndeclare function assertSecond(x: unknown, y: unknown): asserts y;\n\nassertSecond(...[], true);\n      ",
       "options": {
         "checkTypePredicates": true
       }
     },
     {
-      "index": 195,
+      "index": 205,
       "code": "function _foo<T>(value: T) {\n\tif (typeof value === 'object' && value !== null) { console.log('foo'); }\n}",
       "options": null
     }
@@ -3725,6 +3775,70 @@
       "errors": [
         {
           "messageId": "alwaysTruthy",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 164,
+      "code": "\nfunction test<T extends string>(a: Awaited<T>) {\n  return a ?? 'default';\n}\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "neverNullish",
+          "line": 3,
+          "column": 10,
+          "endLine": 3,
+          "endColumn": 11,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 165,
+      "code": "\nfunction test<T extends Promise<object>>(a: Awaited<T>) {\n  return a ? 'yes' : 'no';\n}\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "alwaysTruthy",
+          "line": 3,
+          "column": 10,
+          "endLine": 3,
+          "endColumn": 11,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 166,
+      "code": "\nfunction test<T>(a: T extends string ? 'a' : 'b') {\n  return a ? 'yes' : 'no';\n}\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "alwaysTruthy",
+          "line": 3,
+          "column": 10,
+          "endLine": 3,
+          "endColumn": 11,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 167,
+      "code": "\nfunction test<T>(a: T extends string ? 'a' : 'b') {\n  return a ?? 'default';\n}\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "neverNullish",
+          "line": 3,
+          "column": 10,
+          "endLine": 3,
+          "endColumn": 11,
           "suggestions": []
         }
       ]

@@ -462,558 +462,584 @@
     },
     {
       "index": 85,
-      "code": "\ninterface Element {\n  tagName: string;\n}\n\ninterface HTMLCanvasElement extends Element {\n  getContext(contextId: string): unknown;\n}\n\ninterface HTMLElementTagNameMap {\n  canvas: HTMLCanvasElement;\n}\n\ndeclare const document: {\n  querySelector<K extends keyof HTMLElementTagNameMap>(selectors: K): HTMLElementTagNameMap[K] | null;\n  querySelector<E extends Element = Element>(selectors: string): E | null;\n};\n\nexport const a = document.querySelector('.foo') as HTMLCanvasElement | null;\n\t\t",
-      "options": null
-    },
-    {
-      "index": 86,
       "code": "\ninterface Element { tagName: string; }\n\ninterface HTMLCanvasElement extends Element { getContext(contextId: string): unknown; }\n\ninterface Factory { new <E extends Element = Element>(): E | null; }\n\ndeclare const CanvasFactory: Factory;\n\nexport const a = new CanvasFactory() as HTMLCanvasElement | null;\n\t\t",
       "options": null
     },
     {
-      "index": 87,
+      "index": 86,
       "code": "\ninterface Element { tagName: string; }\n\ninterface HTMLCanvasElement extends Element { getContext(contextId: string): unknown; }\n\ndeclare const query: { <E extends Element = Element>(strings: TemplateStringsArray): E | null; };\n\nexport const a = query`.foo` as HTMLCanvasElement | null;\n\t\t",
       "options": null
     },
     {
-      "index": 88,
-      "code": "\ndeclare function load<T = unknown>(): Promise<T>;\n\nexport async function main() {\n  const actual = (await load()) as Record<string, unknown>;\n  return { ...actual };\n}\n\t\t",
-      "options": null
-    },
-    {
-      "index": 89,
+      "index": 87,
       "code": "\ndeclare function load<T = unknown>(): Promise<Promise<T>>;\n\nexport async function main() {\n  const actual = (await await load()) as Record<string, unknown>;\n  return { ...actual };\n}\n\t\t",
       "options": null
     },
     {
-      "index": 90,
-      "code": "\ndeclare function load<T = unknown>(): Promise<T>;\nexport async function main() {\n  const actual = <Record<string, unknown>>(await load());\n  return { ...actual };\n}\n\t\t",
-      "options": null
-    },
-    {
-      "index": 91,
+      "index": 88,
       "code": "\ntype NumberValueType = number | string;\ntype NumberValuePairType = [NumberValueType, NumberValueType];\n\ntype NumberCellValueType<T extends NumberValuePairType | NumberValueType> =\n  T extends NumberValuePairType ? NumberValuePairType : NumberValueType;\n\nfunction processValue<T extends NumberValuePairType | NumberValueType>(\n  value: NumberCellValueType<T>\n): number {\n  if (Array.isArray(value)) {\n    return 0;\n  }\n\n  const numberValue = typeof value === \"string\" ? parseFloat(value) : (value as number);\n  //                                                                   ^^^^^^^^^^^^^^^^\n  // tsgolint: \"This assertion is unnecessary since it does not change the type of the expression.\"\n  const negative = numberValue < 0;\n  return negative ? -1 : 1;\n}\n\t\t",
       "options": null
     },
     {
-      "index": 92,
+      "index": 89,
       "code": "const cb = async (importOriginal: unknown) => { const actual = (await importOriginal()) as Record<string, unknown>; return { ...actual, useLocation: vi.fn() }; });",
       "options": null
     },
     {
-      "index": 93,
+      "index": 90,
       "code": "\ntype Data<T> = { value?: T };\ntype ValueType<TData> = TData extends Data<infer T> ? T : never;\n\nexport const foo = <TData extends Data<any>>(data: TData) => {\n  const getValue = () => data.value as ValueType<TData> | undefined;\n  const value: ValueType<TData> = getValue()!;\n  return value;\n};\n    ",
       "options": null
     },
     {
-      "index": 94,
+      "index": 91,
       "code": "\nfunction bar<T extends any>(value: T | undefined): T {\n  return value!;\n}\n    ",
       "options": null
     },
     {
-      "index": 95,
+      "index": 92,
       "code": "\nconst array: object[] = [{}];\n\nlet nullish: object | undefined;\nnullish ??= array[1] as object | undefined;\n\nlet falsy: object | undefined;\nfalsy ||= array[1] as object | undefined;\n\nlet truthy: object | undefined = {};\ntruthy &&= array[1] as object | undefined;\n    ",
       "options": null
     },
     {
-      "index": 96,
+      "index": 93,
       "code": "const a = <const>'a';",
       "options": null
     },
     {
-      "index": 97,
+      "index": 94,
       "code": "\nclass T {\n  readonly a = 'a' as const;\n}\n      ",
       "options": null
     },
     {
-      "index": 98,
+      "index": 95,
       "code": "\nenum T {\n  Value1,\n  Value2,\n}\ndeclare const a: T.Value1;\nconst b = a as const;\n      ",
       "options": null
     },
     {
-      "index": 99,
+      "index": 96,
       "code": "\n(() => {})() as undefined;\n      ",
       "options": null
     },
     {
-      "index": 100,
+      "index": 97,
       "code": "\nconst f = () => {};\nf() as undefined;\n      ",
       "options": null
     },
     {
-      "index": 101,
+      "index": 98,
       "code": "\n(function () {})() as undefined;\n      ",
       "options": null
     },
     {
-      "index": 102,
+      "index": 99,
       "code": "\ninterface Overloaded {\n  (): undefined;\n  (value: string): void;\n}\n\n((value => {}) as Overloaded)('') as undefined;\n      ",
       "options": null
     },
     {
-      "index": 103,
+      "index": 100,
       "code": "\ninterface Overloaded {\n  (): void;\n  (value: string): undefined;\n}\n\n((() => {}) as Overloaded)() as undefined;\n      ",
       "options": null
     },
     {
-      "index": 104,
+      "index": 101,
       "code": "\ninterface GenericOverloaded {\n  <T extends string>(value: T): void;\n  (): undefined;\n}\n((value => {}) as GenericOverloaded)('') as undefined;\n      ",
       "options": null
     },
     {
-      "index": 105,
+      "index": 102,
       "code": "\ninterface Unioned {\n  (): undefined | void;\n}\n\n((() => {}) as Unioned)() as undefined;\n      ",
       "options": null
     },
     {
-      "index": 106,
+      "index": 103,
       "code": "\nfunction fn<T>(items: ReadonlyArray<T>) {}\nfn([42] as const);\n      ",
       "options": null
     },
     {
-      "index": 107,
+      "index": 104,
       "code": "\ndeclare const a: any;\ndeclare function foo(arg: string): void;\nfoo(a as string);\n    ",
       "options": null
     },
     {
-      "index": 108,
+      "index": 105,
       "code": "\ndeclare const a: object;\nconst b = a as { id?: number };\n    ",
       "options": null
     },
     {
-      "index": 109,
+      "index": 106,
       "code": "\ndeclare const array: any[];\nfunction foo(strings: string[]): void {}\nfoo(array as string[]);\n    ",
       "options": null
     },
     {
-      "index": 110,
+      "index": 107,
       "code": "\ndeclare const record: Record<string, unknown>;\nconst obj = record as { id?: number };\n    ",
       "options": null
     },
     {
-      "index": 111,
+      "index": 108,
       "code": "\ndeclare const obj: { [key: string]: unknown };\nconst foo = obj as {};\n    ",
       "options": null
     },
     {
-      "index": 112,
+      "index": 109,
       "code": "\ninterface Empty {}\ndeclare function getAny(): any;\nconst result = getAny() as Empty;\n    ",
       "options": null
     },
     {
-      "index": 113,
+      "index": 110,
       "code": "\ninterface Empty {}\ndeclare function getObject(): object;\nconst result = getObject() as Empty;\n    ",
       "options": null
     },
     {
-      "index": 114,
+      "index": 111,
       "code": "\ninterface Obj {\n  id: number;\n}\ndeclare const obj: Readonly<Obj>;\nconst obj2 = obj as Obj;\n    ",
       "options": null
     },
     {
-      "index": 115,
+      "index": 112,
       "code": "\ndeclare const record: Record<string, unknown>;\nconst obj = record as { [additionalProperties: string]: unknown; id?: number };\n    ",
       "options": null
     },
     {
-      "index": 116,
+      "index": 113,
       "code": "\ninterface PropsA {\n  a?: number;\n}\ninterface PropsB extends PropsA {\n  b?: string;\n}\ndeclare const propsB: PropsB;\nconst propsA = propsB as PropsA;\n    ",
       "options": null
     },
     {
-      "index": 117,
+      "index": 114,
       "code": "\ninterface PropsA {\n  a?: number;\n}\ninterface PropsB extends PropsA {\n  b?: string;\n}\ndeclare const propsB: PropsB[];\nconst propsA = propsB as PropsA[];\n    ",
       "options": null
     },
     {
-      "index": 118,
+      "index": 115,
       "code": "\nclass Box<T> {\n  value: T;\n}\nclass PairBox<T, U> {\n  value: T;\n}\ndeclare const pairBox: PairBox<string, number>;\nconst box = pairBox as Box<string>;\n    ",
       "options": null
     },
     {
-      "index": 119,
+      "index": 116,
       "code": "\ntype ObjectLike = Record<string, unknown>;\ndeclare const result: ObjectLike;\ndeclare const key: string;\nresult[key] = { ...(result[key] as ObjectLike) };\n    ",
       "options": null
     },
     {
-      "index": 120,
+      "index": 117,
       "code": "\ninterface AST {\n  comments: string[] | undefined;\n}\nconst ast: AST = {\n  comments: [],\n};\nconst { comments } = ast as { comments: string[] };\n    ",
       "options": null
     },
     {
-      "index": 121,
+      "index": 118,
       "code": "\ntype Tuple = [string | undefined, number];\nconst tuple: Tuple = ['hello', 42];\nconst [first, second] = tuple as [string, number];\n    ",
       "options": null
     },
     {
-      "index": 122,
+      "index": 119,
       "code": "\ninterface Wide {\n  name?: string;\n}\ninterface Narrow {\n  name: string;\n}\ndeclare const narrow: Narrow;\nconst obj = { value: narrow as Wide } satisfies Record<string, Wide>;\n    ",
       "options": null
     },
     {
-      "index": 123,
+      "index": 120,
       "code": "\ninterface Wide {\n  name?: string;\n}\ninterface Narrow {\n  name: string;\n}\ndeclare const narrow: Narrow;\nconst value = narrow as Wide satisfies Wide;\n    ",
       "options": null
     },
     {
-      "index": 124,
+      "index": 121,
       "code": "\ninterface Wide {\n  name?: string;\n}\ninterface Narrow {\n  name: string;\n}\ndeclare const narrow: Narrow;\ndeclare function identity<T>(x: T): T;\nconst result = identity({ value: narrow as Wide }) satisfies { value: Wide };\n    ",
       "options": null
     },
     {
-      "index": 125,
+      "index": 122,
       "code": "\ndeclare const x: string | number;\nconst result: { tag: string; value: string | number } | { value: number } = {\n  value: x as number,\n};\n    ",
       "options": null
     },
     {
-      "index": 126,
+      "index": 123,
       "code": "\ndeclare const x: string | number;\nfunction fn(): { tag: string; value: string | number } | { value: number } {\n  return {\n    value: x as number,\n  };\n}\n    ",
       "options": null
     },
     {
-      "index": 127,
+      "index": 124,
       "code": "\ninterface A {\n  a: string;\n}\ninterface B extends A {\n  b: string;\n}\ndeclare const a: A;\nlet result;\nresult = a as B;\nresult.b;\n    ",
       "options": null
     },
     {
-      "index": 128,
+      "index": 125,
       "code": "\ninterface A {\n  a: string;\n}\ninterface B extends A {\n  b: string;\n}\ninterface C extends B {\n  c: string;\n}\ndeclare let a: A;\ndeclare let b: B;\nconst c = (a = b as C);\nc.c;\n    ",
       "options": null
     },
     {
-      "index": 129,
+      "index": 126,
       "code": "\ntype NumberRecord = { readonly [P in number]: number };\nfunction fn<T extends NumberRecord>(record: T) {\n  for (const key of Object.keys(record)) {\n    const index = +key as keyof T & number;\n    record[index] = record[index] + 1;\n  }\n}\n    ",
       "options": null
     },
     {
-      "index": 130,
+      "index": 127,
       "code": "\ninterface ReadonlyMap<K, V> {\n  get(key: K): V | undefined;\n}\ntype T = { get<K>(key: K): K };\ndeclare const x: ReadonlyMap<string, string>;\ndeclare let y: T;\ny = x as T;\n    ",
       "options": null
     },
     {
-      "index": 131,
+      "index": 128,
       "code": "\ndeclare function find<T>(array: readonly T[] | undefined): T | undefined;\ndeclare const array: string[] | number[];\nfind(array as (string | number)[]);\n    ",
       "options": null
     },
     {
-      "index": 132,
+      "index": 129,
       "code": "\ninterface A {\n  a: string;\n}\ninterface B extends A {\n  b: string;\n}\ndeclare function mapDefined<T>(fn: () => T): T;\ndeclare const b: B;\ndeclare const arrayA: A[];\nconst a = mapDefined(() => b as A);\n[a].concat(arrayA);\n    ",
       "options": null
     },
     {
-      "index": 133,
+      "index": 130,
       "code": "\ninterface A {\n  a: string;\n}\ninterface B extends A {\n  b: string;\n}\ndeclare function mapDefined<T>(fn: () => T): T;\ndeclare const b: B;\ndeclare const arrayA: A[];\nconst a = mapDefined(() =>\n  Math.random() > 0.5 ? (b as A) : (null as unknown as A),\n);\n[a].concat(arrayA);\n    ",
       "options": null
     },
     {
-      "index": 134,
+      "index": 131,
       "code": "\ninterface Params {\n  a?: string;\n  b?: string;\n}\ndeclare const params: Omit<Params, 'a'> & { c?: string };\n(params as Params).a = 'c';\n    ",
       "options": null
     },
     {
-      "index": 135,
+      "index": 132,
       "code": "\nconst text: string | null = null as string | null;\nif (text) {\n  text.toLowerCase();\n}\n    ",
       "options": null
     },
     {
-      "index": 136,
+      "index": 133,
       "code": "\nconst text: string | undefined = undefined as string | undefined;\nif (text) {\n  text.toLowerCase();\n}\n    ",
       "options": null
     },
     {
-      "index": 137,
+      "index": 134,
       "code": "\ntype Infer<T> = T extends ObjectConstructor\n  ? never\n  : T extends () => infer V\n    ? V\n    : never;\ndeclare function fn<T>(o: { p: T }): { [K in keyof T]: Infer<T[K]> };\nconst result = fn({ p: { a: Object as () => string } });\nresult.a.toLowerCase();\n    ",
       "options": null
     },
     {
-      "index": 138,
+      "index": 135,
       "code": "\ntype Accessor<T> = () => T;\ndeclare function inner<T>(): Accessor<T>;\nfunction outer<T>(): Accessor<T> {\n  return inner<string>() as Accessor<any>;\n}\n    ",
       "options": null
     },
     {
-      "index": 139,
+      "index": 136,
       "code": "\ninterface InjectionConstraint<T> {}\ntype InjectionKey<T> = symbol & InjectionConstraint<T>;\ndeclare function inject<T>(key: InjectionKey<T>): T;\nconst context = Symbol('ctx') as InjectionKey<{ value: string }>;\ninject(context).value;\n    ",
       "options": null
     },
     {
-      "index": 140,
+      "index": 137,
       "code": "\ndeclare function fn<U>(g: (memo: U) => U, initial: U): U;\ndeclare function fn<T>(g: (memo: T) => T): T | undefined;\nenum E {\n  A = 1,\n}\nconst x: E = fn(n => n | 0, 0 as E);\n    ",
       "options": null
     },
     {
-      "index": 141,
+      "index": 138,
       "code": "\ntype BasePayload = { id: string };\n\nabstract class AbstractHandler {\n  constructor(_ctx: { token: number }) {}\n}\n\nabstract class AbstractPayloadHandler<\n  TPayload extends BasePayload = BasePayload,\n> extends AbstractHandler {}\n\ntype HandlerCtor = new (ctx: { token: number }) => AbstractHandler;\n\ndeclare const registeredHandlers: HandlerCtor[];\n\nfunction example<TItem extends BasePayload>(\n  handlerClass: typeof AbstractPayloadHandler<TItem>,\n) {\n  registeredHandlers.includes(\n    handlerClass as new (...args: any[]) => AbstractPayloadHandler<TItem>,\n  );\n}\n    ",
       "options": null
     },
     {
-      "index": 142,
+      "index": 139,
       "code": "\nfunction fn<T extends { type: string }, K extends string, V>(\n  node: T,\n): T & Record<K, V> {\n  return node as T & Record<K, V>;\n}\n    ",
       "options": null
     },
     {
-      "index": 143,
+      "index": 140,
       "code": "\ndeclare function fn<T extends boolean>(\n  options: {\n    a: T extends true ? never : unknown;\n  } & {\n    b: T;\n  },\n): void;\n\nfn({\n  a: true,\n  b: true as any,\n});\n    ",
       "options": null
     },
     {
-      "index": 144,
+      "index": 141,
       "code": "\ndeclare const a: number[] | number | undefined;\nconst b: number[] = a ?? ([0] as any);\n    ",
       "options": null
     },
     {
-      "index": 145,
+      "index": 142,
       "code": "\nconst context: { meta: Record<string, unknown> | undefined } = { meta: {} };\nconst meta = context.meta as { schema?: object } | undefined;\n    ",
       "options": null
     },
     {
-      "index": 146,
+      "index": 143,
       "code": "\ntype Test<T extends Record<string, unknown>> = {};\n\nfunction inferred<T extends Test<never>[]>(_input: {\n  addons?: T;\n}): {\n  options: T extends Test<infer C>[] ? C : never;\n} {\n  return {\n    options: {} as T extends Test<infer C>[] ? C : never,\n  };\n}\n\nconst test = inferred({\n  addons: [{} as Test<{ parameters: { potato: boolean } }>],\n});\n\nconsole.log(test.options.parameters.potato);\n    ",
       "options": null
     },
     {
-      "index": 147,
+      "index": 144,
       "code": "\ndeclare function fn(value: string | null): void;\nfn((null) as string | null);\n    ",
       "options": null
     },
     {
-      "index": 148,
+      "index": 145,
       "code": "\nconst value: undefined = (() => {})() as undefined;\n    ",
       "options": null
     },
     {
-      "index": 149,
+      "index": 146,
       "code": "\ntype RecursiveConditional<T> =\n  (value: T extends string ? any : number) => RecursiveConditional<string>;\n\ndeclare const callable: RecursiveConditional<number>;\ndeclare function consume(value: unknown): void;\nconsume(callable as unknown);\n    ",
       "options": null
     },
     {
-      "index": 150,
+      "index": 147,
       "code": "\ntype RecursiveCallable<Options = {}> =\n  & (<NewOptions = {}>(options: NewOptions) => RecursiveCallable<Options & NewOptions>)\n  & ((command: string) => void);\n\ndeclare const callable: RecursiveCallable;\nconst value = callable as unknown;\nconst contextualValue: unknown = callable as unknown;\ndeclare function consume(value: unknown): void;\nconsume(callable as unknown);\n    ",
       "options": null
     },
     {
-      "index": 151,
+      "index": 148,
       "code": "\ntype Item = { id: string | number };\n\ndeclare function combine<T1, T2 extends T1>(a: readonly T1[], b: readonly T2[]): T1[];\n\ndeclare const items: Item[];\n\nconst result = combine([{ id: 0 } as Item], items);\n    ",
       "options": null
     },
     {
-      "index": 152,
+      "index": 149,
       "code": "\ntype Item = { id: string | number };\n\ninterface Combiner {\n  new <T1, T2 extends T1>(a: readonly T1[], b: readonly T2[]): unknown;\n}\n\ndeclare const Combiner: Combiner;\ndeclare const items: Item[];\n\nconst result = new Combiner([{ id: 0 } as Item], items);\n    ",
       "options": null
     },
     {
-      "index": 153,
+      "index": 150,
       "code": "\ntype Item = { id: string | number };\n\ndeclare function combine<T1, T2 extends T1>(\n  ...args: [label: string, a: readonly T1[], b: readonly T2[]]\n): T1[];\n\ndeclare const items: Item[];\n\nconst result = combine('items', [{ id: 0 } as Item], items);\n    ",
       "options": null
     },
     {
-      "index": 154,
+      "index": 151,
       "code": "\ntype Item = { id: string | number };\n\ndeclare function combine<T>(\n  enabled: boolean,\n  ...args: [a: readonly T[], b: readonly Item[]]\n): T[];\n\ndeclare const items: Item[];\n\nconst result = combine(true, [{ id: 0 } as Item], items);\nresult[0].id = 'x';\n    ",
       "options": null
     },
     {
-      "index": 155,
+      "index": 152,
       "code": "\ntype Item = { id: string | number };\n\ndeclare function combine<T1, T2 extends T1>(\n  ...args: [a: readonly T1[], b: readonly T2[]]\n): T1[];\n\ndeclare const items: Item[];\n\nconst result = combine(...[[{ id: 0 } as Item], items]);\nresult[0].id = 'x';\n    ",
       "options": null
     },
     {
-      "index": 156,
+      "index": 153,
       "code": "\ntype IAnyObject = Record<any, any>;\n\nconst { isArray } = Array;\n\nconst isPlainObject = <InferredType extends IAnyObject = IAnyObject>(\n  val: unknown,\n): val is InferredType => Object.prototype.toString.call(val) === '[object Object]';\n\nexport const deepAssign = <\n  TargetObject extends IAnyObject,\n  MergedObject extends IAnyObject = TargetObject,\n  FinalObject extends Partial<TargetObject> & Partial<MergedObject> = TargetObject & MergedObject,\n>(\n  originObject: TargetObject,\n  ...overrideObjects: (MergedObject | null | undefined)[]\n): FinalObject => {\n  if (overrideObjects.length === 0) return originObject as unknown as FinalObject;\n\n  const assignObject = overrideObjects.shift();\n\n  if (assignObject) {\n    Object.entries(assignObject).forEach(([property, value]) => {\n      if (property === '__proto__' || property === 'constructor') return;\n      if (isPlainObject(originObject[property]) && isPlainObject(value)) {\n        deepAssign(originObject[property], value);\n      } else if (isArray(value)) {\n        (originObject as IAnyObject)[property] = [...(value as unknown[])];\n      } else if (isPlainObject(value)) {\n        (originObject as IAnyObject)[property] = {\n          ...value,\n        };\n      } else {\n        (originObject as IAnyObject)[property] = assignObject[property] as unknown;\n      }\n    });\n  }\n\n  return deepAssign(originObject, ...overrideObjects);\n};\n    ",
       "options": null
     },
     {
-      "index": 157,
+      "index": 154,
       "code": "\ntype AccountId = string & { __brand: 'AccountId' };\n\ninterface Req {\n  params: Record<string, string>;\n  query: Record<string, string>;\n  method: string;\n}\n\ndeclare const accountId: AccountId;\n\nexport const req = {\n  params: { id: accountId } as any,\n  query: {},\n} as Req;\n    ",
       "options": null
     },
     {
-      "index": 158,
+      "index": 155,
       "code": "\nenum Lang {\n  EN = 'en-US',\n  SV = 'sv-SE',\n}\n\nconst LANGUAGE_NAMES: Record<Lang, string> = {\n  [Lang.EN]: 'English',\n  [Lang.SV]: 'Svenska',\n};\n\nexport const options = Object.values(Lang)\n  .map(lang => ({\n    label: LANGUAGE_NAMES[lang],\n    value: lang as string,\n  }))\n  .concat([{ label: 'български език', value: 'bg-BG' }]);\n    ",
       "options": null
     },
     {
-      "index": 159,
+      "index": 156,
       "code": "\ntype AnyObject = Record<string, any>;\n\ndeclare function isEditArray(item: unknown): item is { type: string }[];\n\nexport function getEdits(bucket: { data: unknown }): { type: string }[] {\n  const { data } = bucket;\n  if (!data) return [];\n\n  const { edits } = data as AnyObject;\n\n  if (!isEditArray(edits)) return [];\n  return edits;\n}\n    ",
       "options": null
     },
     {
-      "index": 160,
+      "index": 157,
       "code": "\nenum AppTracker {\n  MOOD = 1,\n  ENERGY = 2,\n}\n\nexport function categoryFor(tracker: string): string {\n  return AppTracker[Number(tracker) as AppTracker];\n}\n    ",
       "options": null,
       "tsconfig": "./tsconfig.noUncheckedIndexedAccess.json"
     },
     {
-      "index": 161,
+      "index": 158,
       "code": "\nenum GuideId {\n  MEASURE = 'measure',\n}\n\ninterface Guide {\n  id: GuideId;\n  title: string;\n  thumbnailUrl: string;\n}\n\ninterface GlossaryItem {\n  id: string;\n  title: string;\n}\n\nexport const item: { content: Guide | GlossaryItem } = {\n  content: {\n    id: 'how-to-measure' as any,\n    title: 'How to measure',\n    thumbnailUrl: 'https://example.com/thumb.jpg',\n  },\n};\n    ",
       "options": null
     },
     {
-      "index": 162,
+      "index": 159,
       "code": "\ninterface Node { id: string }\nfunction transform<NodeOut extends Node | null>(\n  nodeIn: Node,\n  visit: (node: Node) => NodeOut,\n): NodeOut {\n  let transformedNode = visit(nodeIn);\n  if (!transformedNode) return transformedNode;\n  if (transformedNode === nodeIn) {\n    transformedNode = { ...transformedNode };\n  }\n  transformedNode = transformedNode as NonNullable<NodeOut>;\n  console.log(transformedNode.id);\n  return transformedNode;\n}\n",
       "options": null
     },
     {
-      "index": 163,
+      "index": 160,
       "code": "\nfunction narrow(value: string | undefined) {\n  value = value as string;\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 164,
+      "index": 161,
       "code": "\nfunction narrow(value: string | undefined) {\n  value = ((<string>value));\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 165,
+      "index": 162,
       "code": "\nfunction narrow(value: string | undefined) {\n  value = value as unknown as string;\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 166,
+      "index": 163,
       "code": "\nfunction narrow(value: string | undefined, condition: boolean) {\n  value = condition ? (value as string) : \"\";\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 167,
+      "index": 164,
       "code": "\nfunction narrow(value: string | undefined) {\n  value = (value as string) && \"\";\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 168,
+      "index": 165,
       "code": "\nfunction narrow(value: string | undefined) {\n  value ||= (value as string);\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 169,
+      "index": 166,
       "code": "\nfunction narrow(value: string | undefined) {\n  value ??= (value as unknown as string);\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 170,
+      "index": 167,
       "code": "\nenum NumericEnum { a = 1, b = 2 }\nconst key: \"a\" | \"b\" = \"a\";\nexport const widened = NumericEnum[key] as number;\nexport const narrowed = (1 as number) as NumericEnum;\n",
       "options": null
     },
     {
-      "index": 171,
+      "index": 168,
       "code": "\nenum NumericEnum { a = 1, b = 2 }\ndeclare const value: NumericEnum | undefined;\ndeclare const numberValue: number | undefined;\nexport const widened = value as number | undefined;\nexport const narrowed = numberValue as NumericEnum | undefined;\n",
       "options": null
     },
     {
-      "index": 172,
+      "index": 169,
       "code": "\nenum NumericEnum { a = 1, b = 2 }\ndeclare const value: NumericEnum;\ndeclare const numberValue: number;\nexport const widened = <number>value;\nexport const narrowed = <NumericEnum>numberValue;\n",
       "options": null
     },
     {
-      "index": 173,
+      "index": 170,
       "code": "\nfunction narrow(value: string | undefined) {\n  value = (console.log(), value as string);\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 174,
+      "index": 171,
       "code": "\nfunction narrow(value: string | undefined) {\n  [value] = [value as string];\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 175,
+      "index": 172,
       "code": "\nfunction narrow(value: string | undefined) {\n  ({ value } = { value: value as string });\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 176,
+      "index": 173,
       "code": "\nenum E { A = 1, B = 2 }\ndeclare const value: number & { brand: \"x\" };\nconst result = value as E & { brand: \"x\" };\nconst onlyMembers: 1 | 2 = result;\n",
       "options": null
     },
     {
-      "index": 177,
+      "index": 174,
       "code": "\nenum E { A = 1, B = 2 }\ndeclare const value: E & { brand: \"x\" };\nconst result = value as number & { brand: \"x\" };\n",
       "options": null
     },
     {
-      "index": 178,
+      "index": 175,
       "code": "\nfunction narrow(value: string | undefined) {\n  ({ value } = { ...{ value: value as string } });\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 179,
+      "index": 176,
       "code": "\nfunction narrow(value: string | undefined, condition: boolean) {\n  let x: unknown, y: unknown;\n  [x, y, value] = condition\n    ? [...[\"a\", \"b\"] as const, value as string]\n    : [undefined, undefined, \"\"];\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 180,
+      "index": 177,
       "code": "\nfunction narrow(value: string | null | undefined) {\n  ({ value = '' } = { value: value as string });\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 181,
+      "index": 178,
       "code": "\nfunction narrow(value: string | undefined, fallback: { value?: string }) {\n  ({ value } = { ...{ value: value as string }, ...fallback });\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 182,
+      "index": 179,
       "code": "\nclass Fallback {\n  get value() { return ''; }\n}\nfunction narrow(value: string | undefined) {\n  ({ value } = { ...{ value: value as string }, ...new Fallback() });\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 183,
+      "index": 180,
       "code": "\nfunction narrow(value: string | undefined, other: string) {\n  value = other && (value as string);\n  return value.length;\n}\n",
       "options": null
     },
     {
-      "index": 184,
+      "index": 181,
       "code": "\nfunction narrow(value: string | undefined, a: string | undefined, b: string | undefined) {\n  ({ value: a = '', value: b } = { value: value as string });\n  return b.length;\n}\n",
       "options": null
     },
     {
-      "index": 185,
+      "index": 182,
       "code": "\nfunction narrow(value: string | undefined, a: string | undefined, b: string | undefined) {\n  ({ nested: { value: a = '' }, nested: { value: b } } = { nested: { value: value as string } });\n  return b.length;\n}\n",
       "options": null
     },
     {
-      "index": 186,
+      "index": 183,
       "code": "\nfunction narrow(value: string | undefined, a: string | undefined, b: string | undefined) {\n  ({ value: a = '', ['value']: b } = { value: value as string });\n  return b.length;\n}\n",
       "options": null
     },
     {
-      "index": 187,
+      "index": 184,
       "code": "\nfunction f<T extends () => any>(value: T) {\n  const result = value as NonNullable<T>;\n}\n    ",
       "options": null
     },
     {
-      "index": 188,
+      "index": 185,
       "code": "\ninterface Empty<X> {}\ntype Alias<T> = T & Empty<any>;\n\nfunction f<T extends object>(value: T) {\n  const result = value as Alias<T>;\n}\n    ",
       "options": null
     },
     {
-      "index": 189,
+      "index": 186,
       "code": "\ninterface Empty<X> {}\ntype Alias<T> = T & Empty<Promise<any>>;\n\nfunction f<T extends object>(value: T) {\n  const result = value as Alias<T>;\n}\n    ",
       "options": null
     },
     {
-      "index": 190,
+      "index": 187,
       "code": "\ninterface Empty<X> {}\ntype Alias<T> = T & Empty<() => any>;\n\nfunction f<T extends object>(value: T) {\n  const result = value as Alias<T>;\n}\n    ",
       "options": null
     },
     {
-      "index": 191,
+      "index": 188,
       "code": "\nfunction f<T extends { (...args: any[]): unknown }>(value: T) {\n  const result = value as NonNullable<T>;\n}\n    ",
       "options": null
     },
     {
-      "index": 192,
+      "index": 189,
       "code": "\ntype RecursiveCallable<T> = (value: T) => RecursiveCallable<{ value: T }>;\n\nfunction f<T extends RecursiveCallable<string>>(value: T) {\n  const result = value as NonNullable<T>;\n}\n    ",
       "options": null
     },
     {
-      "index": 193,
+      "index": 190,
       "code": "\ninterface Empty<X> {}\ntype Alias<T, U> = T & Empty<U>;\n\nfunction f<T extends object, U>(value: T) {\n  const result = value as Alias<T, U>;\n}\n    ",
       "options": null
     },
     {
-      "index": 194,
+      "index": 191,
       "code": "\ninterface Source<T> {\n  value: T;\n}\ninterface Target<T> {\n  value: T;\n}\n\ndeclare const source: Source<any>;\nconst result = source as Target<any>;\n    ",
       "options": null
     },
     {
-      "index": 195,
+      "index": 192,
       "code": "\ntype Layer0<T> = T;\ntype Layer1<T> = (value: Layer0<T>) => Layer0<T>;\ntype Layer2<T> = (value: Layer1<T>) => Layer1<T>;\ntype Layer3<T> = (value: Layer2<T>) => Layer2<T>;\ntype Layer4<T> = (value: Layer3<T>) => Layer3<T>;\n\ntype Watcher<T> = ((handler: Layer4<T>) => void) & { readonly kind: 'watcher' };\ntype Subscription<T> = ((handler: T) => void) & { readonly kind: 'subscription' };\n\ndeclare const watcher: Watcher<string>;\nconst subscription = watcher as Subscription<string>;\n    ",
+      "options": null
+    },
+    {
+      "index": 193,
+      "code": "\ndeclare function get<T = unknown>(): T;\nconst value = get() as string;\n",
+      "options": {
+        "checkLiteralConstAssertions": false,
+        "typesToIgnore": [
+          "string"
+        ]
+      }
+    },
+    {
+      "index": 194,
+      "code": "\ndeclare function get<T>(value: T): T;\nconst value = get(1) as number;\n",
+      "options": null
+    },
+    {
+      "index": 195,
+      "code": "\ndeclare function get<T = unknown>(): T;\nconst value = (get(), 1) as string | number;\n",
+      "options": null
+    },
+    {
+      "index": 196,
+      "code": "\ndeclare function get<T = unknown>(): T;\nconst value = get<unknown>() as string;\n",
+      "options": null
+    },
+    {
+      "index": 197,
+      "code": "\ndeclare function get<T>(): T | null;\nlet value: number | null = get() as number;\nvalue.toFixed();\n",
+      "options": null
+    },
+    {
+      "index": 198,
+      "code": "\nexport function buttons() {\n  return Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label=\"Next\"]'));\n}\n\nexport function chip(el: HTMLElement) {\n  return el.closest<HTMLElement>('[data-id]');\n}\n",
+      "options": null,
+      "tsconfig": "tsconfig.lib-dom.json"
+    },
+    {
+      "index": 199,
+      "code": "\ndeclare const nullable: string | null;\nconst satisfying = { value: nullable! } satisfies { value: string | null };\nsatisfying.value.toUpperCase();",
       "options": null
     }
   ],
@@ -3744,6 +3770,237 @@
           "column": 21,
           "endLine": 2,
           "endColumn": 36,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 150,
+      "code": "\ntype Storage = {\n  list<T = unknown>(): Promise<Map<string, T>>;\n};\ndeclare const db: Storage;\nconst results = (await db.list()) as Map<string, Uint8Array>;\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 6,
+          "column": 17,
+          "endLine": 6,
+          "endColumn": 61,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 151,
+      "code": "\ntype Storage = {\n  list<T = unknown>(): Promise<Map<string, T>>;\n};\ndeclare const db: Storage;\nconst results = (alert(), db.list()) as Promise<Map<string, Uint8Array>>;\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 6,
+          "column": 17,
+          "endLine": 6,
+          "endColumn": 73,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 152,
+      "code": "\ntype Storage = {\n  list<T = unknown>(): Promise<Map<string, T>>;\n};\ndeclare const db: Storage;\nconst results = db?.list() as Promise<Map<string, Uint8Array>>;\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 6,
+          "column": 17,
+          "endLine": 6,
+          "endColumn": 63,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 153,
+      "code": "\ntype Storage = {\n  list<T = unknown>(): Promise<Map<string, T>>;\n};\ndeclare const db: Storage;\nconst results = (await db?.list()) as Map<string, Uint8Array>;\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 6,
+          "column": 17,
+          "endLine": 6,
+          "endColumn": 62,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 154,
+      "code": "\ntype Storage = {\n  list<T = unknown>(): Promise<Map<string, T>> | undefined;\n};\ndeclare const db: Storage;\nconst results = db.list()! as Promise<Map<string, Uint8Array>>;\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 6,
+          "column": 17,
+          "endLine": 6,
+          "endColumn": 63,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 155,
+      "code": "\ndeclare function get<T>(): T;\nconst value = get<string>() as string;\n      ",
+      "options": null,
+      "output": [
+        "\ndeclare function get<T>(): T;\nconst value = get<string>();\n      "
+      ],
+      "errors": [
+        {
+          "messageId": "unnecessaryAssertion",
+          "line": 3,
+          "column": 15,
+          "endLine": 3,
+          "endColumn": 38,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 156,
+      "code": "\ninterface Element {\n  tagName: string;\n}\n\ninterface HTMLCanvasElement extends Element {\n  getContext(contextId: string): unknown;\n}\n\ninterface HTMLElementTagNameMap {\n  canvas: HTMLCanvasElement;\n}\n\ndeclare const document: {\n  querySelector<K extends keyof HTMLElementTagNameMap>(selectors: K): HTMLElementTagNameMap[K] | null;\n  querySelector<E extends Element = Element>(selectors: string): E | null;\n};\n\nexport const a = document.querySelector('.foo') as HTMLCanvasElement | null;\n\t\t",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 157,
+      "code": "\ndeclare function load<T = unknown>(): Promise<T>;\n\nexport async function main() {\n  const actual = (await load()) as Record<string, unknown>;\n  return { ...actual };\n}\n\t\t",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 158,
+      "code": "\ndeclare function load<T = unknown>(): Promise<T>;\nexport async function main() {\n  const actual = <Record<string, unknown>>(await load());\n  return { ...actual };\n}\n\t\t",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 159,
+      "code": "/** @template T @returns {T} */\nfunction get() { throw new Error(); }\nconst value = /** @type {string} */ (get());\n",
+      "fileName": "generic.js",
+      "options": null,
+      "tsconfig": "tsconfig.checkJs.json",
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 3,
+          "column": 15,
+          "endLine": 3,
+          "endColumn": 36,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 160,
+      "code": "\nexport function buttons() {\n  return Array.from(\n    document.querySelectorAll('[aria-label=\"Next\"]'),\n  ) as HTMLButtonElement[];\n}\n\nexport function chip(el: HTMLElement) {\n  return el.closest('[data-id]') as HTMLElement | null;\n}\n",
+      "options": null,
+      "tsconfig": "tsconfig.lib-dom.json",
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 3,
+          "column": 10,
+          "endLine": 5,
+          "endColumn": 27,
+          "suggestions": []
+        },
+        {
+          "messageId": "contextuallyInferredTypeArguments",
+          "line": 9,
+          "column": 10,
+          "endLine": 9,
+          "endColumn": 55,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 161,
+      "code": "declare function f(): string;\ndeclare function f<T>(x: T): T;\nconst value = f() as string;",
+      "options": null,
+      "output": [
+        "declare function f(): string;\ndeclare function f<T>(x: T): T;\nconst value = f();"
+      ],
+      "errors": [
+        {
+          "messageId": "unnecessaryAssertion",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 162,
+      "code": "declare function f<T>(x: T): T;\ndeclare function f(): string;\nconst value = f() as string;",
+      "options": null,
+      "output": [
+        "declare function f<T>(x: T): T;\ndeclare function f(): string;\nconst value = f();"
+      ],
+      "errors": [
+        {
+          "messageId": "unnecessaryAssertion",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 163,
+      "code": "declare function f(): Promise<string>;\ndeclare function f<T>(x: T): Promise<T>;\nconst value = (await f()) as string;",
+      "options": null,
+      "output": [
+        "declare function f(): Promise<string>;\ndeclare function f<T>(x: T): Promise<T>;\nconst value = (await f());"
+      ],
+      "errors": [
+        {
+          "messageId": "unnecessaryAssertion",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 164,
+      "code": "declare function f(): number;\ndeclare function f<T>(key: string): T;\nconst value = f('value') as string;",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "contextuallyInferredTypeArguments",
           "suggestions": []
         }
       ]

@@ -1,0 +1,75 @@
+{
+  "test": "TestNoMisusedPromisesGenericOverloads",
+  "rule": "no-misused-promises",
+  "tsconfig": "tsconfig.minimal.json",
+  "valid": [
+    {
+      "index": 0,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\non('start', () => {});",
+      "options": null
+    },
+    {
+      "index": 1,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\non('start', () => {}, () => {});",
+      "options": null
+    },
+    {
+      "index": 2,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\non();",
+      "options": null
+    },
+    {
+      "index": 3,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\nasyncOn('start', async () => {});",
+      "options": null
+    },
+    {
+      "index": 4,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\nnew newOn('start', () => {});",
+      "options": null
+    },
+    {
+      "index": 5,
+      "code": "\ntype Choice<K extends string> = (Record<K, 0> & (() => void)) | (Record<K, 1> & (() => void));\ndeclare function use(callback: () => void): void;\ndeclare function use<\n  A extends Choice<'a'>,\n  B extends Choice<'b'>,\n  C extends Choice<'c'>,\n  D extends Choice<'d'>,\n  E extends Choice<'e'>,\n  F extends Choice<'f'>,\n  G extends Choice<'g'>,\n  H extends Choice<'h'>,\n  I extends Choice<'i'>,\n  J extends Choice<'j'>,\n  K extends Choice<'k'>,\n  L extends Choice<'l'>,\n  M extends Choice<'m'>,\n  N extends Choice<'n'>\n>(callback: A & { kind: 'a' } & B & C & D & E & F & G & H & I & J & K & L & M & N & { kind: 'b' }): void;\nuse(() => {});\n",
+      "options": null
+    }
+  ],
+  "invalid": [
+    {
+      "index": 0,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\non('start', async () => {});",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "voidReturnArgument",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 1,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\noptionalOn('start', async () => {});",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "voidReturnArgument",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "code": "\ntype EventName = 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm' | 'n' | 'o' | 'p';\ntype Hook = {\n  [K in EventName]: (event: Record<K, 1> | Record<K, 2>) => void;\n}[EventName];\ninterface On {\n  (): void;\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): void;\n}\ndeclare const on: On;\ninterface OptionalOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook>(pattern: P, matcher: M | undefined, hook: NoInfer<M>): void;\n}\ndeclare const optionalOn: OptionalOn;\ninterface AsyncOn {\n  (pattern: 'start', hook: () => void): void;\n  <P extends string, M extends Hook | (() => Promise<void>)>(pattern: P, matcher: M, hook?: NoInfer<M>): void;\n}\ndeclare const asyncOn: AsyncOn;\ninterface NewOn {\n  new (pattern: 'start', hook: () => void): object;\n  new <P extends string, M extends Hook>(pattern: P, matcher: M, hook: NoInfer<M>): object;\n}\ndeclare const newOn: NewOn;\nnew newOn('start', async () => {});",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "voidReturnArgument",
+          "suggestions": []
+        }
+      ]
+    }
+  ]
+}
