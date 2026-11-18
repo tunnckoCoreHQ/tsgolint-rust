@@ -3,8 +3,8 @@
 
 use goport_core::ast::{
     NodeSlice, TextRange, for_each_child_and_js_doc, is_call_signature_declaration, is_class_like,
-    is_constructor_declaration, is_function_like, is_identifier, is_type_node,
-    is_type_parameter_declaration, source_file_text,
+    is_constructor_declaration, is_function_like, is_identifier, is_parenthesized_type_node,
+    is_type_node, is_type_parameter_declaration, is_type_reference_node, source_file_text,
 };
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::{Checker, TypeAliasExt};
@@ -106,7 +106,7 @@ fn check_node(ctx: &mut RuleContext<'_>, node: Node, descriptor: &str) {
             continue;
         }
         let references = reference_nodes(ctx, node, symbol, name);
-        if is_repeated_in_ast(type_parameter, &references, start_of_body) {
+        if is_repeated_in_ast(ctx.checker, type_parameter, &references, start_of_body) {
             continue;
         }
         candidates.push(Candidate {
@@ -261,19 +261,60 @@ fn reference_nodes(
 }
 
 /// Whether the type parameter is referenced at least twice before the body,
-/// so the checker walk is not needed.
-fn is_repeated_in_ast(type_parameter: Node, references: &[Node], start_of_body: i32) -> bool {
-    references
-        .iter()
-        .filter(|reference| {
-            // References inside the declaration itself and in the body do
-            // not count.
-            let in_declaration =
-                reference.pos() < type_parameter.end() && reference.end() > type_parameter.pos();
-            !in_declaration && reference.pos() <= start_of_body
-        })
-        .nth(1)
-        .is_some()
+/// or once as a type argument, so the checker walk is not needed.
+fn is_repeated_in_ast(
+    checker: &mut Checker,
+    type_parameter: Node,
+    references: &[Node],
+    start_of_body: i32,
+) -> bool {
+    let mut total = 0;
+    for &reference in references {
+        // References inside the declaration itself and in the body do not
+        // count.
+        let in_declaration =
+            reference.pos() < type_parameter.end() && reference.end() > type_parameter.pos();
+        if in_declaration || reference.pos() > start_of_body {
+            continue;
+        }
+        if is_type_argument_of_generic_type(checker, reference) {
+            return true;
+        }
+        total += 1;
+        if total >= 2 {
+            return true;
+        }
+    }
+    false
+}
+
+/// Whether the reference is a type argument: the generic type can use it
+/// more than once. Arrays are left to the checker walk.
+fn is_type_argument_of_generic_type(checker: &mut Checker, reference: Node) -> bool {
+    let mut type_argument = reference.parent();
+    if !is_type_reference_node(type_argument) {
+        return false;
+    }
+    while type_argument.parent().is_some() && is_parenthesized_type_node(type_argument.parent()) {
+        type_argument = type_argument.parent();
+    }
+    let parent = type_argument.parent();
+    if parent.is_nil()
+        || !matches!(
+            parent.kind(),
+            SyntaxKind::TypeReference
+                | SyntaxKind::ExpressionWithTypeArguments
+                | SyntaxKind::ImportType
+                | SyntaxKind::TypeQuery
+        )
+    {
+        return false;
+    }
+    let is_array = is_type_reference_node(parent) && {
+        let t = checker.get_type_at_location(parent);
+        checker.is_array_type(t)
+    };
+    !is_array && parent.type_arguments().iter().any(|n| n == type_argument)
 }
 
 fn start_of_body(node: Node) -> i32 {
