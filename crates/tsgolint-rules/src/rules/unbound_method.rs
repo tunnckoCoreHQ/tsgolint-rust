@@ -393,13 +393,9 @@ fn check_if_method(
         return None;
     }
     match declaration.kind() {
-        SyntaxKind::PropertyDeclaration => {
+        SyntaxKind::PropertyAssignment | SyntaxKind::PropertyDeclaration => {
             let initializer = declaration.initializer();
-            (initializer.is_some() && is_function_expression(initializer)).then(unbound_message)
-        }
-        SyntaxKind::PropertyAssignment => {
-            let initializer = declaration.initializer();
-            if is_function_expression(initializer) {
+            if initializer.is_some() && is_function_expression(initializer) {
                 check_method(initializer, ignore_static)
             } else {
                 None

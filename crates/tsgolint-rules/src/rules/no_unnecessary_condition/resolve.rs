@@ -98,15 +98,22 @@ pub(super) fn resolve_indexed_access_type(c: &mut Checker, t: TypeId) -> TypeId 
 }
 
 /// The type of `node`, through the constraint of a type parameter (nil when
-/// it has none) and through resolvable indexed accesses.
+/// it has none), through the base constraint of a conditional type, and
+/// through resolvable indexed accesses.
 pub(super) fn get_resolved_type(c: &mut Checker, node: Node) -> TypeId {
     let node_type = c.get_type_at_location(node);
     if node_type.is_nil() {
         return TypeId::NIL;
     }
-    let Some(constraint) = get_constraint_info(c, node_type).constraint() else {
+    let Some(mut constraint) = get_constraint_info(c, node_type).constraint() else {
         return TypeId::NIL;
     };
+    if is_type_flag_set(c, node_type, TypeFlags::CONDITIONAL) {
+        let base = c.get_base_constraint_of_type(node_type);
+        if base.is_some() {
+            constraint = base;
+        }
+    }
     resolve_indexed_access_type(c, constraint)
 }
 

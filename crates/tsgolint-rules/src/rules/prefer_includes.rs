@@ -4,12 +4,15 @@
 use goport_core::ast::{TextRange, get_source_file_of_node, is_function_like, is_identifier};
 use goport_core::astdata::SyntaxKind;
 use goport_core::core::{Node, SymbolId};
+use goport_util::scanner_util::go_string_bytes;
 use serde_json::Value;
 use tsgolint_core::{
     Listeners, RuleContext, RuleDefinition, RuleFix, RuleListeners, RuleMessage, range_text,
 };
 
-use crate::utils::{get_constrained_type_at_location, is_valid_regexp_pattern};
+use crate::utils::{
+    get_constrained_type_at_location, is_valid_regexp_pattern, quote_single_string_literal,
+};
 
 pub static RULE: RuleDefinition = RuleDefinition {
     name: "prefer-includes",
@@ -62,6 +65,12 @@ fn check_regexp_test(_: &mut (), ctx: &mut RuleContext<'_>, node: Node) {
         return;
     }
 
+    // A lone surrogate, which is not valid UTF-8 in Go: no fix.
+    if std::str::from_utf8(&go_string_bytes(pattern)).is_err() {
+        ctx.report_node(node, prefer_string_includes_message());
+        return;
+    }
+
     // Member access binds tightly, so only operands such as `a + b` need
     // parentheses.
     let needs_parens = !matches!(
@@ -85,11 +94,9 @@ fn check_regexp_test(_: &mut (), ctx: &mut RuleContext<'_>, node: Node) {
         fixes.push(RuleFix::replace_range(TextRange::new(start, start), "("));
         fixes.push(RuleFix::replace_range(TextRange::new(end, end), ")"));
     }
-    // The pattern keeps its escapes; only quotes need escaping.
-    let escaped = pattern.replace('\'', "\\'");
     fixes.push(RuleFix::replace_range(
         TextRange::new(end, end),
-        format!(".includes('{escaped}')"),
+        format!(".includes({})", pattern_string_literal(pattern)),
     ));
     ctx.report_node_with_fixes(node, prefer_string_includes_message(), |_| fixes);
 }
@@ -276,27 +283,65 @@ fn literal_pattern(pattern: &'static str) -> Option<&'static str> {
         .then_some(pattern)
 }
 
-/// No unescaped metacharacter and no escape that is a character class or
-/// a code point escape. typescript-eslint parses the pattern with regexpp;
-/// tsgolint only looks at the previous character, so in `\\.` the `.`
-/// counts as escaped.
+/// No unescaped metacharacter, no escape that is a character class or a
+/// code point escape, and no backslash at the end. typescript-eslint parses
+/// the pattern with regexpp; tsgolint only tracks whether a backslash
+/// escapes the next character.
 fn is_simple_literal_pattern(pattern: &str) -> bool {
-    let mut previous = '\0';
+    let mut escaped = false;
     for ch in pattern.chars() {
-        if previous != '\\' {
+        if escaped {
+            escaped = false;
             if matches!(
                 ch,
-                '.' | '*' | '+' | '?' | '|' | '^' | '$' | '[' | ']' | '(' | ')' | '{' | '}'
+                'd' | 'D' | 'w' | 'W' | 's' | 'S' | 'b' | 'B' | 'c' | 'x' | 'u'
             ) {
                 return false;
             }
+        } else if ch == '\\' {
+            escaped = true;
         } else if matches!(
             ch,
-            'd' | 'D' | 'w' | 'W' | 's' | 'S' | 'b' | 'B' | 'c' | 'x' | 'u'
+            '.' | '*' | '+' | '?' | '|' | '^' | '$' | '[' | ']' | '(' | ')' | '{' | '}'
         ) {
             return false;
         }
-        previous = ch;
     }
-    true
+    !escaped
+}
+
+/// The string literal of the text that the simple literal `pattern` matches.
+fn pattern_string_literal(pattern: &str) -> String {
+    let mut decoded = String::with_capacity(pattern.len());
+    let mut chars = pattern.chars().peekable();
+    while let Some(ch) = chars.next() {
+        if ch != '\\' {
+            decoded.push(ch);
+            continue;
+        }
+        // A simple literal pattern does not end with a backslash.
+        let Some(escape) = chars.next() else { break };
+        match escape {
+            'n' => decoded.push('\n'),
+            'r' => decoded.push('\r'),
+            't' => decoded.push('\t'),
+            'v' => decoded.push('\u{0B}'),
+            'f' => decoded.push('\u{0C}'),
+            '0'..='7' => {
+                // A legacy octal escape: at most `\377`.
+                let mut value = escape as u8 - b'0';
+                let max_digits = if escape <= '3' { 3 } else { 2 };
+                for _ in 1..max_digits {
+                    let Some(digit) = chars.peek().and_then(|next| next.to_digit(8)) else {
+                        break;
+                    };
+                    chars.next();
+                    value = value * 8 + digit as u8;
+                }
+                decoded.push(char::from(value));
+            }
+            _ => decoded.push(escape),
+        }
+    }
+    quote_single_string_literal(&decoded)
 }

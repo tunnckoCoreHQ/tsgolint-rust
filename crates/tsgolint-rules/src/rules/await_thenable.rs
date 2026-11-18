@@ -9,12 +9,14 @@ use goport_core::ast::{
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
 use goport_core::core::{Node, TypeId};
+use goport_core::flags::ObjectFlags;
 use goport_core::frontend::scanner::scanner_ls::get_scanner_for_source_file;
+use serde::Deserialize;
 use serde_json::Value;
 use tsgolint_core::text::token_range_at;
 use tsgolint_core::{
     Listeners, Report, RuleContext, RuleDefinition, RuleFix, RuleListeners, RuleMessage,
-    RuleSuggestion,
+    RuleSuggestion, decode_options,
 };
 
 use crate::utils::{
@@ -75,16 +77,21 @@ fn invalid_promise_aggregator_input_message() -> RuleMessage {
 /// The label of a value that is not a promise.
 const NOT_PROMISE_LIKE: &str = "This expression is not Promise-like";
 
+#[derive(Default, Deserialize)]
+#[serde(default, rename_all = "camelCase")]
+struct Options {
+    allow_mixed_promise_arrays: bool,
+}
+
 const PROMISE_AGGREGATOR_METHODS: [&str; 4] = ["all", "allSettled", "any", "race"];
 
-fn create(_ctx: &mut RuleContext<'_>, _options: &Value) -> RuleListeners {
-    Listeners::new(())
+fn create(_ctx: &mut RuleContext<'_>, options: &Value) -> RuleListeners {
+    let options: Options = decode_options(options, RULE.name);
+    Listeners::new(options)
         .on(SyntaxKind::AwaitExpression, |_, ctx, node| {
             check_await(ctx, node)
         })
-        .on(SyntaxKind::CallExpression, |_, ctx, node| {
-            check_call(ctx, node)
-        })
+        .on(SyntaxKind::CallExpression, check_call)
         .on(SyntaxKind::ForOfStatement, |_, ctx, node| {
             check_for_of(ctx, node)
         })
@@ -160,12 +167,16 @@ fn previous_statement_lacks_semicolon(source_file: Node, node: Node) -> bool {
     false
 }
 
-fn check_call(ctx: &mut RuleContext<'_>, node: Node) {
+fn check_call(options: &mut Options, ctx: &mut RuleContext<'_>, node: Node) {
     let arguments = node.arguments();
     let Some(argument) = arguments.first() else {
         return;
     };
     if !is_promise_aggregator_method(ctx.checker, node) || argument.is_nil() {
+        return;
+    }
+
+    if options.allow_mixed_promise_arrays && has_maybe_awaitable_value(ctx.checker, argument) {
         return;
     }
 
@@ -298,6 +309,16 @@ fn is_invalid_promise_aggregator_input(c: &mut Checker, node: Node, t: TypeId) -
     })
 }
 
+/// A value of the array-like `node` can be awaitable.
+fn has_maybe_awaitable_value(c: &mut Checker, node: Node) -> bool {
+    let t = get_constrained_type_at_location(c, node);
+    union_type_parts(c, t).into_iter().any(|part| {
+        value_types_of_array_like(c, part)
+            .into_iter()
+            .any(|value_type| !is_always_non_awaitable_type(c, node, value_type))
+    })
+}
+
 fn value_types_of_array_like(c: &mut Checker, t: TypeId) -> Vec<TypeId> {
     if c.is_tuple_type(t) {
         return c.get_type_arguments(t).to_vec();
@@ -305,6 +326,9 @@ fn value_types_of_array_like(c: &mut Checker, t: TypeId) -> Vec<TypeId> {
     let number_index_type = get_number_index_type(c, t);
     if number_index_type.is_some() {
         return vec![number_index_type];
+    }
+    if !c.ty(t).object_flags.intersects(ObjectFlags::REFERENCE) {
+        return Vec::new();
     }
     c.get_type_arguments(t)
         .first()

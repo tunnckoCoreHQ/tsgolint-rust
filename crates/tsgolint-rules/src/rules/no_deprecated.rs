@@ -7,6 +7,7 @@ use goport_core::astdata::SyntaxKind;
 use goport_core::checker::{Checker, LiteralValue};
 use goport_core::core::{Node, SymbolId, TypeId};
 use goport_core::flags::{CheckMode, ContextFlags, NodeFlags, SymbolFlags, TypeFlags};
+use rustc_hash::FxHashSet;
 use serde::Deserialize;
 use serde_json::Value;
 use tsgolint_core::{
@@ -344,7 +345,10 @@ fn search_alias_chain(
 
     let target = c.get_aliased_symbol(symbol);
     let mut symbol = symbol;
-    while is_symbol_flag_set(c, symbol, SymbolFlags::ALIAS) {
+    // A circular alias chain (`export { x } from './a'` in a.ts) never reaches
+    // the target, so stop at the first alias that was visited.
+    let mut visited = FxHashSet::default();
+    while is_symbol_flag_set(c, symbol, SymbolFlags::ALIAS) && visited.insert(symbol) {
         if let Some(reason) = js_doc_deprecation(c, symbol) {
             return Some(reason);
         }
