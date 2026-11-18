@@ -137,30 +137,6 @@ pub fn type_is_primitive_like(c: &Checker, t: TypeId, flags: TypeFlags) -> bool 
     })
 }
 
-/// Calls `visit` on each union member, or on `t` when it is not a union.
-/// Stops and returns false as soon as `visit` returns false.
-pub fn visit_union_type_parts(
-    c: &mut Checker,
-    t: TypeId,
-    mut visit: impl FnMut(&mut Checker, TypeId) -> bool,
-) -> bool {
-    union_type_parts(c, t)
-        .into_iter()
-        .all(|part| visit(c, part))
-}
-
-/// Whether `predicate` holds for some union member, or for `t` when it is
-/// not a union.
-pub fn some_union_type_part(
-    c: &mut Checker,
-    t: TypeId,
-    mut predicate: impl FnMut(&mut Checker, TypeId) -> bool,
-) -> bool {
-    union_type_parts(c, t)
-        .into_iter()
-        .any(|part| predicate(c, part))
-}
-
 /// typescript-eslint `typeRecurser`-style walk: calls `predicate` on each
 /// leaf of nested unions and intersections and stops at the first true.
 pub fn type_recurser(

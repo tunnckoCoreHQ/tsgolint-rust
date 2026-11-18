@@ -488,7 +488,7 @@ fn has_generic_call_signature(c: &mut Checker, t: TypeId) -> bool {
 
 /// Whether the asserted expression is a call of a generic function without
 /// type arguments: the assertion can be what its type arguments are inferred
-/// from. Looks through parentheses, `await`, `!` and the left of a comma.
+/// from. Looks through parentheses, `await`, `!` and the right of a comma.
 fn is_generic_call_with_inferred_type_arguments(c: &mut Checker, mut expression: Node) -> bool {
     loop {
         expression = skip_parentheses(expression);
