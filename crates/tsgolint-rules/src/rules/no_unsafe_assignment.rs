@@ -3,13 +3,14 @@
 
 use goport_core::ast::{
     is_array_binding_pattern, is_array_literal_expression, is_assignment_expression,
-    is_computed_property_name, is_literal_expression, is_object_binding_pattern,
+    is_computed_property_name, is_jsx_attribute, is_literal_expression, is_object_binding_pattern,
     is_object_literal_expression, is_property_assignment, is_shorthand_property_assignment,
     is_spread_assignment, is_spread_element, skip_parentheses,
 };
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
 use goport_core::core::{Node, TypeId};
+use goport_core::flags::ContextFlags;
 use rustc_hash::FxHashMap;
 use serde_json::Value;
 use tsgolint_core::diagnostic::TextRange;
@@ -86,7 +87,7 @@ enum Comparison {
     None,
     /// The receiver's type.
     Basic,
-    /// The sender's contextual type.
+    /// The contextual type of the sender or of the receiver.
     Contextual,
 }
 
@@ -353,12 +354,17 @@ fn receiver_type(
     ctx: &mut RuleContext<'_>,
     receiver: Node,
     sender: Node,
+    sender_type: TypeId,
     comparison: Comparison,
 ) -> TypeId {
     if comparison == Comparison::Contextual {
-        let t = get_contextual_type(ctx.checker, sender);
-        if t.is_some() {
-            return t;
+        // An `any` value in a JSX attribute is compared with the type that the
+        // JSX expression gets from its attribute.
+        if !is_jsx_attribute(receiver.parent()) || !is_type_any_type(ctx.checker, sender_type) {
+            let t = ctx.checker.get_contextual_type(sender, ContextFlags::NONE);
+            if t.is_some() {
+                return t;
+            }
         }
         let t = get_contextual_type(ctx.checker, receiver);
         if t.is_some() {
@@ -366,6 +372,37 @@ fn receiver_type(
         }
     }
     ctx.checker.get_type_at_location(receiver)
+}
+
+/// The receiver type that the help of a JSX attribute prints: the sender's
+/// contextual type, or the type of the property in the attributes type when
+/// that one is `unknown`.
+fn jsx_attribute_receiver_type(
+    ctx: &mut RuleContext<'_>,
+    receiver: Node,
+    sender: Node,
+    receiver_type: TypeId,
+) -> TypeId {
+    let mut t = receiver_type;
+    let contextual_type = get_contextual_type(ctx.checker, sender);
+    if contextual_type.is_some() {
+        t = contextual_type;
+    }
+    if is_type_unknown_type(ctx.checker, t) {
+        let attributes = receiver.parent().parent();
+        let attributes_type = ctx
+            .checker
+            .get_apparent_type_of_contextual_type(attributes, ContextFlags::NONE);
+        if attributes_type.is_some() {
+            let property_type = ctx
+                .checker
+                .get_type_of_property_or_index_signature_of_type(attributes_type, receiver.text());
+            if property_type.is_some() {
+                t = property_type;
+            }
+        }
+    }
+    t
 }
 
 /// Returns true when it reported.
@@ -384,11 +421,16 @@ fn check_assignment(
     let sender_type = ctx.checker.get_type_at_location(sender);
 
     if is_type_any_type(ctx.checker, sender_type) {
-        let receiver_type = receiver_type(ctx, receiver, sender, comparison);
+        let receiver_type = receiver_type(ctx, receiver, sender, sender_type, comparison);
         // `any` to `unknown` is allowed.
         if is_type_unknown_type(ctx.checker, receiver_type) {
             return false;
         }
+        let receiver_type = if is_jsx_attribute(receiver.parent()) {
+            jsx_attribute_receiver_type(ctx, receiver, sender, receiver_type)
+        } else {
+            receiver_type
+        };
         let sender_name = sender_type_name(ctx.checker, sender_type);
         // `var foo = this`
         let message = if !state.no_implicit_this
@@ -415,7 +457,7 @@ fn check_assignment(
         return false;
     }
 
-    let receiver_type = receiver_type(ctx, receiver, sender, comparison);
+    let receiver_type = receiver_type(ctx, receiver, sender, sender_type, comparison);
     let Some(unsafe_assignment) =
         is_unsafe_assignment(ctx.checker, sender_type, receiver_type, sender)
     else {
