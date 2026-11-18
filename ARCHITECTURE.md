@@ -12,7 +12,7 @@ The port matches tsgolint's behavior, not its code. Same command line, same `hea
 | `tsgolint-rules` | lib | The 60 rules, the helpers they share (`src/utils`), the rule registry, and the rule test harness (`tests/rules`) with tsgolint's test cases and snapshots. |
 | `tsgolint-rust` | bin `tsgolint` + lib | The command line (Go `flag` syntax), the `headless` protocol (payload decoding, message framing, JSON encoding), the rules of each payload file, tsconfig discovery, the multi-program driver on tsgolint-core, the legacy CLI output, the WASI build, and the e2e suite. |
 
-Dependency direction: `tsgolint-rust` uses `tsgolint-rules` and `tsgolint-core`; `tsgolint-rules` uses `tsgolint-core`. All three use `goport_core` (ts-rust) directly. Nothing uses ts-rust's `ts_goport` crate (language server, project service), so the build stays at `goport_core` + `goport_util`. `goport_core` compiles its modules from `crates/ts_goport/src` of the ts-rust repository.
+Dependency direction: `tsgolint-rust` uses `tsgolint-rules` and `tsgolint-core`; `tsgolint-rules` uses `tsgolint-core`. All three use `goport_core` (ts-rust) directly. Nothing uses ts-rust's `ts_goport` crate (language server, project service), so the build stays at `goport_core` and `goport_util`, with `goport_cell`, which `goport_core` depends on. `goport_core` compiles its modules from `crates/ts_goport/src` of the ts-rust repository.
 
 ## Execution model
 
@@ -68,4 +68,4 @@ The core crate exposes program creation (configured and inferred, with tsgolint'
 
 ## TypeScript version
 
-tsgolint v7.0.2004 uses typescript-go `2bd066d87f5b` (the TypeScript 7.0 release branch, 2026-07-07). ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`, at the commit in `Cargo.lock`. [UPSTREAM.json](UPSTREAM.json) records that commit and the microsoft/TypeScript commit it ports (`fed0bf24149f`, 7.1.0-dev, 2026-10-08, at the time of writing). Checker output can differ between the two revisions, so some type strings in messages, and rarely a diagnostic, can differ. [DIFFERENCES.md](DIFFERENCES.md) describes the kinds of differences.
+tsgolint v7.0.2004 uses typescript-go `2bd066d87f5b` (the TypeScript 7.0 release branch, 2026-07-07). ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`, at the commit in `Cargo.lock`. [UPSTREAM.json](UPSTREAM.json) records that commit, and the microsoft/TypeScript commit and version it ports. Checker output can differ between the two revisions, so some type strings in messages, and rarely a diagnostic, can differ. [DIFFERENCES.md](DIFFERENCES.md) describes the kinds of differences.

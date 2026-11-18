@@ -2,11 +2,11 @@
 
 tsgolint-rust runs the same rules as the Go tsgolint, with the same options, messages, fixes and suggestions, and speaks the same protocol to oxlint. On most projects you get the same diagnostics. This note lists where the output can differ when you switch, and why.
 
-The main reason is the TypeScript underneath. tsgolint v7.0.2004 is built on typescript-go `2bd066d87f5b`, the TypeScript 7.0 release branch (2026-07-07). tsgolint-rust 0.1.0 is built on ts-rust `598e6416`, a port of TypeScript `fed0bf24149f` (7.1.0-dev, 2026-10-08). A newer checker can print a type differently or reach another result, and tsgolint-rust follows it. Its own output on ts-rust is the reference for its tests; the [compatibility table](README.md#compatibility) gives the revisions of each release.
+The main reason is the TypeScript underneath. tsgolint v7.0.2004 is built on typescript-go `2bd066d87f5b`, the TypeScript 7.0 release branch (2026-07-07). tsgolint-rust is built on ts-rust, a port of TypeScript 7.1; [UPSTREAM.json](UPSTREAM.json) records the ts-rust and TypeScript commits. A newer checker can print a type differently or reach another result, and tsgolint-rust follows it. Its own output on ts-rust is the reference for its tests; the [compatibility table](README.md#compatibility) gives the revisions of each release.
 
 ## Differences from the newer TypeScript
 
-You can reproduce each of these with the TypeScript compiler alone: `typescript@7.0.2` behaves like tsgolint, and `typescript@7.1.0-dev.20261008.1` like tsgolint-rust.
+You can reproduce each of these with the TypeScript compiler alone: `typescript@7.0.2` behaves like tsgolint, and `typescript@7.1.0-beta` like tsgolint-rust.
 
 ### Long types are shortened at another point
 
@@ -65,4 +65,4 @@ The `lib.dom.d.ts` of TypeScript 7.1 changed some signatures. `TransformStreamDe
 
 The `wasm32-wasip1` build runs on one thread and gives the same output as the native build. It reads the current directory from `PWD` and needs `/` preopened at `/`; the `@tsgolint-rust/wasm32-wasip1` package sets both up.
 
-The wasm build treats file names as case-sensitive, because ts-rust cannot probe the host file system under WASI. On a case-insensitive file system (macOS, Windows), a path with other casing than the file on disk does not match that file. The native build probes the file system and matches it.
+The wasm build finds out whether the file system is case-sensitive from the current directory: it looks for that directory under a name with swapped letter case. When the path has no letters, for example `/` (also when `PWD` is not set), the wasm build treats file names as case-sensitive.

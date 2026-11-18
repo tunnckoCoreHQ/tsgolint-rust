@@ -25,7 +25,7 @@ use std::rc::Rc;
 
 use goport_core::frontend::tsoptions::{
     ExtendedConfigCache, ExtendedConfigCacheEntry, ParseConfigHost, ParsedCommandLine,
-    get_parsed_command_line_of_config_file_path, parse_extended_config,
+    ResolutionStack, get_parsed_command_line_of_config_file_path, parse_extended_config,
 };
 use goport_core::gostd::strconv;
 use goport_core::options::Tristate;
@@ -82,7 +82,7 @@ impl ExtendedConfigCache for ExtendedConfigs {
         &self,
         file_name: &str,
         path: &Path,
-        resolution_stack: &[Path],
+        resolution_stack: &ResolutionStack,
         host: &dyn ParseConfigHost,
     ) -> Rc<ExtendedConfigCacheEntry> {
         if let Some(entry) = self.entries.borrow().get(path) {
