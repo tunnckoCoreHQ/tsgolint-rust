@@ -444,13 +444,16 @@
       "index": 8,
       "code": "`${    'a'    }`;",
       "options": null,
-      "output": [
-        "'a';"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "'a';"
+            }
+          ]
         }
       ]
     },
@@ -458,13 +461,16 @@
       "index": 9,
       "code": "`${    \"a\"    }`;",
       "options": null,
-      "output": [
-        "\"a\";"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "\"a\";"
+            }
+          ]
         }
       ]
     },
@@ -795,13 +801,16 @@
       "index": 28,
       "code": "`${'`'}`;",
       "options": null,
-      "output": [
-        "'`';"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "'`';"
+            }
+          ]
         }
       ]
     },
@@ -1585,7 +1594,12 @@
         },
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "` $${`${''}${``}`}${`{a}`} `;"
+            }
+          ]
         }
       ]
     },
@@ -1733,13 +1747,16 @@
       "index": 88,
       "code": "`${'\\u00E5'}`;",
       "options": null,
-      "output": [
-        "'\\u00E5';"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "'\\u00E5';"
+            }
+          ]
         }
       ]
     },
@@ -1747,13 +1764,16 @@
       "index": 89,
       "code": "`${'\\n'}`;",
       "options": null,
-      "output": [
-        "'\\n';"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "'\\n';"
+            }
+          ]
         }
       ]
     },
@@ -1920,16 +1940,19 @@
       "index": 101,
       "code": "\n        function func<T extends string>(arg: T) {\n          `${arg}`;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function func<T extends string>(arg: T) {\n          arg;\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
           "line": 3,
           "column": 12,
           "endColumn": 18,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "\n        function func<T extends string>(arg: T) {\n          arg;\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -1968,13 +1991,16 @@
       "index": 104,
       "code": "\n        declare const string: 'a';\n        `${   string   }`;\n      ",
       "options": null,
-      "output": [
-        "\n        declare const string: 'a';\n        string;\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "\n        declare const string: 'a';\n        string;\n      "
+            }
+          ]
         }
       ]
     },
@@ -1982,16 +2008,19 @@
       "index": 105,
       "code": "\n        declare const string: 'a';\n        `${string}`;\n      ",
       "options": null,
-      "output": [
-        "\n        declare const string: 'a';\n        string;\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
           "line": 3,
           "column": 10,
           "endColumn": 19,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "\n        declare const string: 'a';\n        string;\n      "
+            }
+          ]
         }
       ]
     },
@@ -1999,16 +2028,19 @@
       "index": 106,
       "code": "\n        declare const intersection: string & { _brand: 'test-brand' };\n        `${intersection}`;\n      ",
       "options": null,
-      "output": [
-        "\n        declare const intersection: string & { _brand: 'test-brand' };\n        intersection;\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
           "line": 3,
           "column": 10,
           "endColumn": 25,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "\n        declare const intersection: string & { _brand: 'test-brand' };\n        intersection;\n      "
+            }
+          ]
         }
       ]
     },
@@ -2016,13 +2048,16 @@
       "index": 107,
       "code": "true ? `${'test' || ''}`.trim() : undefined;",
       "options": null,
-      "output": [
-        "true ? ('test' || '').trim() : undefined;"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "true ? ('test' || '').trim() : undefined;"
+            }
+          ]
         }
       ]
     },
@@ -2215,13 +2250,16 @@
       "index": 120,
       "code": "`${'abc' || 'def'}`[0];",
       "options": null,
-      "output": [
-        "('abc' || 'def')[0];"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "('abc' || 'def')[0];"
+            }
+          ]
         }
       ]
     },
@@ -2229,13 +2267,16 @@
       "index": 121,
       "code": "const value = \"foo\" + `${cond ? \"bar\" : \"baz\"}`;",
       "options": null,
-      "output": [
-        "const value = \"foo\" + (cond ? \"bar\" : \"baz\");"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "const value = \"foo\" + (cond ? \"bar\" : \"baz\");"
+            }
+          ]
         }
       ]
     },
@@ -2257,13 +2298,56 @@
       "index": 123,
       "code": "declare const b: string;\n'a' ?? `${b && 'c'}`;",
       "options": null,
-      "output": [
-        "declare const b: string;\n'a' ?? (b && 'c');"
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "noUnnecessaryTemplateExpression",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "declare const b: string;\n'a' ?? (b && 'c');"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 124,
+      "code": "\ndeclare const mode: 'light' | 'dark';\n\nlet label = `${mode}`;\nlabel = 'auto';\nexport {};\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "noUnnecessaryTemplateExpression",
+          "line": 4,
+          "column": 14,
+          "endColumn": 21,
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "\ndeclare const mode: 'light' | 'dark';\n\nlet label = mode;\nlabel = 'auto';\nexport {};\n      "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 125,
+      "code": "\ntype UserId = string & { readonly __brand: 'UserId' };\ndeclare const id: UserId;\n\nlet label = `${id}`;\nlabel = 'guest';\nexport {};\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "noUnnecessaryTemplateExpression",
+          "line": 5,
+          "column": 14,
+          "endColumn": 19,
+          "suggestions": [
+            {
+              "messageId": "suggestRemove",
+              "output": "\ntype UserId = string & { readonly __brand: 'UserId' };\ndeclare const id: UserId;\n\nlet label = id;\nlabel = 'guest';\nexport {};\n      "
+            }
+          ]
         }
       ]
     }
