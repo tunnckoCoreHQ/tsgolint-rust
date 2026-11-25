@@ -2,7 +2,9 @@
 //!
 //! TypeScript diagnostics come first, then rule diagnostics. The files are
 //! grouped by the checker ts-rust assigns to them. Each group gets one job
-//! for its semantic diagnostics and then one job that runs the rules on its
+//! for its semantic diagnostics, one per file for its declaration
+//! diagnostics when declarations are emitted, one for the checker's global
+//! diagnostics, and then one job that runs the rules on its
 //! files, on that checker's thread; jobs for one checker run in send order.
 //! Rule diagnostics travel as plain data over a channel to the calling
 //! (loading) thread. On wasm ts-rust runs each job inline when it is sent,
@@ -102,7 +104,10 @@ pub fn lint_program_with(
         fix: settings.fix,
         fix_suggestions: settings.fix_suggestions,
     };
+    let emit_declarations = tsprogram::options().get_emit_declarations();
     let mut semantic_jobs = Vec::new();
+    let mut declaration_jobs = Vec::new();
+    let mut global_jobs = Vec::new();
     let mut lint_jobs = Vec::new();
     for (checker_index, group) in groups {
         let first = group[0].1.file;
@@ -116,6 +121,21 @@ pub fn lint_program_with(
                         .map(|(index, file)| (index, semantic_diagnostics(checker, file)))
                         .collect::<Vec<_>>()
                 },
+            ));
+            if emit_declarations {
+                for (index, file) in &group {
+                    declaration_jobs.push((
+                        *index,
+                        tsprogram::send_declaration_diagnostics_job(file.file),
+                    ));
+                }
+            }
+            // Read before the rules run, as tsgolint does. Only checkers
+            // with linted files can find more than the ones every checker
+            // makes on creation.
+            global_jobs.push(tsprogram::send_type_checker_job_for_file(
+                first,
+                Checker::get_global_diagnostics,
             ));
         }
         let sender = sender.clone();
@@ -145,16 +165,41 @@ pub fn lint_program_with(
     }
 
     if settings.report_semantic {
-        let mut by_file: Vec<Vec<InternalDiagnostic>> = vec![Vec::new(); files.len()];
+        let mut by_file: Vec<Vec<Diagnostic>> = vec![Vec::new(); files.len()];
         for job in semantic_jobs {
             for (index, diagnostics) in job.wait() {
                 by_file[index] = diagnostics;
             }
         }
-        for diagnostics in by_file {
-            for d in diagnostics {
-                on_event(LintEvent::Internal(d));
+        for (index, job) in declaration_jobs {
+            by_file[index].extend(job.wait());
+        }
+        for (file, mut diagnostics) in files.iter().zip(by_file) {
+            if diagnostics.len() > 1 {
+                diagnostics = tsprogram::sort_and_deduplicate_diagnostics(diagnostics);
             }
+            let file_name = source_file_file_name(file.file);
+            for d in diagnostics.iter().filter(|d| is_in_file(d, file_name)) {
+                on_event(LintEvent::Internal(typescript_diagnostic(d, file_name)));
+            }
+        }
+
+        // Global diagnostics have no file; tsgolint reports them against the
+        // tsconfig.
+        let globals = tsprogram::sort_and_deduplicate_diagnostics(
+            global_jobs.into_iter().flat_map(|job| job.wait()).collect(),
+        );
+        let config_file_path = &tsprogram::options().config_file_path;
+        for d in &globals {
+            let event = if d.file.is_some() {
+                typescript_diagnostic(d, source_file_file_name(d.file))
+            } else {
+                InternalDiagnostic {
+                    range: None,
+                    ..typescript_diagnostic(d, config_file_path)
+                }
+            };
+            on_event(LintEvent::Internal(event));
         }
     }
 
@@ -171,8 +216,8 @@ pub fn lint_program_with(
 /// The semantic diagnostics of `file` as tsgolint reports them (Go
 /// `GetSemanticDiagnosticsWithoutNoEmitFiltering` for one file, then
 /// `FilterNoEmitSemanticDiagnostics` and the include-processor
-/// diagnostics).
-fn semantic_diagnostics(checker: &mut Checker, file: Node) -> Vec<InternalDiagnostic> {
+/// diagnostics), not sorted yet.
+fn semantic_diagnostics(checker: &mut Checker, file: Node) -> Vec<Diagnostic> {
     let checked = tsprogram::sort_and_deduplicate_diagnostics(
         tsprogram::get_bind_and_check_diagnostics_with_checker(
             &context::background(),
@@ -183,20 +228,8 @@ fn semantic_diagnostics(checker: &mut Checker, file: Node) -> Vec<InternalDiagno
     );
     let mut diagnostics =
         tsprogram::filter_no_emit_semantic_diagnostics(checked, tsprogram::options());
-    let include = tsprogram::get_include_processor_diagnostics(file);
-    if diagnostics.is_empty() && include.is_empty() {
-        return Vec::new();
-    }
-    diagnostics.extend(include);
-    if diagnostics.len() > 1 {
-        diagnostics = tsprogram::sort_and_deduplicate_diagnostics(diagnostics);
-    }
-    let file_name = source_file_file_name(file);
+    diagnostics.extend(tsprogram::get_include_processor_diagnostics(file));
     diagnostics
-        .iter()
-        .filter(|d| is_in_file(d, file_name))
-        .map(|d| typescript_diagnostic(d, file_name))
-        .collect()
 }
 
 fn is_in_file(d: &Diagnostic, file_name: &str) -> bool {
