@@ -11,7 +11,8 @@ use tsgolint_core::{
 };
 
 use crate::utils::{
-    get_constrained_type_at_location, is_valid_regexp_pattern, quote_single_string_literal,
+    get_constrained_type_at_location, get_type_name, is_valid_regexp_pattern,
+    quote_single_string_literal,
 };
 
 pub static RULE: RuleDefinition = RuleDefinition {
@@ -21,6 +22,13 @@ pub static RULE: RuleDefinition = RuleDefinition {
 
 fn prefer_includes_message() -> RuleMessage {
     RuleMessage::new("preferIncludes", "Use 'includes()' method instead.")
+}
+
+fn prefer_includes_suggestion_message() -> RuleMessage {
+    RuleMessage::new(
+        "preferIncludesSuggestion",
+        "Use 'includes()' method instead.",
+    )
 }
 
 fn prefer_string_includes_message() -> RuleMessage {
@@ -149,7 +157,15 @@ fn check_index_of(_: &mut (), ctx: &mut RuleContext<'_>, node: Node) {
         let start = ctx.trim_node_text_range(call).pos();
         fixes.push(RuleFix::replace_range(TextRange::new(start, start), "!"));
     }
-    ctx.report_node_with_fixes(node, prefer_includes_message(), |_| fixes);
+    let receiver = ctx.checker.get_type_at_location(callee.expression());
+    let use_auto_fix = get_type_name(ctx.checker, receiver) == "string";
+    ctx.report_node_with_fixes_or_suggestions(
+        node,
+        use_auto_fix,
+        prefer_includes_message(),
+        prefer_includes_suggestion_message(),
+        fixes,
+    );
 }
 
 /// `node` is the number literal `value`, or `-` and a number literal.
