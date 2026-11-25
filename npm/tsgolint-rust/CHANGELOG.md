@@ -1,5 +1,11 @@
 # tsgolint-rust
 
+## 0.3.0
+
+### Minor Changes
+
+- [#13](https://github.com/tunnckoCoreHQ/tsgolint-rust/pull/13) [`2a0b1e0`](https://github.com/tunnckoCoreHQ/tsgolint-rust/commit/2a0b1e004701b77341546865d783003ce71625af) Thanks [@olstenlarck](https://github.com/olstenlarck)! - Port tsgolint [v7.0.2008](https://github.com/oxc-project/tsgolint/releases/tag/v7.0.2008).
+
 ## 0.2.0
 
 ### Minor Changes
