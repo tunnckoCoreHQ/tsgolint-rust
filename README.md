@@ -1,13 +1,13 @@
 # tsgolint-rust
 
-A Rust port of [oxc-project/tsgolint](https://github.com/oxc-project/tsgolint) (v7.0.2007), the type-aware linter that [oxlint](https://oxc.rs) runs for `--type-aware` and `--type-check`. It runs on [ts-rust](https://github.com/pingdotgg/ts-rust), a Rust port of TypeScript 7, instead of typescript-go.
+A Rust port of [oxc-project/tsgolint](https://github.com/oxc-project/tsgolint) (v7.0.2008), the type-aware linter that [oxlint](https://oxc.rs) runs for `--type-aware` and `--type-check`. It runs on [ts-rust](https://github.com/pingdotgg/ts-rust), a Rust port of TypeScript 7, instead of typescript-go.
 
 It is a drop-in replacement. oxlint spawns it the same way, sends the same `headless` payload, and gets the same diagnostics, fixes and suggestions back. One ts-rust program and one checker pass give both the lint results and the type errors.
 
 ## Status
 
 - **Rules.** All 61 tsgolint rules, with their options, messages, fixes and suggestions.
-- **tsgolint's own tests.** The 8,063 rule test cases of tsgolint's Go suite run with their expectations. 8,035 pass; the other 28 are skipped in tsgolint itself. The snapshots hold our own output on ts-rust; they differ from tsgolint's in one message, where TypeScript 7.1 orders a union differently.
+- **tsgolint's own tests.** The 8,212 rule test cases of tsgolint's Go suite run with their expectations. 8,184 pass; the other 28 are skipped in tsgolint itself. The snapshots hold our own output on ts-rust; they differ from tsgolint's in one message, where TypeScript 7.1 orders a union differently.
 - **e2e.** tsgolint's end-to-end suite passes, with the native binary and with the wasm build: 21 tests, plus 3 that run only on Windows or case-insensitive file systems.
 - **oxlint.** oxlint 1.86.0 gives the same output on oxc's 25 tsgolint CLI fixtures with either binary, `--fix` included.
 - **Real projects.** Compared with the Go binary on 12 projects (hono, TanStack Query, tRPC, h3, Effect, t3code, vercel/commerce). Every remaining difference comes from the TypeScript revision, from tsgolint's own run-to-run variation, or from the Effect diagnostics. [DIFFERENCES.md](DIFFERENCES.md) explains them.
@@ -121,7 +121,7 @@ TSGOLINT_WASM=$PWD/target/wasm32-wasip1/release/tsgolint.wasm \
 | Crate | What it has |
 |---|---|
 | [`tsgolint-core`](crates/tsgolint-core) | Program loading on ts-rust, the rule framework, the AST walk and the lint engine |
-| [`tsgolint-rules`](crates/tsgolint-rules) | The 61 rules, their shared helpers, and the test harness with tsgolint's cases and snapshots |
+| [`tsgolint-rules`](crates/tsgolint-rules) | The 62 rules, their shared helpers, and the test harness with tsgolint's cases and snapshots |
 | [`tsgolint-rust`](crates/tsgolint-rust) | The `tsgolint` binary: command line, `headless` protocol, tsconfig discovery, driver |
 | [`tsgolint-compare`](crates/tsgolint-compare) | A dev tool that runs the Go and Rust binaries on one payload and compares them |
 

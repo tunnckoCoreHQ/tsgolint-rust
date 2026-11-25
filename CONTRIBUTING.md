@@ -4,7 +4,7 @@ Read [ARCHITECTURE.md](ARCHITECTURE.md) first, then [crates/tsgolint-core/README
 
 ## Goal
 
-Same behavior as [tsgolint v7.0.2007](https://github.com/oxc-project/tsgolint/tree/v7.0.2007), written as idiomatic Rust. Port the behavior, not the code: no Go structure, goroutines, channels, `defer` or Go naming. When tsgolint does something surprising that the output depends on (an odd sort, a quirk in a range, a skipped node), keep the behavior and write a one-line comment that says what tsgolint does.
+Same behavior as [tsgolint v7.0.2008](https://github.com/oxc-project/tsgolint/tree/v7.0.2008), written as idiomatic Rust. Port the behavior, not the code: no Go structure, goroutines, channels, `defer` or Go naming. When tsgolint does something surprising that the output depends on (an odd sort, a quirk in a range, a skipped node), keep the behavior and write a one-line comment that says what tsgolint does.
 
 The Go sources to compare with are tsgolint at that tag and the typescript-go revision it pins (its `typescript-go` submodule, with its `patches/`). ts-rust comes from [pingdotgg/ts-rust](https://github.com/pingdotgg/ts-rust), branch `main`, at the commit in `Cargo.lock`.
 

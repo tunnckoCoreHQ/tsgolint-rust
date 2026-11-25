@@ -14,6 +14,7 @@ use goport_core::jsnum;
 use serde_json::Value;
 use tsgolint_core::{
     Listeners, Report, RuleContext, RuleDefinition, RuleFix, RuleListeners, RuleMessage,
+    RuleSuggestion,
 };
 
 use crate::utils::{
@@ -31,6 +32,10 @@ fn no_unnecessary_template_expression_message() -> RuleMessage {
         "noUnnecessaryTemplateExpression",
         "Template literal expression is unnecessary and can be simplified.",
     )
+}
+
+fn suggest_remove_message() -> RuleMessage {
+    RuleMessage::new("suggestRemove", "Remove the template literal.")
 }
 
 fn create(_ctx: &mut RuleContext<'_>, _options: &Value) -> RuleListeners {
@@ -62,7 +67,8 @@ fn check_template_expression(_: &mut (), ctx: &mut RuleContext<'_>, node: Node) 
             && constraint.is_some()
             && is_underlying_type_string(ctx.checker, constraint)
         {
-            report_single_interpolation(ctx, node, expression, first_span.literal());
+            let fix = is_type_flag_set(ctx.checker, t, TypeFlags::STRING);
+            report_single_interpolation(ctx, node, expression, first_span.literal(), fix);
             return;
         }
     }
@@ -79,7 +85,7 @@ fn check_template_literal_type(_: &mut (), ctx: &mut RuleContext<'_>, node: Node
             && is_underlying_type_string(ctx.checker, constraint)
             && !is_enum_member_type(ctx.checker, constraint)
         {
-            report_single_interpolation(ctx, node, type_node, first_span.literal());
+            report_single_interpolation(ctx, node, type_node, first_span.literal(), true);
             return;
         }
     }
@@ -121,16 +127,18 @@ fn is_trivial_interpolation(ctx: &RuleContext<'_>, template: Node) -> bool {
         )
 }
 
-/// Reports `${x}` and replaces the template with `x`.
+/// Reports `${x}` and replaces the template with `x`: as a fix when `fix`
+/// is true, else as a suggestion.
 fn report_single_interpolation(
     ctx: &mut RuleContext<'_>,
     template: Node,
     interpolation: Node,
     span_literal: Node,
+    fix: bool,
 ) {
     let range = TextRange::new(interpolation.pos() - 2, span_literal.pos() + 1);
     let report = Report::new(range, no_unnecessary_template_expression_message());
-    ctx.report_diagnostic_with_fixes(report, |ctx| {
+    let make_fixes = move |ctx: &mut RuleContext<'_>| {
         let mut text = ctx.node_text(interpolation);
         let parent = template.parent();
         let parent_is_nullish_coalescing = is_binary_expression(parent)
@@ -147,7 +155,17 @@ fn report_single_interpolation(
             text = format!("({text})");
         }
         vec![ctx.fix_replace(template, text)]
-    });
+    };
+    if fix {
+        ctx.report_diagnostic_with_fixes(report, make_fixes);
+    } else {
+        ctx.report_diagnostic_with_suggestions(report, |ctx| {
+            vec![RuleSuggestion {
+                message: suggest_remove_message(),
+                fixes: make_fixes(ctx),
+            }]
+        });
+    }
 }
 
 fn is_fixable_identifier(node: Node) -> bool {

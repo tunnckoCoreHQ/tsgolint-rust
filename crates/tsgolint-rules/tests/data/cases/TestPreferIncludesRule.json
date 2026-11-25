@@ -238,13 +238,16 @@
       "index": 8,
       "code": "\n        function f(a?: string): void {\n          a?.indexOf(b) === -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a?: string): void {\n          !a?.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a?: string): void {\n          !a?.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -252,13 +255,16 @@
       "index": 9,
       "code": "\n        function f(a?: string): void {\n          a?.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a?: string): void {\n          a?.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a?: string): void {\n          a?.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -336,13 +342,16 @@
       "index": 15,
       "code": "\n        function f(a: any[]): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: any[]): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: any[]): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -350,13 +359,16 @@
       "index": 16,
       "code": "\n        function f(a: ReadonlyArray<any>): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: ReadonlyArray<any>): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: ReadonlyArray<any>): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -364,13 +376,16 @@
       "index": 17,
       "code": "\n        function f(a: Int8Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Int8Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Int8Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -378,13 +393,16 @@
       "index": 18,
       "code": "\n        function f(a: Int16Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Int16Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Int16Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -392,13 +410,16 @@
       "index": 19,
       "code": "\n        function f(a: Int32Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Int32Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Int32Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -406,13 +427,16 @@
       "index": 20,
       "code": "\n        function f(a: Uint8Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Uint8Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Uint8Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -420,13 +444,16 @@
       "index": 21,
       "code": "\n        function f(a: Uint16Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Uint16Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Uint16Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -434,13 +461,16 @@
       "index": 22,
       "code": "\n        function f(a: Uint32Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Uint32Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Uint32Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -448,13 +478,16 @@
       "index": 23,
       "code": "\n        function f(a: Float32Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Float32Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Float32Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -462,13 +495,16 @@
       "index": 24,
       "code": "\n        function f(a: Float64Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Float64Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Float64Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -476,13 +512,16 @@
       "index": 25,
       "code": "\n        function f<T>(a: T[] | ReadonlyArray<T>): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f<T>(a: T[] | ReadonlyArray<T>): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f<T>(a: T[] | ReadonlyArray<T>): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -490,13 +529,16 @@
       "index": 26,
       "code": "\n        function f<\n          T,\n          U extends\n            | T[]\n            | ReadonlyArray<T>\n            | Int8Array\n            | Uint8Array\n            | Int16Array\n            | Uint16Array\n            | Int32Array\n            | Uint32Array\n            | Float32Array\n            | Float64Array,\n        >(a: U): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f<\n          T,\n          U extends\n            | T[]\n            | ReadonlyArray<T>\n            | Int8Array\n            | Uint8Array\n            | Int16Array\n            | Uint16Array\n            | Int32Array\n            | Uint32Array\n            | Float32Array\n            | Float64Array,\n        >(a: U): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f<\n          T,\n          U extends\n            | T[]\n            | ReadonlyArray<T>\n            | Int8Array\n            | Uint8Array\n            | Int16Array\n            | Uint16Array\n            | Int32Array\n            | Uint32Array\n            | Float32Array\n            | Float64Array,\n        >(a: U): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -504,13 +546,16 @@
       "index": 27,
       "code": "\n        type UserDefined = {\n          indexOf(x: any): number;\n          includes(x: any): boolean;\n        };\n        function f(a: UserDefined): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        type UserDefined = {\n          indexOf(x: any): number;\n          includes(x: any): boolean;\n        };\n        function f(a: UserDefined): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        type UserDefined = {\n          indexOf(x: any): number;\n          includes(x: any): boolean;\n        };\n        function f(a: UserDefined): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -518,13 +563,16 @@
       "index": 28,
       "code": "\n        function f(a: Readonly<any[]>): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        function f(a: Readonly<any[]>): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        function f(a: Readonly<any[]>): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -532,15 +580,18 @@
       "index": 29,
       "code": "\n        declare const b: any;\n        function f(a: any[]): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        function f(a: any[]): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 4,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        function f(a: any[]): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -548,15 +599,18 @@
       "index": 30,
       "code": "\n        declare const b: any;\n        function f(a: ReadonlyArray<any>): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        function f(a: ReadonlyArray<any>): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 4,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        function f(a: ReadonlyArray<any>): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -564,15 +618,18 @@
       "index": 31,
       "code": "\n        declare const b: any;\n        function f(a: Int8Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        function f(a: Int8Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 4,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        function f(a: Int8Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -580,15 +637,18 @@
       "index": 32,
       "code": "\n        declare const b: any;\n        function f(a: Uint32Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        function f(a: Uint32Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 4,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        function f(a: Uint32Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -596,15 +656,18 @@
       "index": 33,
       "code": "\n        declare const b: any;\n        function f(a: Float64Array): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        function f(a: Float64Array): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 4,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        function f(a: Float64Array): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -612,15 +675,18 @@
       "index": 34,
       "code": "\n        declare const b: any;\n        function f<T>(a: T[] | ReadonlyArray<T>): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        function f<T>(a: T[] | ReadonlyArray<T>): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 4,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        function f<T>(a: T[] | ReadonlyArray<T>): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -628,15 +694,18 @@
       "index": 35,
       "code": "\n        declare const b: any;\n        type UserDefined = {\n          indexOf(x: any): number;\n          includes(x: any): boolean;\n        };\n        function f(a: UserDefined): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        type UserDefined = {\n          indexOf(x: any): number;\n          includes(x: any): boolean;\n        };\n        function f(a: UserDefined): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 8,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        type UserDefined = {\n          indexOf(x: any): number;\n          includes(x: any): boolean;\n        };\n        function f(a: UserDefined): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -644,15 +713,18 @@
       "index": 36,
       "code": "\n        declare const b: any;\n        function f(a: Readonly<any[]>): void {\n          a.indexOf(b) !== -1;\n        }\n      ",
       "options": null,
-      "output": [
-        "\n        declare const b: any;\n        function f(a: Readonly<any[]>): void {\n          a.includes(b);\n        }\n      "
-      ],
+      "output": [],
       "errors": [
         {
           "messageId": "preferIncludes",
           "line": 4,
           "column": 11,
-          "suggestions": []
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        declare const b: any;\n        function f(a: Readonly<any[]>): void {\n          a.includes(b);\n        }\n      "
+            }
+          ]
         }
       ]
     },
@@ -966,6 +1038,64 @@
       "errors": [
         {
           "messageId": "preferStringIncludes",
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 58,
+      "code": "\n        const xs: number[] = [NaN];\n        xs.indexOf(NaN) !== -1;\n\n        const ys: (string | undefined)[] = [, 'a'];\n        ys.indexOf(undefined) !== -1;\n      ",
+      "options": null,
+      "output": [],
+      "errors": [
+        {
+          "messageId": "preferIncludes",
+          "line": 3,
+          "column": 9,
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        const xs: number[] = [NaN];\n        xs.includes(NaN);\n\n        const ys: (string | undefined)[] = [, 'a'];\n        ys.indexOf(undefined) !== -1;\n      "
+            }
+          ]
+        },
+        {
+          "messageId": "preferIncludes",
+          "line": 6,
+          "column": 9,
+          "suggestions": [
+            {
+              "messageId": "preferIncludesSuggestion",
+              "output": "\n        const xs: number[] = [NaN];\n        xs.indexOf(NaN) !== -1;\n\n        const ys: (string | undefined)[] = [, 'a'];\n        ys.includes(undefined);\n      "
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "index": 59,
+      "code": "\n        type Id = string & { __brand: 'Id' };\n        function f<T extends string>(a: 'foo' | 'bar', b: Id, c: T): void {\n          a.indexOf('o') !== -1;\n          b.indexOf('x') === -1;\n          c.indexOf('y') >= 0;\n        }\n      ",
+      "options": null,
+      "output": [
+        "\n        type Id = string & { __brand: 'Id' };\n        function f<T extends string>(a: 'foo' | 'bar', b: Id, c: T): void {\n          a.includes('o');\n          !b.includes('x');\n          c.includes('y');\n        }\n      "
+      ],
+      "errors": [
+        {
+          "messageId": "preferIncludes",
+          "line": 4,
+          "column": 11,
+          "suggestions": []
+        },
+        {
+          "messageId": "preferIncludes",
+          "line": 5,
+          "column": 11,
+          "suggestions": []
+        },
+        {
+          "messageId": "preferIncludes",
+          "line": 6,
+          "column": 11,
           "suggestions": []
         }
       ]
