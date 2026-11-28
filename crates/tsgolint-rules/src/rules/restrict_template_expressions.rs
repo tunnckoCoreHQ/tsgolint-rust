@@ -7,6 +7,7 @@ use goport_core::checker::Checker;
 use goport_core::core::{Node, TypeId};
 use goport_core::flags::TypeFlags;
 use goport_core::frontend::vfs::Fs;
+use rustc_hash::FxHashSet;
 use serde::Deserialize;
 use serde_json::Value;
 use tsgolint_core::{
@@ -101,7 +102,14 @@ fn check_template(state: &mut State, ctx: &mut RuleContext<'_>, node: Node) {
     for span in node.template_spans().nodes() {
         let expression = span.expression();
         let expression_type = get_constrained_type_at_location(ctx.checker, expression);
-        if is_type_allowed(state, ctx.checker, &*ctx.fs(), expression_type) {
+        let mut active_arrays = FxHashSet::default();
+        if is_type_allowed(
+            state,
+            ctx.checker,
+            &*ctx.fs(),
+            &mut active_arrays,
+            expression_type,
+        ) {
             continue;
         }
         let range = ctx.trim_node_text_range(expression);
@@ -110,24 +118,47 @@ fn check_template(state: &mut State, ctx: &mut RuleContext<'_>, node: Node) {
     }
 }
 
-fn is_type_allowed(state: &State, checker: &mut Checker, fs: &dyn Fs, t: TypeId) -> bool {
+/// `active_arrays` holds the array types being checked, so that a recursive
+/// array type counts as allowed when it meets itself again.
+fn is_type_allowed(
+    state: &State,
+    checker: &mut Checker,
+    fs: &dyn Fs,
+    active_arrays: &mut FxHashSet<TypeId>,
+    t: TypeId,
+) -> bool {
     union_type_parts(checker, t).into_iter().all(|part| {
         intersection_type_parts(checker, part)
             .into_iter()
-            .any(|t| is_part_allowed(state, checker, fs, t))
+            .any(|t| is_part_allowed(state, checker, fs, active_arrays, t))
     })
 }
 
-fn is_part_allowed(state: &State, checker: &mut Checker, fs: &dyn Fs, t: TypeId) -> bool {
+fn is_part_allowed(
+    state: &State,
+    checker: &mut Checker,
+    fs: &dyn Fs,
+    active_arrays: &mut FxHashSet<TypeId>,
+    t: TypeId,
+) -> bool {
     let options = &state.options;
-    is_type_flag_set(checker, t, state.allowed_flags)
+    if is_type_flag_set(checker, t, state.allowed_flags)
         || (options.allow_reg_exp && t == checker.global_reg_exp_type)
         || (!options.allow.is_empty()
             && matches_type_or_base_type(checker, t, |checker, t| {
                 type_matches_some_specifier(checker, fs, t, &options.allow)
             }))
-        || (options.allow_array && checker.is_array_or_tuple_type(t) && {
-            let element = get_number_index_type(checker, t);
-            is_type_allowed(state, checker, fs, element)
-        })
+    {
+        return true;
+    }
+    if !options.allow_array || !checker.is_array_or_tuple_type(t) {
+        return false;
+    }
+    if !active_arrays.insert(t) {
+        return true;
+    }
+    let element = get_number_index_type(checker, t);
+    let allowed = is_type_allowed(state, checker, fs, active_arrays, element);
+    active_arrays.remove(&t);
+    allowed
 }
