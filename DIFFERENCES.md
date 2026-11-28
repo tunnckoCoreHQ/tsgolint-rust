@@ -2,7 +2,7 @@
 
 tsgolint-rust runs the same rules as the Go tsgolint, with the same options, messages, fixes and suggestions, and speaks the same protocol to oxlint. On most projects you get the same diagnostics. This note lists where the output can differ when you switch, and why.
 
-The main reason is the TypeScript underneath. tsgolint v7.0.2008 is built on typescript-go `2bd066d87f5b`, the TypeScript 7.0 release branch (2026-07-07). tsgolint-rust is built on ts-rust, a port of TypeScript 7.1; [UPSTREAM.json](UPSTREAM.json) records the ts-rust and TypeScript commits. A newer checker can print a type differently or reach another result, and tsgolint-rust follows it. Its own output on ts-rust is the reference for its tests; the [compatibility table](README.md#compatibility) gives the revisions of each release.
+The main reason is the TypeScript underneath. tsgolint v7.0.2009 is built on typescript-go `2bd066d87f5b`, the TypeScript 7.0 release branch (2026-07-07). tsgolint-rust is built on ts-rust, a port of TypeScript 7.1; [UPSTREAM.json](UPSTREAM.json) records the ts-rust and TypeScript commits. A newer checker can print a type differently or reach another result, and tsgolint-rust follows it. Its own output on ts-rust is the reference for its tests; the [compatibility table](README.md#compatibility) gives the revisions of each release.
 
 ## Differences from the newer TypeScript
 

@@ -67,12 +67,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -274,12 +274,12 @@
       "options": {
         "allow": [
           {
+            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ],
-            "from": "lib"
+            ]
           }
         ],
         "allowAny": true,
@@ -435,12 +435,12 @@
       "options": {
         "allow": [
           {
+            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ],
-            "from": "lib"
+            ]
           }
         ],
         "allowAny": true,
@@ -458,12 +458,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -504,12 +504,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -573,12 +573,12 @@
       "options": {
         "allow": [
           {
+            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ],
-            "from": "lib"
+            ]
           }
         ],
         "allowAny": true,
@@ -642,12 +642,12 @@
       "options": {
         "allow": [
           {
+            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ],
-            "from": "lib"
+            ]
           }
         ],
         "allowAny": true,
@@ -688,12 +688,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -803,12 +803,12 @@
       "options": {
         "allow": [
           {
+            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ],
-            "from": "lib"
+            ]
           }
         ],
         "allowAny": true,
@@ -935,10 +935,10 @@
       "options": {
         "allow": [
           {
+            "from": "file",
             "name": [
               "Base"
-            ],
-            "from": "file"
+            ]
           }
         ],
         "allowAny": true,
@@ -979,6 +979,29 @@
       "index": 52,
       "code": "const msg = `arg = ${'abc'}`;",
       "options": null
+    },
+    {
+      "index": 53,
+      "code": "\n        type Value = string | Value[];\n        type Tuple = readonly [string | Tuple];\n        declare const value: Value;\n        declare const tuple: Tuple;\n        const msg = `${value} ${tuple}`;\n      ",
+      "options": {
+        "allow": [
+          {
+            "from": "lib",
+            "name": [
+              "Error",
+              "URL",
+              "URLSearchParams"
+            ]
+          }
+        ],
+        "allowAny": true,
+        "allowArray": true,
+        "allowBoolean": true,
+        "allowNever": false,
+        "allowNullish": true,
+        "allowNumber": true,
+        "allowRegExp": true
+      }
     }
   ],
   "invalid": [
@@ -1020,12 +1043,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -1098,12 +1121,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -1195,12 +1218,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -1227,12 +1250,12 @@
       "options": {
         "allow": [
           {
-            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ]
+            ],
+            "from": "lib"
           }
         ],
         "allowAny": true,
@@ -1369,12 +1392,12 @@
       "options": {
         "allow": [
           {
+            "from": "lib",
             "name": [
               "Error",
               "URL",
               "URLSearchParams"
-            ],
-            "from": "lib"
+            ]
           }
         ],
         "allowAny": false,
@@ -1519,6 +1542,38 @@
           "messageId": "invalidType",
           "line": 3,
           "column": 27,
+          "suggestions": []
+        }
+      ]
+    },
+    {
+      "index": 19,
+      "code": "type Value = string | Date | Array<Value>;\ndeclare const value: Value;\nexport const text = `${value}`;",
+      "options": {
+        "allow": [
+          {
+            "from": "lib",
+            "name": [
+              "Error",
+              "URL",
+              "URLSearchParams"
+            ]
+          }
+        ],
+        "allowAny": true,
+        "allowArray": true,
+        "allowBoolean": true,
+        "allowNever": false,
+        "allowNullish": true,
+        "allowNumber": true,
+        "allowRegExp": true
+      },
+      "output": [],
+      "errors": [
+        {
+          "messageId": "invalidType",
+          "line": 3,
+          "column": 24,
           "suggestions": []
         }
       ]

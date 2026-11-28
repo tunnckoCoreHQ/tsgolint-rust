@@ -1,7 +1,7 @@
 //! `non-nullable-type-assertion-style`: prefers `x!` over an `as` cast that
 //! only removes `null` and `undefined`.
 
-use goport_core::ast::{get_expression_precedence, is_const_assertion};
+use goport_core::ast::{get_expression_precedence, is_const_assertion, is_in_js_file};
 use goport_core::astdata::SyntaxKind;
 use goport_core::checker::Checker;
 use goport_core::core::{Node, TypeId};
@@ -56,6 +56,11 @@ fn could_be_nullable(checker: &mut Checker, mut t: TypeId) -> bool {
 
 fn check_assertion(_: &mut (), ctx: &mut RuleContext<'_>, node: Node) {
     if is_const_assertion(node) {
+        return;
+    }
+    // A JSDoc cast in a JavaScript file (`/** @type {T} */ (x)`) has no
+    // non-null assertion to prefer: `x!` is not JavaScript.
+    if is_in_js_file(node) {
         return;
     }
     let expression = node.expression();

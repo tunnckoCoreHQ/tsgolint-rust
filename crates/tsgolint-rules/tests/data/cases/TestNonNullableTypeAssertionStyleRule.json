@@ -57,6 +57,13 @@
       "index": 10,
       "code": "\ndeclare function foo<T = any>(): T;\nconst bar = foo() as number;\n    ",
       "options": null
+    },
+    {
+      "index": 11,
+      "code": "\n/** @param {string[]} queue */\nexport function pop(queue) {\n  const name = /** @type {string} */ (queue.pop());\n  return name;\n}\n",
+      "fileName": "repro.js",
+      "options": null,
+      "tsconfig": "./tsconfig.checkJs.json"
     }
   ],
   "invalid": [
